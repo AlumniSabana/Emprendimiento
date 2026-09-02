@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#001459">
+<meta name="description" content="Tablero financiero del Centro de Desarrollo Profesional de la Universidad de La Sabana: precio minimo, punto de equilibrio, runway y flujo de caja para emprendimientos en traccion temprana.">
+<title>Tablero Financiero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --ink:#0A1330;
+  --ink-soft:#4B5670;
+  --paper:#EEF1F8;
+  --paper-raised:#FFFFFF;
+  --paper-sunken:#F5F7FC;
+  --line:#D9E1EE;
+  --line-strong:#C3CFE3;
+  --accent:#001459;
+  --accent-strong:#25409A;
+  --accent-soft:#E3EAF7;
+  --gold:#8A5200;
+  --gold-soft:#FBEFDD;
+  --good:#158A5E;
+  --good-soft:#E4F2EC;
+  --warn:#8A5200;
+  --warn-soft:#FBEFDD;
+  --critical:#A3252F;
+  --critical-soft:#FAE8E9;
+  --shadow: 0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22);
+  --sans-pie:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-display:'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --font-body:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  /* Superficies y texto: neutros con matiz azul */
+  --paper: #EEF1F8;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FC;
+  --ink: #0A1330;
+  --ink-soft: #4B5670;
+  --ink-faint: #8895A4;
+  --rule: #D9E1EE;
+  --rule-soft: #E9EEF7;
+
+  /* Color institucional */
+  --azul: #001459;
+  --azul-700: #1E306E;
+  --azul-500: #25409A;
+  --azul-300: #7FA6D0;
+  --azul-soft: #E3EAF7;
+
+  /* Estados. El ámbar NO es el rojo de alerta: un dato pendiente
+     no es un error, y pintarlo de rojo hace que quien lo lee
+     cierre la herramienta en vez de completarlo. */
+  --ok: #158A5E;
+  --ok-soft: #E4F2EC;
+  --ambar: #8A5200;
+  --ambar-soft: #FBEFDD;
+  --alerta: #A3252F;
+  --alerta-soft: #FAE8E9;
+
+  --on-azul: #FFFFFF;
+  --shadow: 0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22);
+  color-scheme: light;
+}
+
+
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ font-family:var(--font-display); font-weight:600; text-wrap:balance; margin:0; color:var(--ink); }
+.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+button{ font-family:inherit; }
+input,select,textarea{ font-family:inherit; font-size:14px; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:6px; padding:7px 10px; }
+input:focus,select:focus,textarea:focus,button:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+input[type=number]{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+table{ border-collapse:collapse; width:100%; }
+th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; padding:0 10px 8px; border-bottom:1px solid var(--line-strong); }
+td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.scrollx{ overflow-x:auto; }
+
+/* ---------- shell ---------- */
+.shell{ display:flex; min-height:100vh; }
+.sidebar{
+  width:232px; flex:0 0 232px; background:var(--azul); border-right:1px solid var(--azul);
+  display:flex; flex-direction:column; position:sticky; top:var(--alto-volver);
+  height:calc(100vh - var(--alto-volver)); overflow-y:auto;
+}
+.brand{ padding:22px 20px 14px; }
+.brand .kicker{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:#A9BEDE; font-weight:600; }
+.brand h1{ font-size:21px; margin-top:4px; line-height:1.15; color:#FFFFFF; }
+.brand .sub{ color:#A9BEDE; font-size:12px; margin-top:6px; }
+
+.bizrow{ padding:0 20px 16px; display:flex; flex-direction:column; gap:8px; }
+.bizrow input, .bizrow select{ width:100%; }
+.bizrow .field label{ color:#A9BEDE; }
+
+nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
+.navgroup-label{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:#8FA5C6; padding:14px 8px 4px; }
+.tab-btn{
+  display:flex; align-items:center; gap:10px; text-align:left; width:100%; padding:9px 10px; border-radius:7px;
+  border:1px solid transparent; background:transparent; color:#C7D6F0; cursor:pointer; font-size:13.5px; font-weight:500;
+}
+.tab-btn:hover{ background:rgba(255,255,255,.08); color:#FFFFFF; }
+.tab-btn.active{ background:rgba(255,255,255,.13); color:#FFFFFF; font-weight:600; }
+.tab-btn .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.35); flex:0 0 auto; }
+.tab-btn.active .dot{ background:#FFFFFF; }
+
+.main{ flex:1; min-width:0; padding:32px 40px 80px; max-width:980px; }
+.panel{ display:none; }
+.panel.active{ display:block; }
+.panel-head{ margin-bottom:24px; }
+.panel-head h2{ font-size:26px; }
+.panel-head p{ color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:62ch; }
+
+.card{ background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:20px 22px; box-shadow:var(--shadow); }
+.card + .card{ margin-top:16px; }
+.card h3{ font-size:15px; margin-bottom:4px; }
+.card .hint{ color:var(--ink-soft); font-size:12.5px; margin-bottom:14px; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+@media (max-width:720px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field label{ font-size:12px; color:var(--ink-soft); font-weight:500; }
+.field input, .field select{ width:100%; }
+
+.btn{ display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#fff; border:none; border-radius:7px; padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn:hover{ background:var(--accent-strong); }
+.btn.ghost{ background:transparent; color:var(--ink-soft); border:1px solid var(--line-strong); }
+.btn.ghost:hover{ color:var(--ink); border-color:var(--ink-soft); }
+.btn.danger{ background:transparent; color:var(--critical); border:1px solid var(--critical-soft); padding:6px 10px; font-size:12px; }
+.btn.small{ padding:6px 10px; font-size:12px; }
+
+/* KPI strip */
+.kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+@media (max-width:900px){ .kpis{ grid-template-columns:repeat(2,1fr); } }
+.kpi{ background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); position:relative; }
+.kpi .label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; }
+.kpi .value{ font-family:var(--font-display); font-size:26px; margin-top:6px; font-weight:600; }
+.kpi .note{ font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+.kpi.good{ border-color:color-mix(in srgb, var(--good) 35%, var(--line)); }
+.kpi.warn{ border-color:color-mix(in srgb, var(--warn) 40%, var(--line)); }
+.kpi.critical{ border-color:color-mix(in srgb, var(--critical) 45%, var(--line)); }
+
+.pill{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 8px; border-radius:99px; font-size:11.5px; font-weight:600; }
+.pill .dot{ width:6px; height:6px; border-radius:50%; }
+.pill.good{ background:var(--good-soft); color:var(--good); }
+.pill.warn{ background:var(--warn-soft); color:var(--warn); }
+.pill.critical{ background:var(--critical-soft); color:var(--critical); }
+.pill.good .dot{ background:var(--good); }
+.pill.warn .dot{ background:var(--warn); }
+.pill.critical .dot{ background:var(--critical); }
+
+.rowline{ display:flex; align-items:center; gap:8px; }
+
+/* tables */
+.tbl-wrap{ margin-top:6px; }
+.tbl-actions{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.tbl input[type=text], .tbl input[type=number], .tbl input[type=month]{ padding:6px 8px; font-size:13px; }
+.total-row td{ font-weight:600; border-bottom:none; border-top:1px solid var(--line-strong); background:var(--paper-sunken); }
+.rm-btn{ background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:15px; line-height:1; padding:2px 6px; border-radius:5px; }
+.rm-btn:hover{ color:var(--critical); background:var(--critical-soft); }
+.empty-state{ text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px; }
+
+/* sparkline / bars */
+.cf-chart{ display:flex; align-items:flex-end; gap:10px; height:150px; margin-top:14px; padding:0 4px; }
+.cf-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+.cf-bar{ width:100%; max-width:38px; border-radius:4px 4px 0 0; background:var(--accent); transition:height .2s; min-height:2px; }
+.cf-bar.neg{ background:var(--critical); }
+.cf-month{ font-size:10.5px; color:var(--ink-soft); }
+.cf-val{ font-size:11px; font-family:var(--font-mono); }
+
+/* allocation */
+.alloc-bar{ display:flex; height:34px; border-radius:8px; overflow:hidden; border:1px solid var(--line-strong); margin:16px 0; }
+.alloc-seg{ display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#fff; overflow:hidden; white-space:nowrap; }
+.alloc-legend{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:720px){ .alloc-legend{ grid-template-columns:repeat(2,1fr); } }
+.alloc-item .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; }
+
+/* guide accordion */
+.accordion-item{ border-bottom:1px solid var(--line); }
+.accordion-item:last-child{ border-bottom:none; }
+.accordion-head{ width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; background:none; border:none; padding:14px 2px; cursor:pointer; text-align:left; }
+.accordion-head h4{ font-family:var(--font-body); font-size:14px; font-weight:600; margin:0; color:var(--ink); }
+.accordion-head .num{ font-family:var(--font-mono); font-size:11px; color:var(--gold); font-weight:600; }
+.accordion-head .chev{ color:var(--ink-soft); transition:transform .15s; flex:0 0 auto; }
+.accordion-item.open .chev{ transform:rotate(180deg); }
+.accordion-body{ display:none; padding:0 2px 16px; color:var(--ink-soft); font-size:13.5px; line-height:1.65; }
+.accordion-item.open .accordion-body{ display:block; }
+.accordion-body b{ color:var(--ink); }
+.accordion-body .redbox{ margin-top:10px; background:var(--critical-soft); border-left:3px solid var(--critical); padding:9px 12px; border-radius:0 6px 6px 0; color:var(--ink); font-size:13px; }
+
+/* checklist */
+.checklist{ display:flex; flex-direction:column; gap:2px; }
+.check-row{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); }
+.check-row:last-child{ border-bottom:none; }
+.check-row input[type=checkbox]{ width:17px; height:17px; accent-color:var(--accent); }
+.check-row label{ font-size:13.5px; flex:1; }
+.check-row.done label{ color:var(--ink-soft); text-decoration:line-through; }
+.qa{ margin-top:8px; }
+.qa .q{ font-size:13px; font-weight:600; margin-bottom:6px; }
+.qa textarea{ width:100%; min-height:56px; resize:vertical; }
+
+.formula{ background:var(--paper-sunken); border:1px solid var(--line); border-radius:8px; padding:12px 14px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); margin-top:10px; }
+.formula b{ color:var(--accent); }
+
+.result-box{ background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); border-radius:10px; padding:16px 18px; margin-top:16px; }
+.result-box .big{ font-family:var(--font-display); font-size:28px; font-weight:600; color:var(--accent-strong); }
+.result-box .lbl{ font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; }
+
+.badge-count{ background:var(--paper-sunken); color:var(--ink-soft); font-size:10.5px; font-family:var(--font-mono); padding:1px 6px; border-radius:99px; margin-left:auto; }
+
+/* mobile nav */
+.mobile-tabbar{ display:none; }
+@media (max-width:860px){
+  .shell{ flex-direction:column; }
+  .sidebar{ position:relative; width:100%; height:auto; flex:none; border-right:none; border-bottom:1px solid var(--line); }
+  nav.tabs{ display:none; }
+  .bizrow{ padding-bottom:14px; }
+  .mobile-tabbar{ display:flex; overflow-x:auto; gap:6px; padding:8px 14px 14px; border-top:1px solid var(--line); background:var(--azul); }
+  .mobile-tabbar .tab-btn{ white-space:nowrap; width:auto; flex:0 0 auto; }
+  .main{ padding:24px 18px 60px; }
+  .kpis{ grid-template-columns:1fr 1fr; }
+}
+::selection{ background:var(--accent-soft); }
+
+/* ═══════════════ PIE INSTITUCIONAL ═══════════════
+   Idéntico al de «Estudio de Pitch» y «Construye tu portafolio»,
+   para que las herramientas del Centro se lean como un solo
+   servicio y no como cinco páginas sueltas. */
+/* Sin «margin-top». Lo llevaba, y en el tablero dejaba una franja
+   de papel de 48 px entre el final del índice lateral azul y el
+   pie azul: dos bloques del mismo color separados por una línea
+   clara que parecía un error de montaje. El aire que necesita el
+   pie ya lo pone su propio «padding» de arriba. */
+footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
+
+/* ═══════════════ VOLVER A LA PORTADA ═══════════════
+   Arriba, antes de nada. Estuvo en el pie y era un error: para
+   salir de una herramienta había que recorrerla entera hasta el
+   final. La salida se busca donde se entró, no al fondo.
+
+   No es fijo ni flotante: en el tablero cualquier elemento fijo
+   tapa una columna de cifras, y en la ficha se comería el paso
+   del asistente. Va en el flujo, lo primero del documento. */
+/* La altura de la barra vive en una variable porque el índice
+   lateral del tablero la necesita para calcular la suya. Si aquí
+   cambia el «padding», allí se ajusta solo. */
+:root { --alto-volver: 51px; }
+.volver-barra {
+  background: var(--azul);
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  position: sticky; top: 0; z-index: 50;
+}
+.volver-barra .env {
+  max-width: 1440px; margin: 0 auto;
+  padding: .62rem clamp(1.1rem, 4vw, 2.75rem);
+  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+}
+.volver-barra a {
+  display: inline-flex; align-items: center; gap: .5rem;
+  color: #FFFFFF; text-decoration: none;
+  font-family: var(--sans-pie); font-size: .87rem; font-weight: 600;
+  padding: .3rem .2rem; border-radius: 4px;
+  transition: color .15s;
+}
+.volver-barra a:hover { color: #C7D6F0; }
+.volver-barra a:hover .flecha { transform: translateX(-3px); }
+.volver-barra .flecha {
+  font-size: 1.05em; line-height: 1;
+  transition: transform .15s;
+}
+.volver-barra small { color: #A9BEDE; font-size: .78rem; line-height: 1.5; }
+.volver-barra a:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+@media (max-width: 560px) { .volver-barra small { display: none; } }
+@media print { .volver-barra { display: none !important; } }
+.pie-envoltura { max-width: 1440px; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 2.75rem); }
+.pie-rejilla {
+  display: grid; grid-template-columns: 1.15fr 1fr 1.35fr 1fr;
+  gap: 2.5rem; padding-bottom: 2.2rem; border-bottom: 1px solid rgba(255,255,255,.17);
+}
+.pie-logo { height: 48px; width: auto; display: block; margin-bottom: 1.15rem; }
+.pie-col h4 {
+  font-family: var(--sans-pie); font-size: .68rem; letter-spacing: .14em;
+  text-transform: uppercase; color: #FFFFFF; font-weight: 700; margin: 0 0 .9rem;
+}
+.pie-col p { font-size: .82rem; line-height: 1.65; color: #B9C9E2; margin: 0 0 .7rem; }
+.pie-col p:last-child { margin-bottom: 0; }
+.pie-col strong { color: #E7EEF9; font-weight: 600; }
+.pie-marca p { font-size: .78rem; color: #9FB2CE; }
+.pie-enlace {
+  color: #C7D6F0; text-decoration: none; border-bottom: 1px solid rgba(199,214,240,.4);
+  padding-bottom: 1px; transition: color .15s, border-color .15s;
+}
+.pie-enlace:hover { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+.pie-legal {
+  display: flex; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;
+  padding-top: 1.4rem; font-size: .74rem; color: #8FA5C6; line-height: 1.6;
+}
+.pie-legal .pie-enlace { font-weight: 500; color: #B9C9E2; }
+@media (max-width: 1000px) { .pie-rejilla { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+@media (max-width: 640px)  { .pie-rejilla { grid-template-columns: 1fr; } }
+@media print { footer.pie { display: none !important; } }
+
+</style>
+</head>
+<body>
+<div class="volver-barra">
+  <div class="env">
+    <a href="./"><span class="flecha" aria-hidden="true">&larr;</span> Volver a las herramientas</a>
+    <small>Herramientas de emprendimiento &middot; Centro de Desarrollo Profesional</small>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="kicker">Tracción temprana</div>
+      <h1>Tablero&nbsp;Financiero</h1>
+      <div class="sub">Facturación no es ganancia. Aquí ves la diferencia.</div>
+    </div>
+    <div class="bizrow">
+      <div class="field">
+        <label for="bizName">Nombre del negocio</label>
+        <input id="bizName" type="text" placeholder="Ej. Estudio Marlo">
+      </div>
+      <div class="field">
+        <label for="bizType">Tipo de negocio</label>
+        <select id="bizType">
+          <option value="">Seleccionar…</option>
+          <option value="freelancer">Freelancer / servicios (por horas)</option>
+          <option value="productos">Negocio con productos</option>
+          <option value="otro">Otro / mixto</option>
+        </select>
+      </div>
+    </div>
+    <nav class="tabs" id="navTabs"></nav>
+  </aside>
+
+  <main class="main">
+    <div id="panels"></div>
+  </main>
+</div>
+<div class="mobile-tabbar" id="mobileTabs"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================ DATA ============================ */
+var STORAGE_KEY = "tf_dashboard_v1";
+var TABS = [
+  {group:"Resumen", items:[
+    {id:"resumen", label:"Resumen", }
+  ]},
+  {group:"Datos del mes", items:[
+    {id:"ingresos", label:"Ingresos"},
+    {id:"fijos", label:"Gastos fijos"},
+    {id:"variables", label:"Gastos variables"},
+    {id:"flujo", label:"Flujo de caja (6 meses)"}
+  ]},
+  {group:"Cálculos", items:[
+    {id:"precio", label:"Precio mínimo"},
+    {id:"equilibrio", label:"Punto de equilibrio"},
+    {id:"runway", label:"Runway"},
+    {id:"asignacion", label:"Asignación de dinero"}
+  ]},
+  {group:"Rutina", items:[
+    {id:"guia", label:"Guía de uso"},
+    {id:"cierre", label:"Cierre mensual"}
+  ]}
+];
+
+function defaultState(){
+  return {
+    bizName:"", bizType:"",
+    nextId:1,
+    activeTab:"resumen",
+    income:[],           // {id, client, month:'YYYY-MM', amount}
+    fixedExpenses:[],    // {id, name, amount}  (monthly recurring)
+    variableExpenses:[], // {id, name, month, amount}
+    cashCurrent:0,
+    cashFlow:{},          // month -> {income, expense} manual overrides
+    price:{ hours:0, billablePct:70, fixedOverride:null, salary:0, projectHours:0 },
+    breakeven:{ avgTicketOverride:null },
+    alloc:{ operacion:"", impuestos:"", reserva:"", sueldo:"" },
+    checklist:{ items:{}, answers:{q1:"",q2:"",q3:""} }
+  };
+}
+
+var state = loadState();
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    var parsed = JSON.parse(raw);
+    var d = defaultState();
+    for(var k in d){ if(parsed[k]===undefined) parsed[k]=d[k]; }
+    return parsed;
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function uid(){ return state.nextId++; }
+
+/* ============================ HELPERS ============================ */
+var fmtCOP = new Intl.NumberFormat('es-CO', {style:'currency', currency:'COP', maximumFractionDigits:0});
+function money(n){ if(!isFinite(n)) return "—"; return fmtCOP.format(Math.round(n)); }
+function moneyShort(n){
+  if(!isFinite(n)) return "—";
+  var v = Math.round(n);
+  return fmtCOP.format(v);
+}
+function pct(n){ return (isFinite(n)? Math.round(n*10)/10 : 0) + "%"; }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+function monthLabel(m){
+  if(!m) return "—";
+  var parts = m.split("-"); var y=parts[0], mo=parseInt(parts[1],10);
+  var names = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  return names[mo-1] + " " + y.slice(2);
+}
+function currentMonthStr(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function shiftMonth(mstr, delta){
+  var parts = mstr.split("-"); var y=parseInt(parts[0],10), m=parseInt(parts[1],10);
+  var d = new Date(y, m-1+delta, 1);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function last3Months(){
+  var cur = currentMonthStr();
+  return [shiftMonth(cur,-2), shiftMonth(cur,-1), cur];
+}
+function next6Months(){
+  var cur = currentMonthStr(); var arr=[];
+  for(var i=0;i<6;i++) arr.push(shiftMonth(cur,i));
+  return arr;
+}
+
+function bizLabels(){
+  var t = state.bizType;
+  if(t==="freelancer") return {unit:"cliente", unitPlural:"clientes", item:"proyecto", itemPlural:"proyectos"};
+  if(t==="productos") return {unit:"cliente", unitPlural:"clientes", item:"producto/pedido", itemPlural:"pedidos"};
+  return {unit:"cliente", unitPlural:"clientes", item:"proyecto o pedido", itemPlural:"proyectos o pedidos"};
+}
+
+/* ============================ COMPUTATIONS ============================ */
+function totalFixed(){
+  return state.fixedExpenses.reduce(function(s,e){ return s+(Number(e.amount)||0); },0);
+}
+function variableForMonth(m){
+  return state.variableExpenses.filter(function(e){return e.month===m;}).reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+}
+function incomeForMonth(m){
+  return state.income.filter(function(e){return e.month===m;}).reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+}
+function avgVariable(){
+  var months = {};
+  state.variableExpenses.forEach(function(e){ months[e.month] = (months[e.month]||0) + (Number(e.amount)||0); });
+  var keys = Object.keys(months);
+  if(!keys.length) return 0;
+  var sum = keys.reduce(function(s,k){return s+months[k];},0);
+  return sum/keys.length;
+}
+function avgIncome(){
+  var m3 = last3Months();
+  var vals = m3.map(incomeForMonth).filter(function(v){return v>0;});
+  if(vals.length) return vals.reduce(function(a,b){return a+b;},0)/vals.length;
+  var all = {};
+  state.income.forEach(function(e){ all[e.month]=(all[e.month]||0)+(Number(e.amount)||0); });
+  var keys = Object.keys(all);
+  if(!keys.length) return 0;
+  return keys.reduce(function(s,k){return s+all[k];},0)/keys.length;
+}
+function latestMonthWithData(){
+  var months = {};
+  state.income.forEach(function(e){months[e.month]=1;});
+  state.variableExpenses.forEach(function(e){months[e.month]=1;});
+  var keys = Object.keys(months).sort();
+  return keys.length ? keys[keys.length-1] : currentMonthStr();
+}
+function monthlyExpenseAvg(){ return totalFixed() + avgVariable(); }
+
+function avgTicket(){
+  if(state.breakeven.avgTicketOverride!=null && state.breakeven.avgTicketOverride!=="") return Number(state.breakeven.avgTicketOverride);
+  if(!state.income.length) return 0;
+  var sum = state.income.reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+  return sum/state.income.length;
+}
+function breakevenUnits(){
+  var fixed = totalFixed() + avgVariable();
+  var t = avgTicket();
+  if(t<=0) return null;
+  return Math.ceil(fixed/t);
+}
+function runwayMonths(){
+  var burn = monthlyExpenseAvg();
+  if(burn<=0) return null;
+  return state.cashCurrent/burn;
+}
+
+function priceResult(){
+  var p = state.price;
+  var billable = (Number(p.hours)||0) * ((Number(p.billablePct)||0)/100);
+  var fixed = p.fixedOverride!=null && p.fixedOverride!=="" ? Number(p.fixedOverride) : totalFixed();
+  var need = fixed + (Number(p.salary)||0);
+  var hourly = billable>0 ? need/billable : 0;
+  var project = hourly * (Number(p.projectHours)||0);
+  return {billable:billable, fixed:fixed, need:need, hourly:hourly, project:project};
+}
+
+function healthStatus(){
+  var m = latestMonthWithData();
+  var profit = incomeForMonth(m) - (totalFixed()+variableForMonth(m));
+  var rw = runwayMonths();
+  if(profit<0 || (rw!=null && rw<2)) return "critical";
+  if((rw!=null && rw<4) || profit < monthlyExpenseAvg()*0.1) return "warn";
+  return "good";
+}
+
+/* ============================ RENDER: SHELL ============================ */
+function buildNav(container, mobile){
+  container.innerHTML = "";
+  TABS.forEach(function(group){
+    if(!mobile){
+      var lbl = document.createElement("div");
+      lbl.className = "navgroup-label";
+      lbl.textContent = group.group;
+      container.appendChild(lbl);
+    }
+    group.items.forEach(function(item){
+      var btn = document.createElement("button");
+      btn.className = "tab-btn" + (state.activeTab===item.id ? " active":"");
+      btn.setAttribute("data-tab", item.id);
+      btn.innerHTML = '<span class="dot"></span>' + esc(item.label);
+      btn.addEventListener("click", function(){ state.activeTab=item.id; saveState(); renderAll(); window.scrollTo(0,0); });
+      container.appendChild(btn);
+    });
+  });
+}
+
+function renderShellStatic(){
+  document.getElementById("bizName").value = state.bizName;
+  document.getElementById("bizType").value = state.bizType;
+  document.getElementById("bizName").addEventListener("input", function(e){ state.bizName=e.target.value; saveState(); });
+  document.getElementById("bizType").addEventListener("change", function(e){ state.bizType=e.target.value; saveState(); renderAll(); });
+}
+
+/* ============================ RENDER: PANELS ============================ */
+function panelResumen(){
+  var m = latestMonthWithData();
+  var inc = incomeForMonth(m);
+  var fixed = totalFixed();
+  var vari = variableForMonth(m);
+  var profit = inc - fixed - vari;
+  var rw = runwayMonths();
+  var be = breakevenUnits();
+  var labels = bizLabels();
+  var status = healthStatus();
+  var statusText = {good:"Saludable", warn:"Atención", critical:"Crítico"}[status];
+
+  var noData = state.income.length===0 && state.fixedExpenses.length===0;
+
+  var kpiHtml =
+    '<div class="kpis">'+
+      kpiCard("Ganancia real · "+monthLabel(m), money(profit), inc? "Ingresos "+money(inc)+" − gastos "+money(fixed+vari) : "Sin ingresos registrados", profit<0?"critical":(profit<monthlyExpenseAvg()*0.1?"warn":"good"))+
+      kpiCard("Runway", rw==null?"—":(rw<0?"0.0 meses":rw.toFixed(1)+" meses"), rw==null?"Registra gastos para calcular":"Con la caja actual, sin vender más", rw==null?"":(rw<2?"critical":rw<4?"warn":"good"))+
+      kpiCard("Punto de equilibrio", be==null?"—":(be+" "+(be===1?labels.item:labels.itemPlural)), be==null?"Registra ingresos para estimar":"al mes, al ticket promedio actual", "")+
+      kpiCard("Estado financiero", statusText, "Semáforo automático", status)+
+    '</div>';
+
+  var chartMonths = next6Months();
+  var cash = state.cashCurrent;
+  var barsHtml = "";
+  var maxAbs = 1;
+  var running = [];
+  chartMonths.forEach(function(mo){
+    var ov = state.cashFlow[mo] || {};
+    var expInc = ov.income!=null && ov.income!=="" ? Number(ov.income) : avgIncome();
+    var expExp = ov.expense!=null && ov.expense!=="" ? Number(ov.expense) : monthlyExpenseAvg();
+    cash += (expInc-expExp);
+    running.push(cash);
+    maxAbs = Math.max(maxAbs, Math.abs(cash));
+  });
+  chartMonths.forEach(function(mo, idx){
+    var val = running[idx];
+    var h = Math.max(4, Math.abs(val)/maxAbs*120);
+    barsHtml += '<div class="cf-col"><div class="cf-val">'+moneyShort(val)+'</div><div class="cf-bar'+(val<0?' neg':'')+'" style="height:'+h+'px"></div><div class="cf-month">'+monthLabel(mo)+'</div></div>';
+  });
+
+  var onboarding = noData ? (
+    '<div class="card" style="border-color:var(--gold-soft); background:color-mix(in srgb, var(--gold-soft) 55%, var(--paper-raised));">'+
+      '<h3>Empieza aquí: 5 pasos (≈15 min)</h3>'+
+      '<div class="hint">Así queda el tablero funcionando con datos reales desde hoy.</div>'+
+      '<ol style="margin:0; padding-left:18px; color:var(--ink-soft); font-size:13.5px; line-height:1.9;">'+
+        '<li>Elige tu <b style="color:var(--ink)">tipo de negocio</b> arriba a la izquierda.</li>'+
+        '<li>Ve a <b style="color:var(--ink)">Ingresos</b> y registra lo que facturaste este mes, por cliente.</li>'+
+        '<li>Ve a <b style="color:var(--ink)">Gastos fijos</b> y <b style="color:var(--ink)">Gastos variables</b> y regístralos.</li>'+
+        '<li>Escribe tu <b style="color:var(--ink)">caja actual</b> en la pestaña Runway.</li>'+
+        '<li>Abre <b style="color:var(--ink)">Precio mínimo</b> para saber qué tarifa no te hace perder dinero.</li>'+
+      '</ol>'+
+    '</div>'
+  ) : "";
+
+  return (
+    '<div class="panel-head"><h2>Resumen</h2><p>Tu situación financiera real, no lo que facturaste. Actualízalo en tu cierre mensual.</p></div>'+
+    onboarding +
+    kpiHtml +
+    '<div class="card"><h3>Proyección de caja a 6 meses</h3><div class="hint">Caja actual + ingresos y gastos esperados por mes (editables en la pestaña Flujo de caja).</div><div class="cf-chart">'+barsHtml+'</div></div>'
+  );
+}
+
+function kpiCard(label, value, note, status){
+  return '<div class="kpi'+(status?' '+status:'')+'"><div class="label">'+esc(label)+'</div><div class="value">'+esc(value)+'</div><div class="note">'+esc(note)+'</div></div>';
+}
+
+function panelIngresos(){
+  var labels = bizLabels();
+  var rows = state.income.slice().sort(function(a,b){ return a.month<b.month?1:-1; });
+  var total = rows.reduce(function(s,r){return s+(Number(r.amount)||0);},0);
+  var byMonth = {};
+  rows.forEach(function(r){ byMonth[r.month]=(byMonth[r.month]||0)+(Number(r.amount)||0); });
+
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="client" value="'+esc(r.client)+'" placeholder="Nombre del '+labels.unit+'" style="width:100%"></td>'+
+      '<td><input type="month" data-field="month" value="'+esc(r.month)+'"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:130px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'" title="Eliminar">✕</button></td>'+
+    '</tr>';
+  }).join("");
+
+  var body = rows.length ? trs : '<tr><td colspan="4"><div class="empty-state">Aún no hay ingresos registrados. Agrega el primero abajo.</div></td></tr>';
+
+  return (
+    '<div class="panel-head"><h2>Ingresos por '+labels.unit+' y mes</h2><p>Registra cada pago recibido. Esto es lo que entra, no lo que "vendiste" o facturaste sin cobrar.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Registro de ingresos<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addIncome">+ Agregar ingreso</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="incomeTbl"><thead><tr><th>'+cap(labels.unit)+'</th><th>Mes</th><th>Monto</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td colspan="2">Total registrado</td><td class="mono">'+money(total)+'</td><td></td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Ingresos por mes")
+  );
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function monthlySummaryCard(byMonth, title){
+  var keys = Object.keys(byMonth).sort();
+  if(!keys.length) return "";
+  var rows = keys.map(function(k){ return '<tr><td>'+monthLabel(k)+'</td><td class="mono" style="text-align:right">'+money(byMonth[k])+'</td></tr>'; }).join("");
+  return '<div class="card"><h3>'+esc(title)+'</h3><table><tbody>'+rows+'</tbody></table></div>';
+}
+
+function panelFijos(){
+  var rows = state.fixedExpenses;
+  var total = totalFixed();
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="name" value="'+esc(r.name)+'" placeholder="Ej. Arriendo, software, nómina" style="width:100%"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:150px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'">✕</button></td>'+
+    '</tr>';
+  }).join("");
+  var body = rows.length ? trs : '<tr><td colspan="3"><div class="empty-state">Sin gastos fijos registrados.</div></td></tr>';
+  return (
+    '<div class="panel-head"><h2>Gastos fijos</h2><p>Lo que pagas todos los meses, vendas o no vendas: arriendo, suscripciones, nómina, seguros.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Gastos fijos mensuales<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addFixed">+ Agregar gasto fijo</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="fixedTbl"><thead><tr><th>Concepto</th><th>Monto / mes</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td>Total mensual</td><td class="mono">'+money(total)+'</td><td></td></tr></tbody></table></div>'+
+    '</div>'
+  );
+}
+
+function panelVariables(){
+  var rows = state.variableExpenses.slice().sort(function(a,b){return a.month<b.month?1:-1;});
+  var total = rows.reduce(function(s,r){return s+(Number(r.amount)||0);},0);
+  var byMonth = {};
+  rows.forEach(function(r){ byMonth[r.month]=(byMonth[r.month]||0)+(Number(r.amount)||0); });
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="name" value="'+esc(r.name)+'" placeholder="Ej. Materiales, envíos, comisiones" style="width:100%"></td>'+
+      '<td><input type="month" data-field="month" value="'+esc(r.month)+'"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:130px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'">✕</button></td>'+
+    '</tr>';
+  }).join("");
+  var body = rows.length ? trs : '<tr><td colspan="4"><div class="empty-state">Sin gastos variables registrados.</div></td></tr>';
+  return (
+    '<div class="panel-head"><h2>Gastos variables</h2><p>Lo que cambia según cuánto produces o vendes: materiales, envíos, comisiones, insumos.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Registro de gastos variables<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addVar">+ Agregar gasto variable</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="varTbl"><thead><tr><th>Concepto</th><th>Mes</th><th>Monto</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td colspan="2">Total registrado</td><td class="mono">'+money(total)+'</td><td></td></tr></tbody></table></div>'+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Gastos variables por mes")
+  );
+}
+
+function panelFlujo(){
+  var months = next6Months();
+  var cash = state.cashCurrent;
+  var rowsHtml = months.map(function(mo){
+    var ov = state.cashFlow[mo] || {};
+    var incVal = ov.income!=null && ov.income!=="" ? ov.income : "";
+    var expVal = ov.expense!=null && ov.expense!=="" ? ov.expense : "";
+    var incDefault = avgIncome();
+    var expDefault = monthlyExpenseAvg();
+    var effInc = incVal!=="" ? Number(incVal) : incDefault;
+    var effExp = expVal!=="" ? Number(expVal) : expDefault;
+    cash += (effInc-effExp);
+    return '<tr data-month="'+mo+'">'+
+      '<td class="mono">'+monthLabel(mo)+'</td>'+
+      '<td><input type="number" class="mono cf-input" data-field="income" placeholder="'+Math.round(incDefault)+'" value="'+incVal+'" style="width:130px"></td>'+
+      '<td><input type="number" class="mono cf-input" data-field="expense" placeholder="'+Math.round(expDefault)+'" value="'+expVal+'" style="width:130px"></td>'+
+      '<td class="mono" style="'+(cash<0?'color:var(--critical);font-weight:600':'')+'">'+money(cash)+'</td>'+
+    '</tr>';
+  }).join("");
+
+  return (
+    '<div class="panel-head"><h2>Flujo de caja proyectado a 6 meses</h2><p>Parte de tu caja actual y proyecta ingresos/gastos esperados. Deja los campos vacíos para usar el promedio de tus datos.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="cashCurrent">Caja actual (saldo real hoy)</label><input id="cashCurrent" type="number" class="mono" min="0" step="1000" value="'+state.cashCurrent+'"></div>'+
+        '<div class="field"><label>Gasto mensual promedio (fijo + variable)</label><input type="text" class="mono" value="'+money(monthlyExpenseAvg())+'" disabled></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Proyección editable</h3><div class="hint">Los placeholders muestran el promedio calculado a partir de tus datos.</div>'+
+      '<div class="scrollx"><table id="cfTbl"><thead><tr><th>Mes</th><th>Ingreso esperado</th><th>Gasto esperado</th><th>Caja al cierre</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'+
+    '</div>'
+  );
+}
+
+function panelPrecio(){
+  var p = state.price;
+  var r = priceResult();
+  return (
+    '<div class="panel-head"><h2>Calculadora de precio mínimo</h2><p>La tarifa por debajo de la cual estás perdiendo dinero, aunque parezca que estás facturando.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="pHours">Horas disponibles al mes</label><input id="pHours" type="number" class="mono" min="0" value="'+p.hours+'"></div>'+
+        '<div class="field"><label for="pBillable">% de esas horas que facturas realmente</label><input id="pBillable" type="number" class="mono" min="0" max="100" value="'+p.billablePct+'"></div>'+
+        '<div class="field"><label for="pFixed">Gastos fijos del mes</label><input id="pFixed" type="number" class="mono" min="0" step="1000" placeholder="'+Math.round(totalFixed())+' (auto)" value="'+(p.fixedOverride==null?"":p.fixedOverride)+'"></div>'+
+        '<div class="field"><label for="pSalary">Sueldo objetivo (lo que quieres ganar)</label><input id="pSalary" type="number" class="mono" min="0" step="1000" value="'+p.salary+'"></div>'+
+      '</div>'+
+      '<div class="formula">tarifa/hora = ( <b>gastos fijos</b> + <b>sueldo objetivo</b> ) ÷ ( <b>horas disponibles</b> × <b>% facturable</b> )</div>'+
+      '<div class="result-box">'+
+        '<div class="lbl">Tarifa mínima por hora</div>'+
+        '<div class="big">'+money(r.hourly)+'</div>'+
+        '<div class="hint" style="margin-top:2px">Con '+r.billable.toFixed(1)+' horas facturables al mes. Cobrar menos que esto es perder dinero.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Tarifa por proyecto</h3><div class="hint">Estima cuántas horas te toma un proyecto típico.</div>'+
+      '<div class="field" style="max-width:260px"><label for="pProject">Horas estimadas del proyecto</label><input id="pProject" type="number" class="mono" min="0" value="'+p.projectHours+'"></div>'+
+      '<div class="result-box"><div class="lbl">Precio mínimo del proyecto</div><div class="big">'+money(r.project)+'</div></div>'+
+    '</div>'
+  );
+}
+
+function panelEquilibrio(){
+  var labels = bizLabels();
+  var fixed = totalFixed(); var vari = avgVariable();
+  var ticket = avgTicket();
+  var units = breakevenUnits();
+  return (
+    '<div class="panel-head"><h2>Punto de equilibrio</h2><p>Cuántos '+labels.itemPlural+' necesitas al mes solo para no perder dinero, antes de empezar a ganar.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label>Gastos fijos + variables promedio</label><input type="text" class="mono" value="'+money(fixed+vari)+'" disabled></div>'+
+        '<div class="field"><label for="beTicket">Ticket promedio por '+labels.unit+' (editable)</label><input id="beTicket" type="number" class="mono" min="0" step="1000" placeholder="'+Math.round(ticket||0)+' (auto)" value="'+(state.breakeven.avgTicketOverride==null?"":state.breakeven.avgTicketOverride)+'"></div>'+
+      '</div>'+
+      '<div class="formula">'+labels.itemPlural+' necesarios = ( <b>gastos fijos</b> + <b>gastos variables promedio</b> ) ÷ <b>ticket promedio</b></div>'+
+      '<div class="result-box">'+
+        '<div class="lbl">'+cap(labels.itemPlural)+' necesarios al mes</div>'+
+        '<div class="big">'+(units==null? "Agrega datos de ingresos" : units+" "+(units===1?labels.item:labels.itemPlural))+'</div>'+
+        (units!=null ? '<div class="hint" style="margin-top:2px">Al ticket promedio actual de '+money(ticket)+'.</div>' : '')+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function panelRunway(){
+  var burn = monthlyExpenseAvg();
+  var rw = runwayMonths();
+  var status = rw==null? "" : (rw<2?"critical":rw<4?"warn":"good");
+  var msg = rw==null ? "Registra gastos fijos o variables para calcular el runway."
+    : rw<2 ? "Zona crítica: menos de 2 meses de operación sin ventas nuevas. Actúa ya: reduce gastos o consigue ingresos inmediatos."
+    : rw<4 ? "Zona de atención: tienes margen corto. Prioriza cerrar nuevos clientes este mes."
+    : "Tienes colchón razonable. Sigue vigilando el número cada mes.";
+  return (
+    '<div class="panel-head"><h2>Alerta de runway</h2><p>Cuántos meses aguanta el negocio con la caja actual si no entra ni un peso nuevo.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="cashCurrent2">Caja actual (saldo real hoy)</label><input id="cashCurrent2" type="number" class="mono" min="0" step="1000" value="'+state.cashCurrent+'"></div>'+
+        '<div class="field"><label>Gasto mensual promedio</label><input type="text" class="mono" value="'+money(burn)+'" disabled></div>'+
+      '</div>'+
+      '<div class="formula">runway = <b>caja actual</b> ÷ <b>gasto mensual promedio</b></div>'+
+      '<div class="result-box">'+
+        '<div class="rowline"><div class="lbl">Meses de runway</div>'+(status?'<span class="pill '+status+'" style="margin-left:8px"><span class="dot"></span>'+({good:"Saludable",warn:"Atención",critical:"Crítico"}[status])+'</span>':'')+'</div>'+
+        '<div class="big">'+(rw==null?"—":rw.toFixed(1)+" meses")+'</div>'+
+        '<div class="hint" style="margin-top:6px; max-width:56ch">'+msg+'</div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function panelAsignacion(){
+  var a = state.alloc;
+  var vals = {
+    operacion: a.operacion===""? 0 : Number(a.operacion),
+    impuestos: a.impuestos===""? 0 : Number(a.impuestos),
+    reserva: a.reserva===""? 0 : Number(a.reserva),
+    sueldo: a.sueldo===""? 0 : Number(a.sueldo)
+  };
+  var sum = vals.operacion+vals.impuestos+vals.reserva+vals.sueldo;
+  var m = latestMonthWithData();
+  var inc = incomeForMonth(m);
+  var colors = {operacion:"var(--accent)", impuestos:"var(--gold)", reserva:"var(--ink-soft)", sueldo:"var(--good)"};
+  var labels = {operacion:"Operación", impuestos:"Impuestos", reserva:"Reserva", sueldo:"Sueldo del dueño"};
+  var segs = "", legend = "";
+  ["operacion","impuestos","reserva","sueldo"].forEach(function(k){
+    var w = sum>0 ? (vals[k]/Math.max(sum,100))*100 : vals[k];
+    segs += '<div class="alloc-seg" style="width:'+Math.max(vals[k],0)+'%; background:'+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';
+    legend += '<div class="alloc-item"><span class="swatch" style="background:'+colors[k]+'"></span>'+labels[k]+': <span class="mono">'+money(inc*vals[k]/100)+'</span></div>';
+  });
+  var warnMsg = sum!==100 ? '<div class="hint" style="color:var(--critical); font-weight:600; margin-top:6px">Los porcentajes suman '+sum+'%. Deben sumar 100%.</div>' : '<div class="hint" style="color:var(--good); font-weight:600; margin-top:6px">Suman 100%. Asignación válida.</div>';
+
+  return (
+    '<div class="panel-head"><h2>Separación negocio / personal</h2><p>Cada peso que entra se reparte por adelantado. Así el dueño no vive del efectivo de la caja general.</p></div>'+
+    '<div class="card">'+
+      '<h3>Porcentajes de asignación</h3><div class="hint">Defínelos tú. Deben sumar 100%. Se aplican sobre los ingresos de '+monthLabel(m)+' ('+money(inc)+').</div>'+
+      '<div class="grid3">'+
+        allocField("operacion","Operación %",a.operacion)+
+        allocField("impuestos","Impuestos %",a.impuestos)+
+        allocField("reserva","Reserva %",a.reserva)+
+      '</div>'+
+      '<div class="grid3" style="margin-top:16px; max-width:33%">'+
+        allocField("sueldo","Sueldo del dueño %",a.sueldo)+
+      '</div>'+
+      warnMsg+
+      '<div class="alloc-bar">'+segs+'</div>'+
+      '<div class="alloc-legend">'+legend+'</div>'+
+    '</div>'
+  );
+}
+function allocField(key,label,val){
+  return '<div class="field"><label for="alloc_'+key+'">'+label+'</label><input id="alloc_'+key+'" data-alloc="'+key+'" type="number" class="mono" min="0" max="100" value="'+val+'"></div>';
+}
+
+var GUIDE = [
+  {t:"Facturación vs. ganancia real", body:"Facturar es emitir una cuenta de cobro o factura. Ganar es lo que sobra después de pagar todos los gastos del negocio (fijos y variables). Puedes facturar $5.000.000 y ganar $200.000 si tus costos son altos, o incluso perder dinero.", red:"Si tu 'ganancia real' del Resumen está en rojo, revisa primero tus gastos fijos: casi siempre ahí está la fuga."},
+  {t:"Ingresos por cliente y mes", body:"Registra cada pago recibido (no cada cotización enviada), con la fecha en que realmente entró el dinero. Esto te muestra qué clientes te sostienen y en qué meses baja la facturación.", red:"Si un mes queda vacío, no rellenes con estimados: déjalo en cero y trabaja en conseguir ingresos ese mes."},
+  {t:"Gastos fijos", body:"Todo lo que pagas exista o no exista venta ese mes: arriendo, software, nómina fija, seguros. Revísalos cada trimestre: suelen crecer sin que nadie lo note.", red:"Si los gastos fijos superan el 60% de tu ingreso promedio, tu estructura es demasiado pesada para tu etapa."},
+  {t:"Gastos variables", body:"Lo que depende de cuánto vendes o produces: materiales, comisiones, envíos, insumos. Si no vendes, no los pagas.", red:"Si los variables crecen más rápido que tus ingresos, tu margen se está comiendo a sí mismo: revisa proveedores o precios."},
+  {t:"Flujo de caja proyectado", body:"Una foto de cómo se ve tu caja los próximos 6 meses si nada cambia. Úsalo para anticipar meses flacos y decidir con tiempo, no en pánico.", red:"Si algún mes proyectado queda en negativo, ese es tu límite de tiempo para conseguir ventas o reducir gastos."},
+  {t:"Calculadora de precio mínimo", body:"Convierte tus gastos fijos y tu sueldo objetivo en una tarifa por hora. Cualquier precio por debajo de ese número te hace perder dinero, aunque el cliente pague.", red:"Si tu tarifa de mercado actual es menor a la mínima calculada, o subes precios o reduces gastos. No hay tercera opción sostenible."},
+  {t:"Punto de equilibrio", body:"El número de clientes o proyectos que necesitas al mes solo para cubrir gastos, antes de empezar a ganar algo para ti.", red:"Si llevas dos meses por debajo del punto de equilibrio, el problema no es de ventas, sino de estructura de costos o de precio."},
+  {t:"Runway (alerta de caja)", body:"Cuántos meses puedes seguir operando con la caja actual si no entra ni un peso más. Es tu margen de reacción real.", red:"Con runway menor a 2 meses, pausa cualquier gasto no esencial hoy mismo y prioriza cobrar cuentas pendientes."},
+  {t:"Separación negocio / personal", body:"Cada ingreso se reparte de inmediato en cuatro baldes: operación, impuestos, reserva y sueldo del dueño. Evita que uses la caja del negocio como si fuera tu cuenta personal.", red:"Si retiras más de lo que tu balde de 'sueldo' permite, estás financiando tu vida con la reserva o los impuestos del negocio."},
+  {t:"Semáforo financiero", body:"Verde: ganancia positiva y runway sano. Amarillo: ganancia ajustada o runway corto, hay que actuar pronto. Rojo: pérdida o runway crítico, decisión inmediata.", red:"El semáforo en rojo no es un juicio, es una señal de que toca revisar precio, gastos o cobros esta semana."},
+  {t:"Errores comunes en tracción temprana", body:"Los tres más frecuentes: cobrar por intuición o copiando a la competencia sin conocer los propios costos; confundir caja con ganancia (\"tengo plata en el banco, voy bien\"); y mezclar cuentas personales y del negocio sin ningún método.", red:"Si te reconoces en alguno, empieza por la calculadora de precio mínimo: resuelve la causa más común."},
+  {t:"Rutina de cierre mensual", body:"Un ritual corto y fijo (30 min) al final de cada mes para actualizar el tablero y responder tres preguntas clave. Sin esta rutina, el tablero se desactualiza y deja de servir.", red:"Si llevas más de un mes sin cerrar, hazlo hoy antes de seguir tomando decisiones: los números viejos engañan."}
+];
+
+function panelGuia(){
+  var items = GUIDE.map(function(g,i){
+    return '<div class="accordion-item" data-idx="'+i+'">'+
+      '<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+'</span><h4 style="flex:1">'+esc(g.t)+'</h4><span class="chev">▾</span></button>'+
+      '<div class="accordion-body"><p>'+esc(g.body)+'</p><div class="redbox"><b>Si el número se pone en rojo:</b> '+esc(g.red)+'</div></div>'+
+    '</div>';
+  }).join("");
+  return (
+    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Once secciones, tu referencia rápida del tablero.</p></div>'+
+    '<div class="card">'+items+'</div>'
+  );
+}
+
+var CHECK_ITEMS = [
+  {id:"c1", label:"Registrar todos los ingresos del mes, por cliente"},
+  {id:"c2", label:"Revisar y confirmar los gastos fijos (¿cambió alguno?)"},
+  {id:"c3", label:"Registrar los gastos variables del mes"},
+  {id:"c4", label:"Actualizar la caja actual con el saldo real de banco/efectivo"},
+  {id:"c5", label:"Revisar la proyección de flujo de caja a 6 meses"},
+  {id:"c6", label:"Revisar la calculadora de precio (¿sigue vigente el sueldo objetivo?)"},
+  {id:"c7", label:"Aplicar la asignación de porcentajes al ingreso del mes"}
+];
+var QUESTIONS = [
+  {id:"q1", q:"¿Gané dinero de verdad este mes, o solo facturé?"},
+  {id:"q2", q:"¿Cuántos clientes o proyectos necesito el próximo mes para no perder dinero?"},
+  {id:"q3", q:"¿Cuántos meses aguanta el negocio si dejo de vender desde hoy?"}
+];
+
+function panelCierre(){
+  var items = CHECK_ITEMS.map(function(c){
+    var done = !!state.checklist.items[c.id];
+    return '<div class="check-row'+(done?' done':'')+'"><input type="checkbox" id="chk_'+c.id+'" data-chk="'+c.id+'" '+(done?'checked':'')+'><label for="chk_'+c.id+'">'+esc(c.label)+'</label></div>';
+  }).join("");
+  var qs = QUESTIONS.map(function(q){
+    return '<div class="qa"><div class="q">'+esc(q.q)+'</div><textarea data-ans="'+q.id+'" placeholder="Responde con los datos del tablero…">'+esc(state.checklist.answers[q.id]||"")+'</textarea></div>';
+  }).join("");
+  var doneCount = CHECK_ITEMS.filter(function(c){return state.checklist.items[c.id];}).length;
+  return (
+    '<div class="panel-head"><h2>Rutina de cierre mensual</h2><p>30 minutos al final del mes. Sin esta rutina, el tablero se desactualiza rápido.</p></div>'+
+    '<div class="card"><h3>Checklist<span class="badge-count" style="margin-left:8px">'+doneCount+'/'+CHECK_ITEMS.length+'</span></h3><div class="checklist">'+items+'</div></div>'+
+    '<div class="card"><h3>Tres preguntas para responder con los datos</h3>'+qs+'</div>'
+  );
+}
+
+/* ============================ MAIN RENDER ============================ */
+var PANEL_RENDERERS = {
+  resumen:panelResumen, ingresos:panelIngresos, fijos:panelFijos, variables:panelVariables,
+  flujo:panelFlujo, precio:panelPrecio, equilibrio:panelEquilibrio, runway:panelRunway,
+  asignacion:panelAsignacion, guia:panelGuia, cierre:panelCierre
+};
+
+function renderAll(){
+  buildNav(document.getElementById("navTabs"), false);
+  buildNav(document.getElementById("mobileTabs"), true);
+  var panels = document.getElementById("panels");
+  panels.innerHTML = '<div class="panel active">' + PANEL_RENDERERS[state.activeTab]() + '</div>';
+  attachHandlers();
+}
+
+function attachHandlers(){
+  var root = document.getElementById("panels");
+
+  // income
+  var addIncome = root.querySelector("#addIncome");
+  if(addIncome) addIncome.addEventListener("click", function(){
+    state.income.push({id:uid(), client:"", month:currentMonthStr(), amount:0});
+    saveState(); renderAll();
+  });
+  var incomeTbl = root.querySelector("#incomeTbl");
+  if(incomeTbl) bindTable(incomeTbl, state.income);
+
+  var addFixed = root.querySelector("#addFixed");
+  if(addFixed) addFixed.addEventListener("click", function(){
+    state.fixedExpenses.push({id:uid(), name:"", amount:0}); saveState(); renderAll();
+  });
+  var fixedTbl = root.querySelector("#fixedTbl");
+  if(fixedTbl) bindTable(fixedTbl, state.fixedExpenses);
+
+  var addVar = root.querySelector("#addVar");
+  if(addVar) addVar.addEventListener("click", function(){
+    state.variableExpenses.push({id:uid(), name:"", month:currentMonthStr(), amount:0}); saveState(); renderAll();
+  });
+  var varTbl = root.querySelector("#varTbl");
+  if(varTbl) bindTable(varTbl, state.variableExpenses);
+
+  // cash flow
+  ["cashCurrent","cashCurrent2"].forEach(function(id){
+    var el = root.querySelector("#"+id);
+    if(el) el.addEventListener("input", function(e){
+      state.cashCurrent = Number(e.target.value)||0; saveState();
+      var other = document.getElementById(id==="cashCurrent"?"cashCurrent2":"cashCurrent");
+      if(other) other.value = state.cashCurrent;
+      refreshDerived();
+    });
+  });
+  var cfTbl = root.querySelector("#cfTbl");
+  if(cfTbl){
+    cfTbl.addEventListener("input", function(e){
+      var t = e.target; if(!t.dataset.field) return;
+      var tr = t.closest("tr"); var mo = tr.getAttribute("data-month");
+      if(!state.cashFlow[mo]) state.cashFlow[mo] = {};
+      state.cashFlow[mo][t.dataset.field] = t.value;
+      saveState(); refreshDerived();
+    });
+  }
+
+  // price calc
+  bindInput("pHours", function(v){ state.price.hours = v; });
+  bindInput("pBillable", function(v){ state.price.billablePct = v; });
+  bindInput("pFixed", function(v, raw){ state.price.fixedOverride = raw===""? null : v; }, true);
+  bindInput("pSalary", function(v){ state.price.salary = v; });
+  bindInput("pProject", function(v){ state.price.projectHours = v; });
+
+  // breakeven
+  bindInput("beTicket", function(v, raw){ state.breakeven.avgTicketOverride = raw===""? null : v; }, true);
+
+  // allocation
+  root.querySelectorAll("[data-alloc]").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.alloc[el.dataset.alloc] = el.value;
+      saveState(); refreshDerived();
+    });
+  });
+
+  // guide accordion
+  root.querySelectorAll(".accordion-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      btn.parentElement.classList.toggle("open");
+    });
+  });
+
+  // checklist
+  root.querySelectorAll("[data-chk]").forEach(function(el){
+    el.addEventListener("change", function(){
+      state.checklist.items[el.dataset.chk] = el.checked;
+      saveState(); renderAll();
+    });
+  });
+  root.querySelectorAll("[data-ans]").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.checklist.answers[el.dataset.ans] = el.value;
+      saveState();
+    });
+  });
+}
+
+function bindInput(id, setter, allowEmpty){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener("input", function(){
+    var raw = el.value;
+    setter(raw===""? 0 : Number(raw), raw);
+    saveState(); refreshDerived();
+  });
+}
+
+function bindTable(tbl, arr){
+  tbl.addEventListener("input", function(e){
+    var t = e.target; if(!t.dataset.field) return;
+    var tr = t.closest("tr"); var id = Number(tr.getAttribute("data-id"));
+    var row = arr.find(function(r){return r.id===id;});
+    if(!row) return;
+    row[t.dataset.field] = t.dataset.field==="amount" ? (Number(t.value)||0) : t.value;
+    saveState(); refreshDerived();
+  });
+  tbl.addEventListener("click", function(e){
+    var t = e.target; if(!t.dataset.rm) return;
+    var id = Number(t.dataset.rm);
+    var idx = arr.findIndex(function(r){return r.id===id;});
+    if(idx>-1) arr.splice(idx,1);
+    saveState(); renderAll();
+  });
+}
+
+// lightweight refresh: only re-render totals without losing focus, by re-rendering whole panel
+// (inputs re-render on blur-safe intervals via debounce to avoid focus loss on every keystroke)
+var refreshTimer = null;
+function refreshDerived(){
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(function(){ renderAll(); }, 500);
+}
+
+/* ============================ INIT ============================ */
+renderShellStatic();
+renderAll();
+})();
+</script>
+
+<footer class="pie">
+  <div class="pie-envoltura">
+    <div class="pie-rejilla">
+
+      <div class="pie-col pie-marca">
+        <img class="pie-logo" src="data:image/png;base64,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" alt="Universidad de La Sabana" width="241" height="64">
+        <p>Institución de educación superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.</p>
+        <p>Carácter Académico: Universidad.</p>
+      </div>
+
+      <div class="pie-col">
+        <h4>El servicio</h4>
+        <p><strong>Tablero Financiero</strong> es una herramienta de trabajo autónomo del Centro de Desarrollo Profesional, Alumni Sabana, para emprendimientos en tracción temprana.</p><p>Traduce lo que facturas en lo que de verdad ganas: precio mínimo por hora, punto de equilibrio, runway y separación entre la caja del negocio y la personal. No es contabilidad oficial, no reemplaza a un contador y no sustituye una asesoría personalizada.</p>
+      </div>
+
+      <!-- TRATAMIENTO DE DATOS · el bloque que hay que cambiar el día
+           que estas herramientas guarden en la cuenta Alumni Sabana.
+           Hoy dicen lo que de verdad hacen. Cuando se conecte
+           Supabase, la frase de «por ahora» se sustituye por la del
+           portafolio: «se guarda en tu cuenta de la Universidad, por
+           eso lo recuperas desde cualquier computador». -->
+      <div class="pie-col">
+        <h4>Tratamiento de datos</h4>
+        <p>Por ahora, todo lo que registras se guarda <strong>únicamente en este navegador</strong> y en este equipo: no se envía a ningún servidor y nadie más lo puede consultar. Si limpias los datos del navegador o abres la herramienta en otro computador, empiezas de cero.</p><p><strong>Próximamente</strong> podrás guardarlo en tu cuenta Alumni Sabana y recuperarlo desde cualquier computador, igual que en las demás herramientas del Centro.</p><p>Las cifras que escribas son estimaciones tuyas y su exactitud es tu responsabilidad. Los resultados son orientativos.</p>
+        <p><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos de la Universidad ↗</a></p>
+      </div>
+
+      <div class="pie-col">
+        <h4>Contacto</h4>
+        <p>Centro de Desarrollo Profesional<br>Alumni Sabana</p>
+        <p><a class="pie-enlace" href="mailto:desarrolloprofesional@unisabana.edu.co">desarrolloprofesional@unisabana.edu.co</a></p>
+        <p>Contact center: (601) 861 5555</p>
+        <p>Campus del Puente del Común<br>Km. 7, Autopista Norte de Bogotá<br>Chía, Cundinamarca, Colombia</p>
+      </div>
+
+    </div>
+
+    <div class="pie-legal">
+      <span>Universidad de La Sabana &middot; Personería Jurídica: Resolución 130 del 14 de enero de 1980, Ministerio de Educación Nacional<br>Versión del archivo: <b>2026.08.31</b></span>
+      <span><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos</a> &middot; Vigilada Mineducación</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

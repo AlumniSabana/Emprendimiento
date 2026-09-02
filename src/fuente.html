@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Herramientas de emprendimiento del Centro de Desarrollo Profesional de la Universidad de La Sabana: de la idea al lanzamiento y al crecimiento de tu negocio.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#001459">
+<title>Emprendimiento · Centro de Desarrollo Profesional — Alumni Sabana</title>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   HERRAMIENTAS DE EMPRENDIMIENTO
+   Centro de Desarrollo Profesional · Alumni Sabana
+   Universidad de La Sabana
+
+   Portada de las herramientas de emprendimiento. Misma paleta,
+   misma tipografía y mismo pie que «Estudio de Pitch», «Construye
+   tu portafolio» y la portada de empleabilidad: las herramientas
+   del Centro se leen como un solo servicio, no como páginas sueltas.
+
+   ── CÓMO ESTÁ ORGANIZADA ──────────────────────────────────────
+   Tres etapas, en el orden en que las vive quien emprende:
+
+     1 · IDEA        · tienes una idea, no sabes si es un negocio
+     2 · LANZAMIENTO · ya vendes, no sabes si estás ganando
+     3 · CRECIMIENTO · funciona, quieres que lo conozcan más
+
+   El orden es la mitad del mensaje: quien llega perdido encuentra
+   su etapa antes de leer una sola tarjeta.
+
+   ── PARA AÑADIR O ACTIVAR UNA HERRAMIENTA ─────────────────────
+   1. Quita el atributo «data-pronto» de su <article>.
+   2. Añade su dirección en el bloque DIRECCIONES, al final.
+   El botón se activa solo. No hace falta tocar nada más.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════ 1 · VARIABLES ═══════════════ */
+:root {
+  --paper: #EEF1F8;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FC;
+  --ink: #0A1330;
+  --ink-soft: #4B5670;
+  /* #8895A4 venía de las otras portadas del Centro, pero medido da
+     3,05:1 sobre blanco: por debajo del mínimo de 4,5:1 que pide la
+     WCAG para texto pequeño, y las etiquetas «¿PARA QUÉ SIRVE?» son
+     justo texto pequeño. Se oscurece hasta 4,6:1 conservando el
+     mismo matiz azulado. Se comprueba contra los DOS fondos en que
+     aparece: el blanco de las tarjetas activas y el #F5F7FC de las
+     de «Próximamente», que es el más exigente de los dos. */
+  --ink-faint: #616E80;
+  --rule: #D9E1EE;
+  --rule-soft: #E9EEF7;
+
+  --azul: #001459;
+  --azul-700: #1E306E;
+  --azul-500: #25409A;
+  --azul-300: #7FA6D0;
+  --azul-soft: #E3EAF7;
+
+  --ok: #158A5E;
+  --ambar: #8A5200;
+  --ambar-soft: #FBEFDD;
+
+  --shadow: 0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22);
+  --shadow-alta: 0 2px 6px rgba(0,20,89,.08), 0 22px 44px -20px rgba(0,20,89,.3);
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  --ancho: 1140px;
+  --pad: clamp(1.1rem, 4vw, 2.75rem);
+}
+
+/* ═══════════════ 2 · BASE ═══════════════ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--azul); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--azul-500); outline-offset: 3px; border-radius: 2px; }
+
+.envoltura { max-width: var(--ancho); margin: 0 auto; padding: 0 var(--pad); }
+.eyebrow {
+  font-size: .69rem; letter-spacing: .16em; text-transform: uppercase;
+  font-weight: 700; color: var(--azul-500);
+}
+.saltar {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--azul); color: #FFFFFF;
+  padding: .6rem 1rem; border-radius: 0 0 5px 0; font-size: .85rem; font-weight: 600;
+}
+.saltar:focus { left: 0; }
+
+/* ═══════════════ 3 · CABECERA ═══════════════ */
+.masthead { background: var(--azul); color: #EAF0F8; }
+.masthead-fila {
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 1.1rem 0; flex-wrap: wrap;
+}
+.masthead img { height: 42px; width: auto; display: block; }
+.masthead .divisor {
+  padding-left: 1.1rem; border-left: 1px solid rgba(255,255,255,.28);
+  font-family: var(--serif); font-size: 1rem; line-height: 1.3;
+}
+.masthead .divisor small {
+  display: block; font-family: var(--sans); font-size: .68rem;
+  letter-spacing: .12em; text-transform: uppercase; color: #A9BEDE;
+  font-weight: 600; margin-top: .25rem;
+}
+.masthead .volver {
+  margin-left: auto; font-size: .84rem; color: #C7D6F0; text-decoration: none;
+  border-bottom: 1px solid rgba(199,214,240,.4); padding-bottom: 1px;
+  transition: color .15s, border-color .15s;
+}
+.masthead .volver:hover { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+
+/* ═══════════════ 4 · PORTADA ═══════════════ */
+.hero { background: var(--azul); color: #FFFFFF; padding: 2.4rem 0 3rem; }
+.hero h1 {
+  font-size: clamp(1.55rem, 3.4vw, 2.45rem); font-style: italic;
+  letter-spacing: -.005em; line-height: 1.22; max-width: 22ch;
+}
+.hero p {
+  margin-top: 1.1rem; font-size: 1.05rem;
+  color: #C7D6F0; line-height: 1.6; max-width: 62ch;
+}
+.hero .eyebrow { color: #A9BEDE; }
+
+/* El recorrido: las tres etapas como índice de la página. No es
+   decoración —es el único sitio donde se ve el camino entero de un
+   vistazo, y cada una lleva a su sección. */
+.recorrido {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: .9rem; margin-top: 2rem; list-style: none; padding: 0;
+  counter-reset: etapa;
+}
+.recorrido a {
+  display: block; text-decoration: none; height: 100%;
+  border: 1px solid rgba(255,255,255,.22); border-radius: 7px;
+  padding: .95rem 1.1rem 1.05rem;
+  background: rgba(255,255,255,.05);
+  transition: background .16s, border-color .16s, transform .12s;
+}
+.recorrido a:hover {
+  background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.5);
+  transform: translateY(-2px);
+}
+.recorrido .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255,255,255,.16); color: #FFFFFF;
+  font-size: .72rem; font-weight: 700; margin-bottom: .5rem;
+}
+.recorrido b {
+  display: block; font-family: var(--serif); font-size: 1.06rem;
+  font-weight: 600; color: #FFFFFF; line-height: 1.25;
+}
+.recorrido span.q {
+  display: block; margin-top: .3rem; font-size: .82rem;
+  color: #A9BEDE; line-height: 1.5;
+}
+
+/* ═══════════════ 5 · PANEL DE QUIEN ENTRÓ ═══════════════ */
+.panel {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: var(--shadow); padding: 1.5rem 1.7rem;
+  margin-top: -2.6rem; margin-bottom: 2rem;
+}
+.panel[hidden] { display: none; }
+.panel-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap; }
+.panel h2 { font-size: 1.5rem; font-style: italic; color: var(--azul); margin-top: .2rem; }
+.panel-cab p { font-size: .9rem; color: var(--ink-soft); margin-top: .3rem; }
+.panel-nota {
+  font-size: .82rem; color: var(--ink-faint);
+  margin-top: 1rem; padding-top: .9rem; border-top: 1px solid var(--rule-soft);
+}
+
+/* El panel de la cuenta sí sube a solaparse con la banda azul: es
+   una tarjeta blanca con sombra, y el efecto de que «flote» sobre
+   el azul es el que tienen las otras portadas del Centro.
+
+   La primera ETAPA no sube. Se intentó y el resultado fue un
+   título azul marino cayendo sobre la banda azul marino: el
+   «Idea de negocio» desaparecía por completo. Un titular de
+   sección no es una tarjeta —no lleva fondo propio— así que sobre
+   la banda no tiene dónde apoyarse. Se queda en el papel. */
+
+/* ═══════════════ 6 · ETAPAS ═══════════════ */
+.etapa { padding-top: 2.8rem; scroll-margin-top: 1rem; }
+.etapa.primera { padding-top: 2.4rem; }
+.etapa-cab { margin-bottom: 1.3rem; }
+.etapa-cab .linea {
+  display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap;
+}
+.etapa-cab .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex: none; border-radius: 50%;
+  background: var(--azul); color: #FFFFFF;
+  font-family: var(--sans); font-size: .78rem; font-weight: 700;
+  align-self: center;
+}
+.etapa-cab h2 { font-size: 1.5rem; font-style: italic; color: var(--azul); }
+.etapa-cab .cuando {
+  margin-top: .5rem; color: var(--ink-soft); font-size: .95rem; max-width: 74ch;
+}
+.etapa-cab .cuando b { color: var(--ink); font-weight: 600; }
+
+/* ═══════════════ 7 · TARJETAS ═══════════════ */
+/* La rejilla es de DOS columnas fijas, no «auto-fit».
+   Se probaron las dos alternativas y ninguna sirve:
+     · «auto-fit» estira la tarjeta única de las etapas 2 y 3 hasta
+       los 1140 px del contenedor. Deja de leerse como tarjeta y
+       pasa a ser una franja con líneas de 140 caracteres.
+     · «auto-fill» con un máximo corrige eso, pero reparte el
+       sobrante en columnas fantasma y apila las dos tarjetas de la
+       etapa 1 en una sola columna, dejando media página vacía.
+   Con dos columnas explícitas, una tarjeta ocupa una columna
+   —el mismo ancho en las tres etapas— y dos se ponen al lado. */
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+  align-items: start;
+}
+/* Por debajo de dos columnas cómodas, una sola a todo el ancho. */
+@media (max-width: 860px) {
+  .tarjetas { grid-template-columns: minmax(0, 1fr); }
+}
+.tarjeta {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: var(--shadow); padding: 1.6rem 1.7rem 1.7rem;
+  display: flex; flex-direction: column; gap: .9rem;
+  transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+}
+.tarjeta:hover { box-shadow: var(--shadow-alta); transform: translateY(-2px); border-color: var(--azul-300); }
+.tarjeta h3 { font-size: 1.4rem; font-style: italic; color: var(--azul); }
+.tarjeta .lema { font-size: .95rem; color: var(--ink-soft); }
+
+.tarjeta dl {
+  margin: 0; display: grid; grid-template-columns: auto 1fr;
+  gap: .35rem .9rem; font-size: .86rem;
+  padding-top: .9rem; border-top: 1px solid var(--rule-soft);
+}
+.tarjeta dt {
+  font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 700; padding-top: .2rem;
+}
+.tarjeta dd { margin: 0; color: var(--ink-soft); }
+
+.tarjeta .ir { margin-top: auto; padding-top: 1.1rem; }
+
+/* ── Las que todavía no existen ──
+   Se ven, porque el recorrido completo es información útil: quien
+   entra sabe qué va a haber y en qué orden. Pero no fingen ser un
+   enlace. El botón es un <span>, no una <a>: no se puede pulsar,
+   no recibe el foco del tabulador y no promete lo que no hay. */
+.tarjeta[data-pronto] { background: var(--surface-2); box-shadow: none; }
+.tarjeta[data-pronto]:hover { transform: none; box-shadow: none; border-color: var(--rule); }
+.tarjeta[data-pronto] h3 { color: var(--azul-700); }
+.marca-pronto {
+  display: inline-flex; align-items: center; gap: .4rem; align-self: flex-start;
+  background: var(--ambar-soft); color: var(--ambar);
+  border: 1px solid rgba(138,82,0,.22); border-radius: 999px;
+  padding: .18rem .68rem; font-size: .67rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.boton-pronto {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--ink-soft);
+  border: 1px dashed var(--rule); border-radius: 5px;
+  padding: .68rem 1.3rem; font-size: .9rem; font-weight: 600;
+  cursor: default; user-select: none;
+}
+
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  background: var(--azul); color: #FFFFFF; border: 1px solid var(--azul);
+  font-family: var(--sans); font-size: .9rem; font-weight: 600;
+  padding: .68rem 1.3rem; border-radius: 5px; text-decoration: none;
+  transition: opacity .15s, transform .08s;
+}
+.boton:hover { opacity: .9; }
+.boton:active { transform: translateY(1px); }
+.boton .flecha { font-size: 1.05em; line-height: 1; }
+.boton.linea { background: transparent; color: var(--azul); border-color: var(--rule); }
+.boton.linea:hover { background: var(--azul-soft); border-color: var(--azul); opacity: 1; }
+
+/* ═══════════════ 8 · AVISO Y PIE ═══════════════ */
+.privacidad {
+  display: flex; gap: .8rem; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 1rem 1.2rem; margin: 3rem 0 3.2rem; font-size: .88rem; color: var(--ink-soft);
+  box-shadow: var(--shadow);
+}
+.privacidad .sello { flex: none; }
+.privacidad .sello img { height: 34px; width: auto; display: block; }
+.privacidad b { color: var(--ink); }
+
+footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
+.pie-rejilla {
+  display: grid; grid-template-columns: 1.1fr 1.4fr 1.3fr 1fr; gap: 2.4rem;
+  padding-bottom: 1.9rem; border-bottom: 1px solid rgba(255,255,255,.16);
+}
+.pie-logo { height: 48px; width: auto; display: block; margin-bottom: 1.15rem; }
+.pie-col h4 {
+  font-family: var(--sans); font-size: .69rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #FFFFFF; margin: 0 0 .9rem;
+}
+.pie-col p { font-size: .82rem; line-height: 1.65; color: #B9C9E2; margin: 0 0 .7rem; }
+.pie-col p:last-child { margin-bottom: 0; }
+.pie-col strong { color: #E7EEF9; font-weight: 600; }
+.pie-marca p { font-size: .78rem; color: #9FB2CE; }
+.pie-enlace {
+  color: #E7EEF9; text-decoration: none; font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,.35); padding-bottom: 1px;
+  transition: color .15s, border-color .15s;
+}
+.pie-enlace:hover { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+.pie-legal {
+  display: flex; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;
+  padding-top: 1.25rem; font-size: .72rem; color: #8FA4C4; line-height: 1.6;
+}
+.pie-legal .pie-enlace { font-weight: 500; color: #B9C9E2; }
+
+/* ═══════════════ 9 · RESPONSIVE ═══════════════ */
+@media (max-width: 1000px) { .pie-rejilla { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+@media (max-width: 760px)  { .recorrido { grid-template-columns: 1fr; gap: .6rem; } }
+@media (max-width: 620px) {
+  .pie-rejilla { grid-template-columns: 1fr; }
+  .masthead .divisor { padding-left: 0; border-left: 0; }
+  .masthead .volver { margin-left: 0; }
+  .privacidad { flex-direction: column; }
+  .etapa.primera, .panel { margin-top: -1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  .tarjeta:hover, .recorrido a:hover { transform: none; }
+}
+@media print {
+  .hero, .masthead { background: #FFFFFF !important; color: #0A1330 !important; }
+  .hero h1, .recorrido b { color: #0A1330 !important; }
+  .boton, .recorrido, .saltar { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<a class="saltar" href="#etapas">Saltar a las herramientas</a>
+
+<!-- ══════════════════ CABECERA ══════════════════ -->
+<header class="masthead">
+  <div class="envoltura masthead-fila">
+    <img src="LOGO_ALUMNI" alt="Alumni Sabana" width="150" height="84">
+    <div class="divisor">Centro de Desarrollo Profesional<small>Universidad de La Sabana</small></div>
+    <a class="volver" href="#etapas">Ver las herramientas ↓</a>
+  </div>
+</header>
+
+<!-- ══════════════════ PORTADA ══════════════════ -->
+<section class="hero">
+  <div class="envoltura">
+    <span class="eyebrow">Herramientas de emprendimiento</span>
+    <h1>De la idea que tienes en la cabeza al negocio que ya funciona.</h1>
+    <p>Emprender no es un solo paso, son tres momentos con preguntas distintas. Estas herramientas de trabajo autónomo acompañan cada uno. Empieza por la etapa en la que estás hoy: no hace falta pasar por todas ni hacerlas en orden.</p>
+
+    <ul class="recorrido">
+      <li><a href="#idea">
+        <span class="num">1</span>
+        <b>Idea de negocio</b>
+        <span class="q">«Tengo una idea, pero no sé si es un negocio ni por dónde se empieza.»</span>
+      </a></li>
+      <li><a href="#lanzamiento">
+        <span class="num">2</span>
+        <b>Lanzamiento de negocio</b>
+        <span class="q">«Ya estoy vendiendo, pero no sé si de verdad estoy ganando dinero.»</span>
+      </a></li>
+      <li><a href="#crecimiento">
+        <span class="num">3</span>
+        <b>Crecimiento de negocio</b>
+        <span class="q">«Funciona, y ahora necesito que más gente lo conozca.»</span>
+      </a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ ETAPAS ══════════════════ -->
+<main class="envoltura" id="etapas">
+
+  <!-- ══════════════ PANEL DE QUIEN ENTRÓ ══════════════
+       Oculto sin sesión. Lo rellena y lo muestra pintarPanel(). -->
+  <section class="panel" id="panel" hidden>
+    <div class="panel-cab">
+      <div>
+        <span class="eyebrow">Tu cuenta</span>
+        <h2 id="panel-nombre">—</h2>
+        <p id="panel-datos"></p>
+      </div>
+      <button type="button" class="boton linea" id="panel-salir">Cerrar sesión</button>
+    </div>
+    <p class="panel-nota">Tu sesión vale para todas las herramientas del Centro y se cierra al cerrar la pestaña.</p>
+  </section>
+
+  <!-- ─────────────── 1 · IDEA ─────────────── -->
+  <section class="etapa primera" id="idea">
+    <div class="etapa-cab">
+      <div class="linea"><span class="num">1</span><h2>Idea de negocio</h2></div>
+      <p class="cuando"><b>Estás aquí si</b> tienes una idea dando vueltas y todavía no sabes si es un negocio, a quién le vendes, ni qué papeles necesitas para existir formalmente.</p>
+    </div>
+
+    <div class="tarjetas">
+
+      <!-- ── Chat de ideación · todavía no existe ── -->
+      <article class="tarjeta" data-pronto>
+        <span class="marca-pronto">Próximamente</span>
+        <h3>Chat de ideación</h3>
+        <p class="lema">Una conversación guiada para pasar de «tengo una idea» a una propuesta concreta: qué problema resuelves, para quién, y por qué alguien pagaría por ello en vez de seguir como está.</p>
+        <dl>
+          <dt>¿Para qué sirve?</dt><dd>Para poner en palabras una idea que todavía está desordenada.</dd>
+          <dt>¿Qué necesitas?</dt><dd>Nada. Solo la idea y un rato para pensarla en voz alta.</dd>
+          <dt>¿Qué te llevas?</dt><dd>Tu idea escrita en una frase que cualquiera entienda.</dd>
+        </dl>
+        <div class="ir">
+          <span class="boton-pronto">En construcción</span>
+        </div>
+      </article>
+
+      <!-- ── Ficha de identificación · activa ── -->
+      <article class="tarjeta">
+        <span class="eyebrow">Disponible</span>
+        <h3>Ficha de identificación de negocio</h3>
+        <p class="lema">Nueve preguntas sobre lo que vendes, dónde y con cuánta gente. Con eso te devuelve qué figura jurídica te corresponde, ante qué entidades tienes que responder y qué documentos te van a pedir. El primer paso antes de ver tu ruta de trámites.</p>
+        <dl>
+          <dt>¿Para qué sirve?</dt><dd>Para saber qué te exige la ley colombiana según el negocio que tienes.</dd>
+          <dt>¿Qué necesitas?</dt><dd>Saber qué vendes y dónde. Sin cuenta.</dd>
+          <dt>¿Qué te llevas?</dt><dd>Tu ficha con el mapa de entidades, documentos y un código CIIU sugerido.</dd>
+          <dt>¿Cuánto tarda?</dt><dd>Entre 10 y 15 minutos.</dd>
+        </dl>
+        <div class="ir">
+          <a class="boton" data-destino="ficha" href="#">Abrir la ficha <span class="flecha" aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─────────────── 2 · LANZAMIENTO ─────────────── -->
+  <section class="etapa" id="lanzamiento">
+    <div class="etapa-cab">
+      <div class="linea"><span class="num">2</span><h2>Lanzamiento de negocio</h2></div>
+      <p class="cuando"><b>Estás aquí si</b> ya vendes y entra dinero, pero no tienes claro cuánto de eso es ganancia, qué precio deberías cobrar, ni cuántos meses aguantas si mañana se frena todo.</p>
+    </div>
+
+    <div class="tarjetas">
+
+      <!-- ── Tablero financiero · activo ── -->
+      <article class="tarjeta">
+        <span class="eyebrow">Disponible</span>
+        <h3>Tablero de apoyo financiero</h3>
+        <p class="lema">Facturar no es ganar. Registras tus ingresos y tus gastos de un mes y el tablero calcula lo que de verdad te queda: el precio mínimo por hora que no te hace perder dinero, tu punto de equilibrio, cuántos meses de caja te quedan y dónde se está yendo la plata.</p>
+        <dl>
+          <dt>¿Para qué sirve?</dt><dd>Para dejar de decidir con la intuición y empezar a decidir con las cifras.</dd>
+          <dt>¿Qué necesitas?</dt><dd>Lo que facturaste y lo que gastaste el mes pasado. Sin cuenta.</dd>
+          <dt>¿Qué te llevas?</dt><dd>Tu precio mínimo, tu punto de equilibrio, tu runway y una proyección a seis meses.</dd>
+          <dt>¿Cuánto tarda?</dt><dd>Unos 15 minutos la primera vez.</dd>
+        </dl>
+        <div class="ir">
+          <a class="boton" data-destino="tablero" href="#">Abrir el tablero <span class="flecha" aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─────────────── 3 · CRECIMIENTO ─────────────── -->
+  <section class="etapa" id="crecimiento">
+    <div class="etapa-cab">
+      <div class="linea"><span class="num">3</span><h2>Crecimiento de negocio</h2></div>
+      <p class="cuando"><b>Estás aquí si</b> el negocio ya funciona y lo que necesitas ahora es que más gente lo conozca, sin gastarte en publicidad lo que te costó ganar.</p>
+    </div>
+
+    <div class="tarjetas">
+
+      <!-- ── Guía de campañas · todavía no existe ── -->
+      <article class="tarjeta" data-pronto>
+        <span class="marca-pronto">Próximamente</span>
+        <h3>Guía de campañas publicitarias</h3>
+        <p class="lema">Qué campaña tiene sentido para tu tipo de negocio: en qué canal, con qué presupuesto mínimo, con qué mensaje y cómo saber si funcionó. Distinta si vendes a empresas, si tienes local a la calle o si vendes en línea.</p>
+        <dl>
+          <dt>¿Para qué sirve?</dt><dd>Para invertir en publicidad con un plan y no a ver qué pasa.</dd>
+          <dt>¿Qué necesitas?</dt><dd>Saber a quién le vendes y cuánto puedes destinar al mes.</dd>
+          <dt>¿Qué te llevas?</dt><dd>Tu campaña armada: canal, mensaje, presupuesto y qué medir.</dd>
+        </dl>
+        <div class="ir">
+          <span class="boton-pronto">En construcción</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════ PRIVACIDAD ══════════════════ -->
+  <div class="privacidad">
+    <span class="sello"><img src="LOGO_USABANA_NAVY" alt="Universidad de La Sabana" width="362" height="96"></span>
+    <p><b>Sobre tus datos.</b> Por ahora estas herramientas funcionan sin cuenta y no envían nada a ningún servidor: el tablero guarda lo que registras únicamente en el navegador de este equipo, y la ficha vive solo en la pestaña mientras la tienes abierta. Si limpias los datos del navegador o abres la herramienta en otro computador, empiezas de cero. Próximamente podrás guardar tu trabajo en tu cuenta Alumni Sabana y recuperarlo desde cualquier computador. Nada de esto es asesoría jurídica ni contable: las cifras y los códigos que veas son orientativos y debes confirmarlos con tu Cámara de Comercio o con un profesional. Los detalles completos están dentro de cada herramienta y en la <a href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos de la Universidad</a>.</p>
+  </div>
+
+</main>
+
+<!-- ══════════════════ PIE ══════════════════ -->
+<footer class="pie">
+  <div class="envoltura">
+    <div class="pie-rejilla">
+
+      <div class="pie-col pie-marca">
+        <img class="pie-logo" src="LOGO_USABANA_BLANCO" alt="Universidad de La Sabana" width="241" height="64">
+        <p>Institución de educación superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.</p>
+        <p>Carácter Académico: Universidad.</p>
+      </div>
+
+      <div class="pie-col">
+        <h4>El servicio</h4>
+        <p>Las herramientas de emprendimiento del <strong>Centro de Desarrollo Profesional, Alumni Sabana</strong> son de trabajo autónomo y de acceso abierto para la comunidad universitaria.</p>
+        <p>Acompañan tu preparación, pero <strong>no son asesoría jurídica, contable ni financiera</strong>, no reemplazan a un profesional ni a tu Cámara de Comercio, y no sustituyen una asesoría personalizada del Centro.</p>
+      </div>
+
+      <div class="pie-col">
+        <h4>Tratamiento de datos</h4>
+        <p>Cada herramienta explica dentro qué guarda y dónde. Ninguna publica nada en tu nombre ni envía tus cifras a un servidor.</p>
+        <p>La veracidad de la información que registres y la exactitud de tus estimaciones son tu responsabilidad.</p>
+        <p><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos de la Universidad ↗</a></p>
+      </div>
+
+      <div class="pie-col">
+        <h4>Contacto</h4>
+        <p>Centro de Desarrollo Profesional<br>Alumni Sabana</p>
+        <p><a class="pie-enlace" href="mailto:desarrolloprofesional@unisabana.edu.co">desarrolloprofesional@unisabana.edu.co</a></p>
+        <p>Contact center: (601) 861 5555</p>
+        <p>Campus del Puente del Común<br>Km. 7, Autopista Norte de Bogotá<br>Chía, Cundinamarca, Colombia</p>
+      </div>
+
+    </div>
+
+    <div class="pie-legal">
+      <span>Universidad de La Sabana &middot; Personería Jurídica: Resolución 130 del 14 de enero de 1980, Ministerio de Educación Nacional<br>Versión del archivo: <b>2026.09.02</b></span>
+      <span><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos</a> &middot; Vigilada Mineducación</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════
+     DIRECCIONES DE LAS HERRAMIENTAS
+     ----------------------------------------------------------
+     ESTO ES LO ÚNICO QUE HAY QUE EDITAR AL PUBLICAR.
+
+     Por defecto apuntan al nombre de archivo, que es lo que
+     funciona con los tres HTML en la misma carpeta o en el mismo
+     servidor. Cuando el CDP publique cada herramienta en su
+     dirección definitiva, sustituye el valor por la URL completa:
+
+       ficha:   "https://alumni.unisabana.edu.co/ficha-negocio/",
+       tablero: "https://alumni.unisabana.edu.co/tablero/",
+
+     PARA ACTIVAR UNA HERRAMIENTA QUE HOY ESTÁ «PRÓXIMAMENTE»:
+       1. Añade su dirección aquí (por ejemplo, «ideacion»).
+       2. En su <article>, quita el atributo «data-pronto», la
+          <span class="marca-pronto"> y cambia el
+          <span class="boton-pronto"> por:
+            <a class="boton" data-destino="ideacion" href="#">…</a>
+     ══════════════════════════════════════════════════════════ */
+  var DIRECCIONES = {
+    ficha:   "ficha-negocio.html",
+    tablero: "tablero-financiero.html"
+    /* ideacion: "chat-de-ideacion.html", */
+    /* campanas: "guia-de-campanas.html"  */
+  };
+
+  /* Marca de versión en el enlace. Los navegadores guardan en caché
+     las páginas abiertas desde el disco, así que al reemplazar un
+     archivo por uno nuevo se puede seguir viendo el viejo. Cambiando
+     la marca cambia la dirección, y el navegador se ve obligado a
+     leer el archivo otra vez. Súbela cada vez que publiques. */
+  var VERSION = "2026.09.02";
+
+  function conVersion(url) {
+    if (!url || !VERSION) return url;
+    return url + (url.indexOf("?") < 0 ? "?v=" : "&v=") + VERSION;
+  }
+
+  /* Se asignan por script y no en el HTML para que las direcciones
+     vivan en un solo sitio: al publicar se edita el bloque de arriba
+     y no hay que ir buscando enlaces por el documento.
+
+     Si una herramienta no tiene dirección, el enlace deja de serlo:
+     se le quita el href y se marca como deshabilitado. Un botón que
+     parece un enlace y no lleva a ninguna parte es peor que no
+     tenerlo, porque el fallo se descubre después del clic. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-destino]"), function (a) {
+    var destino = DIRECCIONES[a.getAttribute("data-destino")];
+    if (destino) {
+      a.setAttribute("href", conVersion(destino));
+    } else {
+      a.removeAttribute("href");
+      a.setAttribute("aria-disabled", "true");
+    }
+  });
+
+  /* ══════════════════════════════════════════════════════════
+     LA CUENTA
+     ----------------------------------------------------------
+     Estas dos herramientas todavía no guardan en la cuenta, así
+     que la portada no obliga a entrar. Pero si quien llega ya
+     tiene la sesión abierta desde otra herramienta del Centro
+     —la sesión es compartida—, se le saluda por su nombre en vez
+     de tratarlo como un desconocido.
+
+     auth.js es opcional aquí: si no está cargado, esto no falla,
+     simplemente no se muestra el panel. Por eso cada llamada está
+     comprobada antes de usarse.
+     ══════════════════════════════════════════════════════════ */
+  function pintarPanel(sesion) {
+    var panel = document.getElementById("panel");
+    if (!panel) return;
+
+    panel.hidden = !sesion;
+    if (!sesion) return;
+
+    document.getElementById("panel-nombre").textContent = sesion.nombre || sesion.correo;
+    var datos = [sesion.programa, sesion.facultad, sesion.correo].filter(Boolean);
+    document.getElementById("panel-datos").textContent = datos.join(" · ");
+  }
+
+  if (typeof alCambiarSesion === "function") alCambiarSesion(pintarPanel);
+  if (typeof alEntrar === "function") alEntrar(pintarPanel);
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest("#panel-salir") && typeof Cuenta !== "undefined") Cuenta.salir();
+  });
+
+  function arranque() {
+    if (typeof Cuenta !== "undefined") pintarPanel(Cuenta.sesion);
+  }
+  if (document.readyState !== "loading") arranque();
+  else document.addEventListener("DOMContentLoaded", arranque);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,984 @@
+<title>Tablero Financiero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --ink:#172227;
+  --ink-soft:#4B5852;
+  --paper:#EEF0EA;
+  --paper-raised:#F8F9F4;
+  --paper-sunken:#E4E7DE;
+  --line:#D3D7C8;
+  --line-strong:#B8BDA9;
+  --accent:#235E52;
+  --accent-strong:#194840;
+  --accent-soft:#DCE8E1;
+  --gold:#93701E;
+  --gold-soft:#EFE3C4;
+  --good:#3F7D45;
+  --good-soft:#DCEBDD;
+  --warn:#9A5F12;
+  --warn-soft:#F3E2C4;
+  --critical:#A4373A;
+  --critical-soft:#F4DBDA;
+  --shadow: 0 1px 2px rgba(23,34,39,.06), 0 8px 24px -12px rgba(23,34,39,.18);
+  --font-display:'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --font-body:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E9ECE3;
+    --ink-soft:#A9B2A5;
+    --paper:#12100D;
+    --paper-raised:#1B1815;
+    --paper-sunken:#211E1A;
+    --line:#332F29;
+    --line-strong:#4A453C;
+    --accent:#6FBFA6;
+    --accent-strong:#8FD3BC;
+    --accent-soft:#1E322C;
+    --gold:#D9B25E;
+    --gold-soft:#332913;
+    --good:#7BC488;
+    --good-soft:#1E3020;
+    --warn:#E3AC5B;
+    --warn-soft:#372A11;
+    --critical:#E38686;
+    --critical-soft:#3A1E1E;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E9ECE3;
+  --ink-soft:#A9B2A5;
+  --paper:#12100D;
+  --paper-raised:#1B1815;
+  --paper-sunken:#211E1A;
+  --line:#332F29;
+  --line-strong:#4A453C;
+  --accent:#6FBFA6;
+  --accent-strong:#8FD3BC;
+  --accent-soft:#1E322C;
+  --gold:#D9B25E;
+  --gold-soft:#332913;
+  --good:#7BC488;
+  --good-soft:#1E3020;
+  --warn:#E3AC5B;
+  --warn-soft:#372A11;
+  --critical:#E38686;
+  --critical-soft:#3A1E1E;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ font-family:var(--font-display); font-weight:600; text-wrap:balance; margin:0; color:var(--ink); }
+.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+button{ font-family:inherit; }
+input,select,textarea{ font-family:inherit; font-size:14px; color:var(--ink); background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:6px; padding:7px 10px; }
+input:focus,select:focus,textarea:focus,button:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+input[type=number]{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+table{ border-collapse:collapse; width:100%; }
+th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; padding:0 10px 8px; border-bottom:1px solid var(--line-strong); }
+td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.scrollx{ overflow-x:auto; }
+
+/* ---------- shell ---------- */
+.shell{ display:flex; min-height:100vh; }
+.sidebar{
+  width:232px; flex:0 0 232px; background:var(--paper-raised); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{ padding:22px 20px 14px; }
+.brand .kicker{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+.brand h1{ font-size:21px; margin-top:4px; line-height:1.15; }
+.brand .sub{ color:var(--ink-soft); font-size:12px; margin-top:6px; }
+
+.bizrow{ padding:0 20px 16px; display:flex; flex-direction:column; gap:8px; }
+.bizrow input, .bizrow select{ width:100%; }
+
+nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
+.navgroup-label{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); padding:14px 8px 4px; }
+.tab-btn{
+  display:flex; align-items:center; gap:10px; text-align:left; width:100%; padding:9px 10px; border-radius:7px;
+  border:1px solid transparent; background:transparent; color:var(--ink-soft); cursor:pointer; font-size:13.5px; font-weight:500;
+}
+.tab-btn:hover{ background:var(--paper-sunken); color:var(--ink); }
+.tab-btn.active{ background:var(--accent-soft); color:var(--accent-strong); font-weight:600; }
+.tab-btn .dot{ width:6px; height:6px; border-radius:50%; background:var(--line-strong); flex:0 0 auto; }
+.tab-btn.active .dot{ background:var(--accent); }
+
+.main{ flex:1; min-width:0; padding:32px 40px 80px; max-width:980px; }
+.panel{ display:none; }
+.panel.active{ display:block; }
+.panel-head{ margin-bottom:24px; }
+.panel-head h2{ font-size:26px; }
+.panel-head p{ color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:62ch; }
+
+.card{ background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:20px 22px; box-shadow:var(--shadow); }
+.card + .card{ margin-top:16px; }
+.card h3{ font-size:15px; margin-bottom:4px; }
+.card .hint{ color:var(--ink-soft); font-size:12.5px; margin-bottom:14px; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+@media (max-width:720px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field label{ font-size:12px; color:var(--ink-soft); font-weight:500; }
+.field input, .field select{ width:100%; }
+
+.btn{ display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#fff; border:none; border-radius:7px; padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn:hover{ background:var(--accent-strong); }
+.btn.ghost{ background:transparent; color:var(--ink-soft); border:1px solid var(--line-strong); }
+.btn.ghost:hover{ color:var(--ink); border-color:var(--ink-soft); }
+.btn.danger{ background:transparent; color:var(--critical); border:1px solid var(--critical-soft); padding:6px 10px; font-size:12px; }
+.btn.small{ padding:6px 10px; font-size:12px; }
+
+/* KPI strip */
+.kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+@media (max-width:900px){ .kpis{ grid-template-columns:repeat(2,1fr); } }
+.kpi{ background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); position:relative; }
+.kpi .label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; }
+.kpi .value{ font-family:var(--font-display); font-size:26px; margin-top:6px; font-weight:600; }
+.kpi .note{ font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+.kpi.good{ border-color:color-mix(in srgb, var(--good) 35%, var(--line)); }
+.kpi.warn{ border-color:color-mix(in srgb, var(--warn) 40%, var(--line)); }
+.kpi.critical{ border-color:color-mix(in srgb, var(--critical) 45%, var(--line)); }
+
+.pill{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 8px; border-radius:99px; font-size:11.5px; font-weight:600; }
+.pill .dot{ width:6px; height:6px; border-radius:50%; }
+.pill.good{ background:var(--good-soft); color:var(--good); }
+.pill.warn{ background:var(--warn-soft); color:var(--warn); }
+.pill.critical{ background:var(--critical-soft); color:var(--critical); }
+.pill.good .dot{ background:var(--good); }
+.pill.warn .dot{ background:var(--warn); }
+.pill.critical .dot{ background:var(--critical); }
+
+.rowline{ display:flex; align-items:center; gap:8px; }
+
+/* tables */
+.tbl-wrap{ margin-top:6px; }
+.tbl-actions{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.tbl input[type=text], .tbl input[type=number], .tbl input[type=month]{ padding:6px 8px; font-size:13px; }
+.total-row td{ font-weight:600; border-bottom:none; border-top:1px solid var(--line-strong); background:var(--paper-sunken); }
+.rm-btn{ background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:15px; line-height:1; padding:2px 6px; border-radius:5px; }
+.rm-btn:hover{ color:var(--critical); background:var(--critical-soft); }
+.empty-state{ text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px; }
+
+/* sparkline / bars */
+.cf-chart{ display:flex; align-items:flex-end; gap:10px; height:150px; margin-top:14px; padding:0 4px; }
+.cf-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+.cf-bar{ width:100%; max-width:38px; border-radius:4px 4px 0 0; background:var(--accent); transition:height .2s; min-height:2px; }
+.cf-bar.neg{ background:var(--critical); }
+.cf-month{ font-size:10.5px; color:var(--ink-soft); }
+.cf-val{ font-size:11px; font-family:var(--font-mono); }
+
+/* allocation */
+.alloc-bar{ display:flex; height:34px; border-radius:8px; overflow:hidden; border:1px solid var(--line-strong); margin:16px 0; }
+.alloc-seg{ display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#fff; overflow:hidden; white-space:nowrap; }
+.alloc-legend{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:720px){ .alloc-legend{ grid-template-columns:repeat(2,1fr); } }
+.alloc-item .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; }
+
+/* guide accordion */
+.accordion-item{ border-bottom:1px solid var(--line); }
+.accordion-item:last-child{ border-bottom:none; }
+.accordion-head{ width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; background:none; border:none; padding:14px 2px; cursor:pointer; text-align:left; }
+.accordion-head h4{ font-family:var(--font-body); font-size:14px; font-weight:600; margin:0; color:var(--ink); }
+.accordion-head .num{ font-family:var(--font-mono); font-size:11px; color:var(--gold); font-weight:600; }
+.accordion-head .chev{ color:var(--ink-soft); transition:transform .15s; flex:0 0 auto; }
+.accordion-item.open .chev{ transform:rotate(180deg); }
+.accordion-body{ display:none; padding:0 2px 16px; color:var(--ink-soft); font-size:13.5px; line-height:1.65; }
+.accordion-item.open .accordion-body{ display:block; }
+.accordion-body b{ color:var(--ink); }
+.accordion-body .redbox{ margin-top:10px; background:var(--critical-soft); border-left:3px solid var(--critical); padding:9px 12px; border-radius:0 6px 6px 0; color:var(--ink); font-size:13px; }
+
+/* checklist */
+.checklist{ display:flex; flex-direction:column; gap:2px; }
+.check-row{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); }
+.check-row:last-child{ border-bottom:none; }
+.check-row input[type=checkbox]{ width:17px; height:17px; accent-color:var(--accent); }
+.check-row label{ font-size:13.5px; flex:1; }
+.check-row.done label{ color:var(--ink-soft); text-decoration:line-through; }
+.qa{ margin-top:8px; }
+.qa .q{ font-size:13px; font-weight:600; margin-bottom:6px; }
+.qa textarea{ width:100%; min-height:56px; resize:vertical; }
+
+.formula{ background:var(--paper-sunken); border:1px solid var(--line); border-radius:8px; padding:12px 14px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); margin-top:10px; }
+.formula b{ color:var(--accent); }
+
+.result-box{ background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); border-radius:10px; padding:16px 18px; margin-top:16px; }
+.result-box .big{ font-family:var(--font-display); font-size:28px; font-weight:600; color:var(--accent-strong); }
+.result-box .lbl{ font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; }
+
+.badge-count{ background:var(--paper-sunken); color:var(--ink-soft); font-size:10.5px; font-family:var(--font-mono); padding:1px 6px; border-radius:99px; margin-left:auto; }
+
+/* mobile nav */
+.mobile-tabbar{ display:none; }
+@media (max-width:860px){
+  .shell{ flex-direction:column; }
+  .sidebar{ position:relative; width:100%; height:auto; flex:none; border-right:none; border-bottom:1px solid var(--line); }
+  nav.tabs{ display:none; }
+  .bizrow{ padding-bottom:14px; }
+  .mobile-tabbar{ display:flex; overflow-x:auto; gap:6px; padding:8px 14px 14px; border-top:1px solid var(--line); }
+  .mobile-tabbar .tab-btn{ white-space:nowrap; width:auto; flex:0 0 auto; }
+  .main{ padding:24px 18px 60px; }
+  .kpis{ grid-template-columns:1fr 1fr; }
+}
+::selection{ background:var(--accent-soft); }
+</style>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="kicker">Tracción temprana</div>
+      <h1>Tablero&nbsp;Financiero</h1>
+      <div class="sub">Facturación no es ganancia. Aquí ves la diferencia.</div>
+    </div>
+    <div class="bizrow">
+      <div class="field">
+        <label for="bizName">Nombre del negocio</label>
+        <input id="bizName" type="text" placeholder="Ej. Estudio Marlo">
+      </div>
+      <div class="field">
+        <label for="bizType">Tipo de negocio</label>
+        <select id="bizType">
+          <option value="">Seleccionar…</option>
+          <option value="freelancer">Freelancer / servicios (por horas)</option>
+          <option value="productos">Negocio con productos</option>
+          <option value="otro">Otro / mixto</option>
+        </select>
+      </div>
+    </div>
+    <nav class="tabs" id="navTabs"></nav>
+  </aside>
+
+  <main class="main">
+    <div id="panels"></div>
+  </main>
+</div>
+<div class="mobile-tabbar" id="mobileTabs"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================ DATA ============================ */
+var STORAGE_KEY = "tf_dashboard_v1";
+var TABS = [
+  {group:"Resumen", items:[
+    {id:"resumen", label:"Resumen", }
+  ]},
+  {group:"Datos del mes", items:[
+    {id:"ingresos", label:"Ingresos"},
+    {id:"fijos", label:"Gastos fijos"},
+    {id:"variables", label:"Gastos variables"},
+    {id:"flujo", label:"Flujo de caja (6 meses)"}
+  ]},
+  {group:"Cálculos", items:[
+    {id:"precio", label:"Precio mínimo"},
+    {id:"equilibrio", label:"Punto de equilibrio"},
+    {id:"runway", label:"Runway"},
+    {id:"asignacion", label:"Asignación de dinero"}
+  ]},
+  {group:"Rutina", items:[
+    {id:"guia", label:"Guía de uso"},
+    {id:"cierre", label:"Cierre mensual"}
+  ]}
+];
+
+function defaultState(){
+  return {
+    bizName:"", bizType:"",
+    nextId:1,
+    activeTab:"resumen",
+    income:[],           // {id, client, month:'YYYY-MM', amount}
+    fixedExpenses:[],    // {id, name, amount}  (monthly recurring)
+    variableExpenses:[], // {id, name, month, amount}
+    cashCurrent:0,
+    cashFlow:{},          // month -> {income, expense} manual overrides
+    price:{ hours:0, billablePct:70, fixedOverride:null, salary:0, projectHours:0 },
+    breakeven:{ avgTicketOverride:null },
+    alloc:{ operacion:"", impuestos:"", reserva:"", sueldo:"" },
+    checklist:{ items:{}, answers:{q1:"",q2:"",q3:""} }
+  };
+}
+
+var state = loadState();
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    var parsed = JSON.parse(raw);
+    var d = defaultState();
+    for(var k in d){ if(parsed[k]===undefined) parsed[k]=d[k]; }
+    return parsed;
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function uid(){ return state.nextId++; }
+
+/* ============================ HELPERS ============================ */
+var fmtCOP = new Intl.NumberFormat('es-CO', {style:'currency', currency:'COP', maximumFractionDigits:0});
+function money(n){ if(!isFinite(n)) return "—"; return fmtCOP.format(Math.round(n)); }
+function moneyShort(n){
+  if(!isFinite(n)) return "—";
+  var v = Math.round(n);
+  return fmtCOP.format(v);
+}
+function pct(n){ return (isFinite(n)? Math.round(n*10)/10 : 0) + "%"; }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+function monthLabel(m){
+  if(!m) return "—";
+  var parts = m.split("-"); var y=parts[0], mo=parseInt(parts[1],10);
+  var names = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  return names[mo-1] + " " + y.slice(2);
+}
+function currentMonthStr(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function shiftMonth(mstr, delta){
+  var parts = mstr.split("-"); var y=parseInt(parts[0],10), m=parseInt(parts[1],10);
+  var d = new Date(y, m-1+delta, 1);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function last3Months(){
+  var cur = currentMonthStr();
+  return [shiftMonth(cur,-2), shiftMonth(cur,-1), cur];
+}
+function next6Months(){
+  var cur = currentMonthStr(); var arr=[];
+  for(var i=0;i<6;i++) arr.push(shiftMonth(cur,i));
+  return arr;
+}
+
+function bizLabels(){
+  var t = state.bizType;
+  if(t==="freelancer") return {unit:"cliente", unitPlural:"clientes", item:"proyecto", itemPlural:"proyectos"};
+  if(t==="productos") return {unit:"cliente", unitPlural:"clientes", item:"producto/pedido", itemPlural:"pedidos"};
+  return {unit:"cliente", unitPlural:"clientes", item:"proyecto o pedido", itemPlural:"proyectos o pedidos"};
+}
+
+/* ============================ COMPUTATIONS ============================ */
+function totalFixed(){
+  return state.fixedExpenses.reduce(function(s,e){ return s+(Number(e.amount)||0); },0);
+}
+function variableForMonth(m){
+  return state.variableExpenses.filter(function(e){return e.month===m;}).reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+}
+function incomeForMonth(m){
+  return state.income.filter(function(e){return e.month===m;}).reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+}
+function avgVariable(){
+  var months = {};
+  state.variableExpenses.forEach(function(e){ months[e.month] = (months[e.month]||0) + (Number(e.amount)||0); });
+  var keys = Object.keys(months);
+  if(!keys.length) return 0;
+  var sum = keys.reduce(function(s,k){return s+months[k];},0);
+  return sum/keys.length;
+}
+function avgIncome(){
+  var m3 = last3Months();
+  var vals = m3.map(incomeForMonth).filter(function(v){return v>0;});
+  if(vals.length) return vals.reduce(function(a,b){return a+b;},0)/vals.length;
+  var all = {};
+  state.income.forEach(function(e){ all[e.month]=(all[e.month]||0)+(Number(e.amount)||0); });
+  var keys = Object.keys(all);
+  if(!keys.length) return 0;
+  return keys.reduce(function(s,k){return s+all[k];},0)/keys.length;
+}
+function latestMonthWithData(){
+  var months = {};
+  state.income.forEach(function(e){months[e.month]=1;});
+  state.variableExpenses.forEach(function(e){months[e.month]=1;});
+  var keys = Object.keys(months).sort();
+  return keys.length ? keys[keys.length-1] : currentMonthStr();
+}
+function monthlyExpenseAvg(){ return totalFixed() + avgVariable(); }
+
+function avgTicket(){
+  if(state.breakeven.avgTicketOverride!=null && state.breakeven.avgTicketOverride!=="") return Number(state.breakeven.avgTicketOverride);
+  if(!state.income.length) return 0;
+  var sum = state.income.reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+  return sum/state.income.length;
+}
+function breakevenUnits(){
+  var fixed = totalFixed() + avgVariable();
+  var t = avgTicket();
+  if(t<=0) return null;
+  return Math.ceil(fixed/t);
+}
+function runwayMonths(){
+  var burn = monthlyExpenseAvg();
+  if(burn<=0) return null;
+  return state.cashCurrent/burn;
+}
+
+function priceResult(){
+  var p = state.price;
+  var billable = (Number(p.hours)||0) * ((Number(p.billablePct)||0)/100);
+  var fixed = p.fixedOverride!=null && p.fixedOverride!=="" ? Number(p.fixedOverride) : totalFixed();
+  var need = fixed + (Number(p.salary)||0);
+  var hourly = billable>0 ? need/billable : 0;
+  var project = hourly * (Number(p.projectHours)||0);
+  return {billable:billable, fixed:fixed, need:need, hourly:hourly, project:project};
+}
+
+function healthStatus(){
+  var m = latestMonthWithData();
+  var profit = incomeForMonth(m) - (totalFixed()+variableForMonth(m));
+  var rw = runwayMonths();
+  if(profit<0 || (rw!=null && rw<2)) return "critical";
+  if((rw!=null && rw<4) || profit < monthlyExpenseAvg()*0.1) return "warn";
+  return "good";
+}
+
+/* ============================ RENDER: SHELL ============================ */
+function buildNav(container, mobile){
+  container.innerHTML = "";
+  TABS.forEach(function(group){
+    if(!mobile){
+      var lbl = document.createElement("div");
+      lbl.className = "navgroup-label";
+      lbl.textContent = group.group;
+      container.appendChild(lbl);
+    }
+    group.items.forEach(function(item){
+      var btn = document.createElement("button");
+      btn.className = "tab-btn" + (state.activeTab===item.id ? " active":"");
+      btn.setAttribute("data-tab", item.id);
+      btn.innerHTML = '<span class="dot"></span>' + esc(item.label);
+      btn.addEventListener("click", function(){ state.activeTab=item.id; saveState(); renderAll(); window.scrollTo(0,0); });
+      container.appendChild(btn);
+    });
+  });
+}
+
+function renderShellStatic(){
+  document.getElementById("bizName").value = state.bizName;
+  document.getElementById("bizType").value = state.bizType;
+  document.getElementById("bizName").addEventListener("input", function(e){ state.bizName=e.target.value; saveState(); });
+  document.getElementById("bizType").addEventListener("change", function(e){ state.bizType=e.target.value; saveState(); renderAll(); });
+}
+
+/* ============================ RENDER: PANELS ============================ */
+function panelResumen(){
+  var m = latestMonthWithData();
+  var inc = incomeForMonth(m);
+  var fixed = totalFixed();
+  var vari = variableForMonth(m);
+  var profit = inc - fixed - vari;
+  var rw = runwayMonths();
+  var be = breakevenUnits();
+  var labels = bizLabels();
+  var status = healthStatus();
+  var statusText = {good:"Saludable", warn:"Atención", critical:"Crítico"}[status];
+
+  var noData = state.income.length===0 && state.fixedExpenses.length===0;
+
+  var kpiHtml =
+    '<div class="kpis">'+
+      kpiCard("Ganancia real · "+monthLabel(m), money(profit), inc? "Ingresos "+money(inc)+" − gastos "+money(fixed+vari) : "Sin ingresos registrados", profit<0?"critical":(profit<monthlyExpenseAvg()*0.1?"warn":"good"))+
+      kpiCard("Runway", rw==null?"—":(rw<0?"0.0 meses":rw.toFixed(1)+" meses"), rw==null?"Registra gastos para calcular":"Con la caja actual, sin vender más", rw==null?"":(rw<2?"critical":rw<4?"warn":"good"))+
+      kpiCard("Punto de equilibrio", be==null?"—":(be+" "+(be===1?labels.item:labels.itemPlural)), be==null?"Registra ingresos para estimar":"al mes, al ticket promedio actual", "")+
+      kpiCard("Estado financiero", statusText, "Semáforo automático", status)+
+    '</div>';
+
+  var chartMonths = next6Months();
+  var cash = state.cashCurrent;
+  var barsHtml = "";
+  var maxAbs = 1;
+  var running = [];
+  chartMonths.forEach(function(mo){
+    var ov = state.cashFlow[mo] || {};
+    var expInc = ov.income!=null && ov.income!=="" ? Number(ov.income) : avgIncome();
+    var expExp = ov.expense!=null && ov.expense!=="" ? Number(ov.expense) : monthlyExpenseAvg();
+    cash += (expInc-expExp);
+    running.push(cash);
+    maxAbs = Math.max(maxAbs, Math.abs(cash));
+  });
+  chartMonths.forEach(function(mo, idx){
+    var val = running[idx];
+    var h = Math.max(4, Math.abs(val)/maxAbs*120);
+    barsHtml += '<div class="cf-col"><div class="cf-val">'+moneyShort(val)+'</div><div class="cf-bar'+(val<0?' neg':'')+'" style="height:'+h+'px"></div><div class="cf-month">'+monthLabel(mo)+'</div></div>';
+  });
+
+  var onboarding = noData ? (
+    '<div class="card" style="border-color:var(--gold-soft); background:color-mix(in srgb, var(--gold-soft) 55%, var(--paper-raised));">'+
+      '<h3>Empieza aquí — 5 pasos (≈15 min)</h3>'+
+      '<div class="hint">Así queda el tablero funcionando con datos reales desde hoy.</div>'+
+      '<ol style="margin:0; padding-left:18px; color:var(--ink-soft); font-size:13.5px; line-height:1.9;">'+
+        '<li>Elige tu <b style="color:var(--ink)">tipo de negocio</b> arriba a la izquierda.</li>'+
+        '<li>Ve a <b style="color:var(--ink)">Ingresos</b> y registra lo que facturaste este mes, por cliente.</li>'+
+        '<li>Ve a <b style="color:var(--ink)">Gastos fijos</b> y <b style="color:var(--ink)">Gastos variables</b> y regístralos.</li>'+
+        '<li>Escribe tu <b style="color:var(--ink)">caja actual</b> en la pestaña Runway.</li>'+
+        '<li>Abre <b style="color:var(--ink)">Precio mínimo</b> para saber qué tarifa no te hace perder dinero.</li>'+
+      '</ol>'+
+    '</div>'
+  ) : "";
+
+  return (
+    '<div class="panel-head"><h2>Resumen</h2><p>Tu situación financiera real, no lo que facturaste. Actualízalo en tu cierre mensual.</p></div>'+
+    onboarding +
+    kpiHtml +
+    '<div class="card"><h3>Proyección de caja — 6 meses</h3><div class="hint">Caja actual + ingresos y gastos esperados por mes (editables en la pestaña Flujo de caja).</div><div class="cf-chart">'+barsHtml+'</div></div>'
+  );
+}
+
+function kpiCard(label, value, note, status){
+  return '<div class="kpi'+(status?' '+status:'')+'"><div class="label">'+esc(label)+'</div><div class="value">'+esc(value)+'</div><div class="note">'+esc(note)+'</div></div>';
+}
+
+function panelIngresos(){
+  var labels = bizLabels();
+  var rows = state.income.slice().sort(function(a,b){ return a.month<b.month?1:-1; });
+  var total = rows.reduce(function(s,r){return s+(Number(r.amount)||0);},0);
+  var byMonth = {};
+  rows.forEach(function(r){ byMonth[r.month]=(byMonth[r.month]||0)+(Number(r.amount)||0); });
+
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="client" value="'+esc(r.client)+'" placeholder="Nombre del '+labels.unit+'" style="width:100%"></td>'+
+      '<td><input type="month" data-field="month" value="'+esc(r.month)+'"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:130px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'" title="Eliminar">✕</button></td>'+
+    '</tr>';
+  }).join("");
+
+  var body = rows.length ? trs : '<tr><td colspan="4"><div class="empty-state">Aún no hay ingresos registrados. Agrega el primero abajo.</div></td></tr>';
+
+  return (
+    '<div class="panel-head"><h2>Ingresos por '+labels.unit+' y mes</h2><p>Registra cada pago recibido. Esto es lo que entra, no lo que "vendiste" o facturaste sin cobrar.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Registro de ingresos<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addIncome">+ Agregar ingreso</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="incomeTbl"><thead><tr><th>'+cap(labels.unit)+'</th><th>Mes</th><th>Monto</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td colspan="2">Total registrado</td><td class="mono">'+money(total)+'</td><td></td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Ingresos por mes")
+  );
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function monthlySummaryCard(byMonth, title){
+  var keys = Object.keys(byMonth).sort();
+  if(!keys.length) return "";
+  var rows = keys.map(function(k){ return '<tr><td>'+monthLabel(k)+'</td><td class="mono" style="text-align:right">'+money(byMonth[k])+'</td></tr>'; }).join("");
+  return '<div class="card"><h3>'+esc(title)+'</h3><table><tbody>'+rows+'</tbody></table></div>';
+}
+
+function panelFijos(){
+  var rows = state.fixedExpenses;
+  var total = totalFixed();
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="name" value="'+esc(r.name)+'" placeholder="Ej. Arriendo, software, nómina" style="width:100%"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:150px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'">✕</button></td>'+
+    '</tr>';
+  }).join("");
+  var body = rows.length ? trs : '<tr><td colspan="3"><div class="empty-state">Sin gastos fijos registrados.</div></td></tr>';
+  return (
+    '<div class="panel-head"><h2>Gastos fijos</h2><p>Lo que pagas todos los meses, vendas o no vendas: arriendo, suscripciones, nómina, seguros.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Gastos fijos mensuales<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addFixed">+ Agregar gasto fijo</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="fixedTbl"><thead><tr><th>Concepto</th><th>Monto / mes</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td>Total mensual</td><td class="mono">'+money(total)+'</td><td></td></tr></tbody></table></div>'+
+    '</div>'
+  );
+}
+
+function panelVariables(){
+  var rows = state.variableExpenses.slice().sort(function(a,b){return a.month<b.month?1:-1;});
+  var total = rows.reduce(function(s,r){return s+(Number(r.amount)||0);},0);
+  var byMonth = {};
+  rows.forEach(function(r){ byMonth[r.month]=(byMonth[r.month]||0)+(Number(r.amount)||0); });
+  var trs = rows.map(function(r){
+    return '<tr data-id="'+r.id+'">'+
+      '<td><input type="text" class="mono" data-field="name" value="'+esc(r.name)+'" placeholder="Ej. Materiales, envíos, comisiones" style="width:100%"></td>'+
+      '<td><input type="month" data-field="month" value="'+esc(r.month)+'"></td>'+
+      '<td><input type="number" class="mono" data-field="amount" value="'+r.amount+'" min="0" step="1000" style="width:130px"></td>'+
+      '<td style="text-align:right"><button class="rm-btn" data-rm="'+r.id+'">✕</button></td>'+
+    '</tr>';
+  }).join("");
+  var body = rows.length ? trs : '<tr><td colspan="4"><div class="empty-state">Sin gastos variables registrados.</div></td></tr>';
+  return (
+    '<div class="panel-head"><h2>Gastos variables</h2><p>Lo que cambia según cuánto produces o vendes: materiales, envíos, comisiones, insumos.</p></div>'+
+    '<div class="card">'+
+      '<div class="tbl-actions"><h3 style="margin:0">Registro de gastos variables<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addVar">+ Agregar gasto variable</button></div>'+
+      '<div class="scrollx"><table class="tbl" id="varTbl"><thead><tr><th>Concepto</th><th>Mes</th><th>Monto</th><th></th></tr></thead><tbody>'+body+
+      '<tr class="total-row"><td colspan="2">Total registrado</td><td class="mono">'+money(total)+'</td><td></td></tr></tbody></table></div>'+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Gastos variables por mes")
+  );
+}
+
+function panelFlujo(){
+  var months = next6Months();
+  var cash = state.cashCurrent;
+  var rowsHtml = months.map(function(mo){
+    var ov = state.cashFlow[mo] || {};
+    var incVal = ov.income!=null && ov.income!=="" ? ov.income : "";
+    var expVal = ov.expense!=null && ov.expense!=="" ? ov.expense : "";
+    var incDefault = avgIncome();
+    var expDefault = monthlyExpenseAvg();
+    var effInc = incVal!=="" ? Number(incVal) : incDefault;
+    var effExp = expVal!=="" ? Number(expVal) : expDefault;
+    cash += (effInc-effExp);
+    return '<tr data-month="'+mo+'">'+
+      '<td class="mono">'+monthLabel(mo)+'</td>'+
+      '<td><input type="number" class="mono cf-input" data-field="income" placeholder="'+Math.round(incDefault)+'" value="'+incVal+'" style="width:130px"></td>'+
+      '<td><input type="number" class="mono cf-input" data-field="expense" placeholder="'+Math.round(expDefault)+'" value="'+expVal+'" style="width:130px"></td>'+
+      '<td class="mono" style="'+(cash<0?'color:var(--critical);font-weight:600':'')+'">'+money(cash)+'</td>'+
+    '</tr>';
+  }).join("");
+
+  return (
+    '<div class="panel-head"><h2>Flujo de caja proyectado — 6 meses</h2><p>Parte de tu caja actual y proyecta ingresos/gastos esperados. Deja los campos vacíos para usar el promedio de tus datos.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="cashCurrent">Caja actual (saldo real hoy)</label><input id="cashCurrent" type="number" class="mono" min="0" step="1000" value="'+state.cashCurrent+'"></div>'+
+        '<div class="field"><label>Gasto mensual promedio (fijo + variable)</label><input type="text" class="mono" value="'+money(monthlyExpenseAvg())+'" disabled></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Proyección editable</h3><div class="hint">Los placeholders muestran el promedio calculado a partir de tus datos.</div>'+
+      '<div class="scrollx"><table id="cfTbl"><thead><tr><th>Mes</th><th>Ingreso esperado</th><th>Gasto esperado</th><th>Caja al cierre</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'+
+    '</div>'
+  );
+}
+
+function panelPrecio(){
+  var p = state.price;
+  var r = priceResult();
+  return (
+    '<div class="panel-head"><h2>Calculadora de precio mínimo</h2><p>La tarifa por debajo de la cual estás perdiendo dinero, aunque parezca que estás facturando.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="pHours">Horas disponibles al mes</label><input id="pHours" type="number" class="mono" min="0" value="'+p.hours+'"></div>'+
+        '<div class="field"><label for="pBillable">% de esas horas que facturas realmente</label><input id="pBillable" type="number" class="mono" min="0" max="100" value="'+p.billablePct+'"></div>'+
+        '<div class="field"><label for="pFixed">Gastos fijos del mes</label><input id="pFixed" type="number" class="mono" min="0" step="1000" placeholder="'+Math.round(totalFixed())+' (auto)" value="'+(p.fixedOverride==null?"":p.fixedOverride)+'"></div>'+
+        '<div class="field"><label for="pSalary">Sueldo objetivo (lo que quieres ganar)</label><input id="pSalary" type="number" class="mono" min="0" step="1000" value="'+p.salary+'"></div>'+
+      '</div>'+
+      '<div class="formula">tarifa/hora = ( <b>gastos fijos</b> + <b>sueldo objetivo</b> ) ÷ ( <b>horas disponibles</b> × <b>% facturable</b> )</div>'+
+      '<div class="result-box">'+
+        '<div class="lbl">Tarifa mínima por hora</div>'+
+        '<div class="big">'+money(r.hourly)+'</div>'+
+        '<div class="hint" style="margin-top:2px">Con '+r.billable.toFixed(1)+' horas facturables al mes. Cobrar menos que esto es perder dinero.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Tarifa por proyecto</h3><div class="hint">Estima cuántas horas te toma un proyecto típico.</div>'+
+      '<div class="field" style="max-width:260px"><label for="pProject">Horas estimadas del proyecto</label><input id="pProject" type="number" class="mono" min="0" value="'+p.projectHours+'"></div>'+
+      '<div class="result-box"><div class="lbl">Precio mínimo del proyecto</div><div class="big">'+money(r.project)+'</div></div>'+
+    '</div>'
+  );
+}
+
+function panelEquilibrio(){
+  var labels = bizLabels();
+  var fixed = totalFixed(); var vari = avgVariable();
+  var ticket = avgTicket();
+  var units = breakevenUnits();
+  return (
+    '<div class="panel-head"><h2>Punto de equilibrio</h2><p>Cuántos '+labels.itemPlural+' necesitas al mes solo para no perder dinero — antes de empezar a ganar.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label>Gastos fijos + variables promedio</label><input type="text" class="mono" value="'+money(fixed+vari)+'" disabled></div>'+
+        '<div class="field"><label for="beTicket">Ticket promedio por '+labels.unit+' (editable)</label><input id="beTicket" type="number" class="mono" min="0" step="1000" placeholder="'+Math.round(ticket||0)+' (auto)" value="'+(state.breakeven.avgTicketOverride==null?"":state.breakeven.avgTicketOverride)+'"></div>'+
+      '</div>'+
+      '<div class="formula">'+labels.itemPlural+' necesarios = ( <b>gastos fijos</b> + <b>gastos variables promedio</b> ) ÷ <b>ticket promedio</b></div>'+
+      '<div class="result-box">'+
+        '<div class="lbl">'+cap(labels.itemPlural)+' necesarios al mes</div>'+
+        '<div class="big">'+(units==null? "Agrega datos de ingresos" : units+" "+(units===1?labels.item:labels.itemPlural))+'</div>'+
+        (units!=null ? '<div class="hint" style="margin-top:2px">Al ticket promedio actual de '+money(ticket)+'.</div>' : '')+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function panelRunway(){
+  var burn = monthlyExpenseAvg();
+  var rw = runwayMonths();
+  var status = rw==null? "" : (rw<2?"critical":rw<4?"warn":"good");
+  var msg = rw==null ? "Registra gastos fijos o variables para calcular el runway."
+    : rw<2 ? "Zona crítica: menos de 2 meses de operación sin ventas nuevas. Actúa ya — reduce gastos o consigue ingresos inmediatos."
+    : rw<4 ? "Zona de atención: tienes margen corto. Prioriza cerrar nuevos clientes este mes."
+    : "Tienes colchón razonable. Sigue vigilando el número cada mes.";
+  return (
+    '<div class="panel-head"><h2>Alerta de runway</h2><p>Cuántos meses aguanta el negocio con la caja actual si no entra ni un peso nuevo.</p></div>'+
+    '<div class="card">'+
+      '<div class="grid2">'+
+        '<div class="field"><label for="cashCurrent2">Caja actual (saldo real hoy)</label><input id="cashCurrent2" type="number" class="mono" min="0" step="1000" value="'+state.cashCurrent+'"></div>'+
+        '<div class="field"><label>Gasto mensual promedio</label><input type="text" class="mono" value="'+money(burn)+'" disabled></div>'+
+      '</div>'+
+      '<div class="formula">runway = <b>caja actual</b> ÷ <b>gasto mensual promedio</b></div>'+
+      '<div class="result-box">'+
+        '<div class="rowline"><div class="lbl">Meses de runway</div>'+(status?'<span class="pill '+status+'" style="margin-left:8px"><span class="dot"></span>'+({good:"Saludable",warn:"Atención",critical:"Crítico"}[status])+'</span>':'')+'</div>'+
+        '<div class="big">'+(rw==null?"—":rw.toFixed(1)+" meses")+'</div>'+
+        '<div class="hint" style="margin-top:6px; max-width:56ch">'+msg+'</div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function panelAsignacion(){
+  var a = state.alloc;
+  var vals = {
+    operacion: a.operacion===""? 0 : Number(a.operacion),
+    impuestos: a.impuestos===""? 0 : Number(a.impuestos),
+    reserva: a.reserva===""? 0 : Number(a.reserva),
+    sueldo: a.sueldo===""? 0 : Number(a.sueldo)
+  };
+  var sum = vals.operacion+vals.impuestos+vals.reserva+vals.sueldo;
+  var m = latestMonthWithData();
+  var inc = incomeForMonth(m);
+  var colors = {operacion:"var(--accent)", impuestos:"var(--gold)", reserva:"var(--ink-soft)", sueldo:"var(--good)"};
+  var labels = {operacion:"Operación", impuestos:"Impuestos", reserva:"Reserva", sueldo:"Sueldo del dueño"};
+  var segs = "", legend = "";
+  ["operacion","impuestos","reserva","sueldo"].forEach(function(k){
+    var w = sum>0 ? (vals[k]/Math.max(sum,100))*100 : vals[k];
+    segs += '<div class="alloc-seg" style="width:'+Math.max(vals[k],0)+'%; background:'+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';
+    legend += '<div class="alloc-item"><span class="swatch" style="background:'+colors[k]+'"></span>'+labels[k]+' — <span class="mono">'+money(inc*vals[k]/100)+'</span></div>';
+  });
+  var warnMsg = sum!==100 ? '<div class="hint" style="color:var(--critical); font-weight:600; margin-top:6px">Los porcentajes suman '+sum+'%. Deben sumar 100%.</div>' : '<div class="hint" style="color:var(--good); font-weight:600; margin-top:6px">Suman 100%. Asignación válida.</div>';
+
+  return (
+    '<div class="panel-head"><h2>Separación negocio / personal</h2><p>Cada peso que entra se reparte por adelantado. Así el dueño no vive del efectivo de la caja general.</p></div>'+
+    '<div class="card">'+
+      '<h3>Porcentajes de asignación</h3><div class="hint">Defínelos tú — deben sumar 100%. Se aplican sobre los ingresos de '+monthLabel(m)+' ('+money(inc)+').</div>'+
+      '<div class="grid3">'+
+        allocField("operacion","Operación %",a.operacion)+
+        allocField("impuestos","Impuestos %",a.impuestos)+
+        allocField("reserva","Reserva %",a.reserva)+
+      '</div>'+
+      '<div class="grid3" style="margin-top:16px; max-width:33%">'+
+        allocField("sueldo","Sueldo del dueño %",a.sueldo)+
+      '</div>'+
+      warnMsg+
+      '<div class="alloc-bar">'+segs+'</div>'+
+      '<div class="alloc-legend">'+legend+'</div>'+
+    '</div>'
+  );
+}
+function allocField(key,label,val){
+  return '<div class="field"><label for="alloc_'+key+'">'+label+'</label><input id="alloc_'+key+'" data-alloc="'+key+'" type="number" class="mono" min="0" max="100" value="'+val+'"></div>';
+}
+
+var GUIDE = [
+  {t:"Facturación vs. ganancia real", body:"Facturar es emitir una cuenta de cobro o factura. Ganar es lo que sobra después de pagar todos los gastos del negocio (fijos y variables). Puedes facturar $5.000.000 y ganar $200.000 si tus costos son altos, o incluso perder dinero.", red:"Si tu 'ganancia real' del Resumen está en rojo, revisa primero tus gastos fijos: casi siempre ahí está la fuga."},
+  {t:"Ingresos por cliente y mes", body:"Registra cada pago recibido (no cada cotización enviada), con la fecha en que realmente entró el dinero. Esto te muestra qué clientes te sostienen y en qué meses baja la facturación.", red:"Si un mes queda vacío, no rellenes con estimados: déjalo en cero y trabaja en conseguir ingresos ese mes."},
+  {t:"Gastos fijos", body:"Todo lo que pagas exista o no exista venta ese mes: arriendo, software, nómina fija, seguros. Revísalos cada trimestre — suelen crecer sin que nadie lo note.", red:"Si los gastos fijos superan el 60% de tu ingreso promedio, tu estructura es demasiado pesada para tu etapa."},
+  {t:"Gastos variables", body:"Lo que depende de cuánto vendes o produces: materiales, comisiones, envíos, insumos. Si no vendes, no los pagas.", red:"Si los variables crecen más rápido que tus ingresos, tu margen se está comiendo a sí mismo — revisa proveedores o precios."},
+  {t:"Flujo de caja proyectado", body:"Una foto de cómo se ve tu caja los próximos 6 meses si nada cambia. Úsalo para anticipar meses flacos y decidir con tiempo, no en pánico.", red:"Si algún mes proyectado queda en negativo, ese es tu límite de tiempo para conseguir ventas o reducir gastos."},
+  {t:"Calculadora de precio mínimo", body:"Convierte tus gastos fijos y tu sueldo objetivo en una tarifa por hora. Cualquier precio por debajo de ese número te hace perder dinero, aunque el cliente pague.", red:"Si tu tarifa de mercado actual es menor a la mínima calculada, o subes precios o reduces gastos — no hay tercera opción sostenible."},
+  {t:"Punto de equilibrio", body:"El número de clientes o proyectos que necesitas al mes solo para cubrir gastos, antes de empezar a ganar algo para ti.", red:"Si llevas dos meses por debajo del punto de equilibrio, el problema no es de ventas — es de estructura de costos o de precio."},
+  {t:"Runway (alerta de caja)", body:"Cuántos meses puedes seguir operando con la caja actual si no entra ni un peso más. Es tu margen de reacción real.", red:"Con runway menor a 2 meses, pausa cualquier gasto no esencial hoy mismo y prioriza cobrar cuentas pendientes."},
+  {t:"Separación negocio / personal", body:"Cada ingreso se reparte de inmediato en cuatro baldes: operación, impuestos, reserva y sueldo del dueño. Evita que uses la caja del negocio como si fuera tu cuenta personal.", red:"Si retiras más de lo que tu balde de 'sueldo' permite, estás financiando tu vida con la reserva o los impuestos del negocio."},
+  {t:"Semáforo financiero", body:"Verde: ganancia positiva y runway sano. Amarillo: ganancia ajustada o runway corto — hay que actuar pronto. Rojo: pérdida o runway crítico — decisión inmediata.", red:"El semáforo en rojo no es un juicio, es una señal de que toca revisar precio, gastos o cobros esta semana."},
+  {t:"Errores comunes en tracción temprana", body:"Los tres más frecuentes: cobrar por intuición o copiando a la competencia sin conocer los propios costos; confundir caja con ganancia (\"tengo plata en el banco, voy bien\"); y mezclar cuentas personales y del negocio sin ningún método.", red:"Si te reconoces en alguno, empieza por la calculadora de precio mínimo — resuelve la causa más común."},
+  {t:"Rutina de cierre mensual", body:"Un ritual corto y fijo (30 min) al final de cada mes para actualizar el tablero y responder tres preguntas clave. Sin esta rutina, el tablero se desactualiza y deja de servir.", red:"Si llevas más de un mes sin cerrar, hazlo hoy antes de seguir tomando decisiones — los números viejos engañan."}
+];
+
+function panelGuia(){
+  var items = GUIDE.map(function(g,i){
+    return '<div class="accordion-item" data-idx="'+i+'">'+
+      '<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+'</span><h4 style="flex:1">'+esc(g.t)+'</h4><span class="chev">▾</span></button>'+
+      '<div class="accordion-body"><p>'+esc(g.body)+'</p><div class="redbox"><b>Si el número se pone en rojo:</b> '+esc(g.red)+'</div></div>'+
+    '</div>';
+  }).join("");
+  return (
+    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Once secciones — tu referencia rápida del tablero.</p></div>'+
+    '<div class="card">'+items+'</div>'
+  );
+}
+
+var CHECK_ITEMS = [
+  {id:"c1", label:"Registrar todos los ingresos del mes, por cliente"},
+  {id:"c2", label:"Revisar y confirmar los gastos fijos (¿cambió alguno?)"},
+  {id:"c3", label:"Registrar los gastos variables del mes"},
+  {id:"c4", label:"Actualizar la caja actual con el saldo real de banco/efectivo"},
+  {id:"c5", label:"Revisar la proyección de flujo de caja a 6 meses"},
+  {id:"c6", label:"Revisar la calculadora de precio (¿sigue vigente el sueldo objetivo?)"},
+  {id:"c7", label:"Aplicar la asignación de porcentajes al ingreso del mes"}
+];
+var QUESTIONS = [
+  {id:"q1", q:"¿Gané dinero de verdad este mes, o solo facturé?"},
+  {id:"q2", q:"¿Cuántos clientes o proyectos necesito el próximo mes para no perder dinero?"},
+  {id:"q3", q:"¿Cuántos meses aguanta el negocio si dejo de vender desde hoy?"}
+];
+
+function panelCierre(){
+  var items = CHECK_ITEMS.map(function(c){
+    var done = !!state.checklist.items[c.id];
+    return '<div class="check-row'+(done?' done':'')+'"><input type="checkbox" id="chk_'+c.id+'" data-chk="'+c.id+'" '+(done?'checked':'')+'><label for="chk_'+c.id+'">'+esc(c.label)+'</label></div>';
+  }).join("");
+  var qs = QUESTIONS.map(function(q){
+    return '<div class="qa"><div class="q">'+esc(q.q)+'</div><textarea data-ans="'+q.id+'" placeholder="Responde con los datos del tablero…">'+esc(state.checklist.answers[q.id]||"")+'</textarea></div>';
+  }).join("");
+  var doneCount = CHECK_ITEMS.filter(function(c){return state.checklist.items[c.id];}).length;
+  return (
+    '<div class="panel-head"><h2>Rutina de cierre mensual</h2><p>30 minutos al final del mes. Sin esta rutina, el tablero se desactualiza rápido.</p></div>'+
+    '<div class="card"><h3>Checklist<span class="badge-count" style="margin-left:8px">'+doneCount+'/'+CHECK_ITEMS.length+'</span></h3><div class="checklist">'+items+'</div></div>'+
+    '<div class="card"><h3>Tres preguntas para responder con los datos</h3>'+qs+'</div>'
+  );
+}
+
+/* ============================ MAIN RENDER ============================ */
+var PANEL_RENDERERS = {
+  resumen:panelResumen, ingresos:panelIngresos, fijos:panelFijos, variables:panelVariables,
+  flujo:panelFlujo, precio:panelPrecio, equilibrio:panelEquilibrio, runway:panelRunway,
+  asignacion:panelAsignacion, guia:panelGuia, cierre:panelCierre
+};
+
+function renderAll(){
+  buildNav(document.getElementById("navTabs"), false);
+  buildNav(document.getElementById("mobileTabs"), true);
+  var panels = document.getElementById("panels");
+  panels.innerHTML = '<div class="panel active">' + PANEL_RENDERERS[state.activeTab]() + '</div>';
+  attachHandlers();
+}
+
+function attachHandlers(){
+  var root = document.getElementById("panels");
+
+  // income
+  var addIncome = root.querySelector("#addIncome");
+  if(addIncome) addIncome.addEventListener("click", function(){
+    state.income.push({id:uid(), client:"", month:currentMonthStr(), amount:0});
+    saveState(); renderAll();
+  });
+  var incomeTbl = root.querySelector("#incomeTbl");
+  if(incomeTbl) bindTable(incomeTbl, state.income);
+
+  var addFixed = root.querySelector("#addFixed");
+  if(addFixed) addFixed.addEventListener("click", function(){
+    state.fixedExpenses.push({id:uid(), name:"", amount:0}); saveState(); renderAll();
+  });
+  var fixedTbl = root.querySelector("#fixedTbl");
+  if(fixedTbl) bindTable(fixedTbl, state.fixedExpenses);
+
+  var addVar = root.querySelector("#addVar");
+  if(addVar) addVar.addEventListener("click", function(){
+    state.variableExpenses.push({id:uid(), name:"", month:currentMonthStr(), amount:0}); saveState(); renderAll();
+  });
+  var varTbl = root.querySelector("#varTbl");
+  if(varTbl) bindTable(varTbl, state.variableExpenses);
+
+  // cash flow
+  ["cashCurrent","cashCurrent2"].forEach(function(id){
+    var el = root.querySelector("#"+id);
+    if(el) el.addEventListener("input", function(e){
+      state.cashCurrent = Number(e.target.value)||0; saveState();
+      var other = document.getElementById(id==="cashCurrent"?"cashCurrent2":"cashCurrent");
+      if(other) other.value = state.cashCurrent;
+      refreshDerived();
+    });
+  });
+  var cfTbl = root.querySelector("#cfTbl");
+  if(cfTbl){
+    cfTbl.addEventListener("input", function(e){
+      var t = e.target; if(!t.dataset.field) return;
+      var tr = t.closest("tr"); var mo = tr.getAttribute("data-month");
+      if(!state.cashFlow[mo]) state.cashFlow[mo] = {};
+      state.cashFlow[mo][t.dataset.field] = t.value;
+      saveState(); refreshDerived();
+    });
+  }
+
+  // price calc
+  bindInput("pHours", function(v){ state.price.hours = v; });
+  bindInput("pBillable", function(v){ state.price.billablePct = v; });
+  bindInput("pFixed", function(v, raw){ state.price.fixedOverride = raw===""? null : v; }, true);
+  bindInput("pSalary", function(v){ state.price.salary = v; });
+  bindInput("pProject", function(v){ state.price.projectHours = v; });
+
+  // breakeven
+  bindInput("beTicket", function(v, raw){ state.breakeven.avgTicketOverride = raw===""? null : v; }, true);
+
+  // allocation
+  root.querySelectorAll("[data-alloc]").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.alloc[el.dataset.alloc] = el.value;
+      saveState(); refreshDerived();
+    });
+  });
+
+  // guide accordion
+  root.querySelectorAll(".accordion-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      btn.parentElement.classList.toggle("open");
+    });
+  });
+
+  // checklist
+  root.querySelectorAll("[data-chk]").forEach(function(el){
+    el.addEventListener("change", function(){
+      state.checklist.items[el.dataset.chk] = el.checked;
+      saveState(); renderAll();
+    });
+  });
+  root.querySelectorAll("[data-ans]").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.checklist.answers[el.dataset.ans] = el.value;
+      saveState();
+    });
+  });
+}
+
+function bindInput(id, setter, allowEmpty){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener("input", function(){
+    var raw = el.value;
+    setter(raw===""? 0 : Number(raw), raw);
+    saveState(); refreshDerived();
+  });
+}
+
+function bindTable(tbl, arr){
+  tbl.addEventListener("input", function(e){
+    var t = e.target; if(!t.dataset.field) return;
+    var tr = t.closest("tr"); var id = Number(tr.getAttribute("data-id"));
+    var row = arr.find(function(r){return r.id===id;});
+    if(!row) return;
+    row[t.dataset.field] = t.dataset.field==="amount" ? (Number(t.value)||0) : t.value;
+    saveState(); refreshDerived();
+  });
+  tbl.addEventListener("click", function(e){
+    var t = e.target; if(!t.dataset.rm) return;
+    var id = Number(t.dataset.rm);
+    var idx = arr.findIndex(function(r){return r.id===id;});
+    if(idx>-1) arr.splice(idx,1);
+    saveState(); renderAll();
+  });
+}
+
+// lightweight refresh: only re-render totals without losing focus, by re-rendering whole panel
+// (inputs re-render on blur-safe intervals via debounce to avoid focus loss on every keystroke)
+var refreshTimer = null;
+function refreshDerived(){
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(function(){ renderAll(); }, 500);
+}
+
+/* ============================ INIT ============================ */
+renderShellStatic();
+renderAll();
+})();
+</script>

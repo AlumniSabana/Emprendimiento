@@ -1,0 +1,17 @@
+# Archivos intermedios que genera construir.sh dentro de src/.
+# Los publicables son los de la raíz; estos son copias de paso.
+src/tablero-financiero.html
+src/ficha-negocio.html
+src/emprendimiento-alumni-sabana.html
+src/_check.js
+
+# Python
+__pycache__/
+*.pyc
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
