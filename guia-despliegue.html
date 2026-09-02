@@ -1,0 +1,452 @@
+<title>Publicar Herramientas de Emprendimiento</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #F7F8FB;
+    --surface: #FFFFFF;
+    --sunken: #EEF1F8;
+    --ink: #0F1729;
+    --ink-soft: #4B5670;
+    --ink-faint: #616E80;
+    --rule: #D9E1EE;
+    --rule-soft: #E7ECF5;
+    --azul: #001459;
+    --azul-mid: #25409A;
+    --azul-soft: #E3EAF7;
+    --term-bg: #0E1836;
+    --term-ink: #C7D6F0;
+    --term-rule: #22315E;
+    --term-dim: #8FA5C6;
+    --ambar: #8A5200;
+    --ambar-soft: #FBEFDD;
+    --ambar-rule: #E4C89B;
+    --ok: #146B4C;
+    --ok-soft: #E4F2EC;
+
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0B1120;
+      --surface: #121B2E;
+      --sunken: #16203A;
+      --ink: #E8EDF7;
+      --ink-soft: #AFBBD0;
+      --ink-faint: #8494AC;
+      --rule: #26314B;
+      --rule-soft: #1D2740;
+      --azul: #A9C2EA;
+      --azul-mid: #7FA6D0;
+      --azul-soft: #1A2647;
+      --term-bg: #060C1B;
+      --term-rule: #1B2748;
+      --ambar: #E0AC63;
+      --ambar-soft: #2B2013;
+      --ambar-rule: #4A3618;
+      --ok: #6FCBA4;
+      --ok-soft: #10281F;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0B1120;
+    --surface: #121B2E;
+    --sunken: #16203A;
+    --ink: #E8EDF7;
+    --ink-soft: #AFBBD0;
+    --ink-faint: #8494AC;
+    --rule: #26314B;
+    --rule-soft: #1D2740;
+    --azul: #A9C2EA;
+    --azul-mid: #7FA6D0;
+    --azul-soft: #1A2647;
+    --term-bg: #060C1B;
+    --term-rule: #1B2748;
+    --ambar: #E0AC63;
+    --ambar-soft: #2B2013;
+    --ambar-rule: #4A3618;
+    --ok: #6FCBA4;
+    --ok-soft: #10281F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .envoltura {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+
+  /* ── Cabecera ── */
+  .cabecera {
+    padding: 3.2rem 0 2rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 2.6rem;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--azul-mid);
+    font-weight: 600;
+  }
+  h1 {
+    font-size: clamp(1.75rem, 4.2vw, 2.35rem);
+    line-height: 1.15;
+    letter-spacing: -.018em;
+    margin: .7rem 0 0;
+    text-wrap: balance;
+  }
+  .entradilla {
+    margin: 1rem 0 0;
+    color: var(--ink-soft);
+    font-size: 1.03rem;
+    max-width: 62ch;
+  }
+
+  /* ── Secciones ── */
+  section { margin-bottom: 3rem; }
+  h2 {
+    font-size: 1.25rem;
+    letter-spacing: -.01em;
+    margin: 0 0 .5rem;
+    text-wrap: balance;
+  }
+  h3 {
+    font-size: .95rem;
+    margin: 1.8rem 0 .5rem;
+    letter-spacing: -.005em;
+  }
+  p { margin: 0 0 .9rem; max-width: 65ch; }
+  p:last-child { margin-bottom: 0; }
+  .sub {
+    color: var(--ink-soft);
+    margin-bottom: 1.4rem;
+    max-width: 65ch;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: .875em;
+    background: var(--sunken);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: .09em .35em;
+    color: var(--ink);
+    word-break: break-word;
+  }
+
+  /* ── Terminal ── */
+  .term {
+    background: var(--term-bg);
+    border: 1px solid var(--term-rule);
+    border-radius: 7px;
+    overflow: hidden;
+    margin: 0 0 1rem;
+  }
+  .term-cab {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--term-dim);
+    padding: .5rem .95rem;
+    border-bottom: 1px solid var(--term-rule);
+  }
+  .term pre {
+    margin: 0;
+    padding: .9rem .95rem 1rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .83rem;
+    line-height: 1.75;
+    color: var(--term-ink);
+  }
+  .term .p { color: #6E86B8; user-select: none; }
+  .term .c { color: #7D93BE; font-style: italic; }
+  .term .o { color: #9FE6C4; }
+
+  /* ── Pasos: numerados porque el orden importa de verdad ── */
+  .pasos { counter-reset: paso; margin: 0; padding: 0; list-style: none; }
+  .paso {
+    counter-increment: paso;
+    position: relative;
+    padding: 0 0 1.9rem 3.1rem;
+    border-left: 1px solid var(--rule);
+    margin-left: .85rem;
+  }
+  .paso:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .paso::before {
+    content: counter(paso);
+    position: absolute;
+    left: -.85rem; top: -.15rem;
+    width: 1.7rem; height: 1.7rem;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--azul);
+    color: #FFFFFF;
+    border-radius: 50%;
+    font-family: var(--mono);
+    font-size: .76rem;
+    font-weight: 600;
+  }
+  :root[data-theme="dark"] .paso::before { color: #0B1120; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .paso::before { color: #0B1120; }
+  }
+  .paso h3 { margin: 0 0 .45rem; font-size: 1.02rem; }
+  .paso p { font-size: .94rem; }
+
+  /* ── Avisos: solo donde hay riesgo real ── */
+  .aviso {
+    background: var(--ambar-soft);
+    border: 1px solid var(--ambar-rule);
+    border-radius: 6px;
+    padding: .9rem 1.1rem;
+    margin: 1.2rem 0;
+    font-size: .91rem;
+    color: var(--ink);
+  }
+  .aviso b { color: var(--ambar); }
+  .aviso p { margin-bottom: .5rem; }
+  .aviso code { background: rgba(138,82,0,.09); border-color: var(--ambar-rule); }
+
+  /* ── Mapa de archivos ── */
+  .mapa {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 1.1rem 1.3rem;
+    font-family: var(--mono);
+    font-size: .82rem;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .mapa .gen { color: var(--ink-faint); }
+  .mapa .edit { color: var(--azul-mid); font-weight: 600; }
+  .mapa .nota { color: var(--ink-faint); font-style: italic; }
+
+  .leyenda {
+    display: flex; gap: 1.4rem; flex-wrap: wrap;
+    margin-top: .8rem; font-size: .82rem; color: var(--ink-soft);
+  }
+  .leyenda span { display: inline-flex; align-items: center; gap: .4rem; }
+  .punto { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+
+  /* ── Tabla de tareas ── */
+  .tabla-envoltura { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .91rem;
+  }
+  th, td {
+    text-align: left;
+    padding: .68rem .8rem;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    border-bottom-color: var(--rule);
+  }
+  td:first-child { color: var(--ink-soft); }
+  td code { white-space: nowrap; }
+
+  .cierre {
+    border-top: 1px solid var(--rule);
+    margin-top: 3.4rem;
+    padding-top: 1.5rem;
+    color: var(--ink-faint);
+    font-size: .87rem;
+  }
+
+  a { color: var(--azul-mid); text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--azul-mid); outline-offset: 3px; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="envoltura">
+
+  <header class="cabecera">
+    <span class="eyebrow">Centro de Desarrollo Profesional</span>
+    <h1>Publicar las herramientas de emprendimiento</h1>
+    <p class="entradilla">De tu computador a <code>vercel.app</code>, con el registro de cada cambio en GitHub. La primera parte se hace una sola vez; la segunda es la que vas a repetir cada vez que cambies algo.</p>
+  </header>
+
+  <section>
+    <h2>Antes de empezar</h2>
+    <p class="sub">Descomprime <code>emprendimiento-cdp-repo.zip</code> en una carpeta de tu computador. Ya trae el repositorio de Git iniciado y el primer commit hecho, así que no hace falta <code>git init</code>.</p>
+
+    <div class="term">
+      <div class="term-cab">Comprobar que quedó bien</div>
+      <pre><span class="p">$</span> cd ruta/a/emprendimiento-cdp
+<span class="p">$</span> git log --oneline
+<span class="o">9ae0f5b Portada de emprendimiento y las dos primeras herramientas</span></pre>
+    </div>
+
+    <p>Si ves esa línea, el repositorio está listo. Necesitas <strong>Git</strong>, <strong>Python 3</strong> y <strong>Node</strong> instalados: Python genera las páginas y Node comprueba que el JavaScript sea válido antes de publicar.</p>
+  </section>
+
+  <section>
+    <h2>Una sola vez: conectar GitHub y Vercel</h2>
+    <p class="sub">Estos cinco pasos van en orden y cada uno depende del anterior.</p>
+
+    <ol class="pasos">
+
+      <li class="paso">
+        <h3>Crea el repositorio en GitHub</h3>
+        <p>En GitHub, <strong>New repository</strong>. Nómbralo <code>emprendimiento-cdp</code>. Déjalo <strong>vacío</strong>: sin README, sin <code>.gitignore</code>, sin licencia. El proyecto ya trae los suyos y si GitHub crea otros, el primer <code>push</code> choca.</p>
+      </li>
+
+      <li class="paso">
+        <h3>Apunta tu carpeta a ese repositorio</h3>
+        <p>Copia la dirección que te da GitHub y, en la carpeta del proyecto:</p>
+        <div class="term">
+          <div class="term-cab">Terminal</div>
+          <pre><span class="p">$</span> git remote add origin https://github.com/TU-USUARIO/emprendimiento-cdp.git
+<span class="p">$</span> git push -u origin main</pre>
+        </div>
+        <p>Recarga GitHub: deben aparecer los archivos.</p>
+      </li>
+
+      <li class="paso">
+        <h3>Importa el proyecto en Vercel</h3>
+        <p>En Vercel, <strong>Add New → Project</strong>, y elige <code>emprendimiento-cdp</code> de la lista de tus repositorios de GitHub.</p>
+      </li>
+
+      <li class="paso">
+        <h3>No configures nada</h3>
+        <p>Vercel intentará adivinar un framework. Déjalo en <strong>Other</strong> y <strong>deja vacíos</strong> los campos de Build Command y Output Directory.</p>
+        <div class="aviso">
+          <p><b>Esto importa.</b> Son tres HTML ya construidos, no una aplicación que Vercel deba compilar. Si le pones un Build Command, fallará el despliegue buscando un <code>package.json</code> que no existe.</p>
+          <p style="margin-bottom:0">Las páginas se construyen <em>en tu computador</em> con <code>./construir.sh</code>, antes del commit. Vercel solo sirve el resultado.</p>
+        </div>
+      </li>
+
+      <li class="paso">
+        <h3>Deploy</h3>
+        <p>En menos de un minuto tienes tu dirección, del estilo <code>emprendimiento-cdp.vercel.app</code>. Ábrela y comprueba lo mismo que comprobamos aquí: que los dos botones abren su herramienta, y que «Volver a las herramientas» regresa a la portada.</p>
+      </li>
+
+    </ol>
+  </section>
+
+  <section>
+    <h2>Cada vez que cambies algo</h2>
+    <p class="sub">Este es el ciclo que vas a repetir. Son cuatro órdenes y siempre las mismas.</p>
+
+    <div class="term">
+      <div class="term-cab">El ciclo completo</div>
+      <pre><span class="c"># 1 · edita lo que quieras dentro de src/</span>
+
+<span class="c"># 2 · genera las tres páginas y compruébalas</span>
+<span class="p">$</span> ./construir.sh
+<span class="o">Las tres páginas están listas para publicar.</span>
+
+<span class="c"># 3 · guarda el cambio con su explicación</span>
+<span class="p">$</span> git add -A
+<span class="p">$</span> git commit -m "Qué cambió y por qué"
+
+<span class="c"># 4 · publícalo</span>
+<span class="p">$</span> git push</pre>
+    </div>
+
+    <p>Vercel detecta el <code>push</code> y publica solo. No hay que entrar a su panel.</p>
+
+    <div class="aviso">
+      <p style="margin-bottom:0"><b>Si <code>construir.sh</code> falla, no hagas push.</b> Termina con error y dice exactamente qué comprobación no pasó: una tilde rota, un logo sin incrustar, el JavaScript con un error de coma. Ese es el momento barato de arreglarlo. Después del push, el fallo ya está publicado.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué se edita y qué se genera</h2>
+    <p class="sub">La regla es una: <strong>nunca edites un HTML de la raíz</strong>. Los genera <code>construir.sh</code> y el siguiente build los sobreescribe sin avisar, con tu cambio dentro.</p>
+
+    <div class="mapa">
+<span class="gen">emprendimiento-cdp/</span>
+<span class="gen">├── index.html                  ← se genera</span>
+<span class="gen">├── ficha-negocio.html          ← se genera</span>
+<span class="gen">├── tablero-financiero.html     ← se genera</span>
+<span class="gen">├── construir.sh</span>
+<span class="gen">└── src/</span>
+<span class="gen">    ├── </span><span class="edit">fuente.html</span><span class="gen">              ← la portada: aquí se edita</span>
+<span class="gen">    ├── </span><span class="edit">aplicar.py</span><span class="gen">               ← viste las dos herramientas</span>
+<span class="gen">    ├── </span><span class="edit">_comun.py</span><span class="gen">                ← paleta, pie y barra de volver</span>
+<span class="gen">    └── originales/             </span><span class="nota">no tocar</span>
+    </div>
+
+    <div class="leyenda">
+      <span><i class="punto" style="background:var(--azul-mid)"></i> Se edita a mano</span>
+      <span><i class="punto" style="background:var(--ink-faint)"></i> Lo genera el build</span>
+    </div>
+
+    <p style="margin-top:1.3rem"><code>aplicar.py</code> parte <strong>siempre</strong> de <code>src/originales/</code>, nunca del resultado anterior. Por eso puedes ejecutar <code>./construir.sh</code> las veces que quieras y sale idéntico; si partiera de su propia salida, cada ejecución añadiría otro pie y otra barra de volver.</p>
+  </section>
+
+  <section>
+    <h2>Tareas frecuentes</h2>
+    <div class="tabla-envoltura">
+      <table>
+        <thead>
+          <tr><th>Quiero…</th><th>Se toca</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cambiar un texto de la portada</td>
+            <td><code>src/fuente.html</code></td>
+          </tr>
+          <tr>
+            <td>Cambiar el pie o los colores de las dos herramientas</td>
+            <td><code>src/_comun.py</code></td>
+          </tr>
+          <tr>
+            <td>Activar una herramienta que dice «Próximamente»</td>
+            <td><code>src/fuente.html</code>: añade su dirección en <code>DIRECCIONES</code> y quita <code>data-pronto</code> de su tarjeta</td>
+          </tr>
+          <tr>
+            <td>Que el navegador deje de mostrar la versión vieja</td>
+            <td>Sube <code>VERSION</code> en <code>src/fuente.html</code> y en <code>src/aplicar.py</code></td>
+          </tr>
+          <tr>
+            <td>Ver un cambio antes de publicarlo</td>
+            <td>Abre el HTML de la raíz con doble clic</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Si algo sale mal</h2>
+
+    <h3>El despliegue de Vercel falla</h3>
+    <p>Casi siempre es un Build Command puesto donde debía ir vacío. En Vercel: <strong>Settings → General → Build &amp; Development Settings</strong>, y deja Framework en <code>Other</code> con los campos vacíos.</p>
+
+    <h3>Publiqué algo roto</h3>
+    <p>En Vercel, <strong>Deployments</strong>, busca el despliegue anterior que sí funcionaba y usa <strong>Promote to Production</strong>. El sitio vuelve atrás en segundos. Después arreglas con calma en tu computador.</p>
+
+    <h3>Se ven tildes rotas</h3>
+    <p>No debería pasar: <code>construir.sh</code> lo comprueba. Si ocurre, es que se editó un HTML de la raíz a mano en vez de <code>src/</code>. Ejecuta <code>./construir.sh</code> y vuelve a publicar.</p>
+  </section>
+
+  <p class="cierre">El repositorio incluye su propio <code>README.md</code> con esta misma información, para quien abra el proyecto dentro de un año sin haber visto esta página.</p>
+
+</div>
