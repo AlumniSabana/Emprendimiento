@@ -15,6 +15,7 @@
 
 import io, re
 from _comun import PALETA, PIE_CSS, pie, barra_volver
+import _ficha_corrido, _tablero_importar, _tablero_videos
 
 VERSION = "2026.08.31"
 
@@ -241,6 +242,77 @@ PIE_TABLERO = pie(
     ),
     version=VERSION)
 
+# ── Importar ingresos desde una hoja de cálculo ──
+# El bloque va bajo la tabla de ingresos, dentro de su misma tarjeta.
+# Va tras cerrar la tabla y antes de cerrar la tarjeta: así queda
+# dentro del mismo bloque «Registro de ingresos», que es donde la
+# persona está mirando cuando piensa «esto una a una, no».
+_ancla_imp = """      '</tbody></table></div>'+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Ingresos por mes")"""
+if _ancla_imp not in t:
+    raise SystemExit('ERROR: no se encontró el cierre de la tabla de ingresos')
+t = t.replace(_ancla_imp, """      '</tbody></table></div>'+
+      bloqueImportar()+
+    '</div>'+
+    monthlySummaryCard(byMonth, "Ingresos por mes")""", 1)
+
+# Los eventos del importador, junto a los que ya existen.
+_ancla_ev = """  var addIncome = root.querySelector("#addIncome");"""
+if _ancla_ev not in t:
+    raise SystemExit('ERROR: no se encontró el enganche de eventos de ingresos')
+t = t.replace(_ancla_ev, """  var impBtn = root.querySelector("#impBtn");
+  var impArchivo = root.querySelector("#impArchivo");
+  if(impBtn && impArchivo){
+    impBtn.addEventListener("click", function(){ impArchivo.click(); });
+    impArchivo.addEventListener("change", function(e){
+      leerArchivoIngresos(e.target.files && e.target.files[0]);
+      e.target.value = "";           /* permite subir el mismo archivo dos veces */
+    });
+  }
+  var impEjemplo = root.querySelector("#impEjemplo");
+  if(impEjemplo) impEjemplo.addEventListener("click", descargarEjemploCSV);
+  var impZona = root.querySelector("#impZona");
+  if(impZona){
+    ["dragenter","dragover"].forEach(function(ev){
+      impZona.addEventListener(ev, function(e){
+        e.preventDefault(); impZona.classList.add("encima"); });
+    });
+    ["dragleave","drop"].forEach(function(ev){
+      impZona.addEventListener(ev, function(e){
+        e.preventDefault(); impZona.classList.remove("encima"); });
+    });
+    impZona.addEventListener("drop", function(e){
+      leerArchivoIngresos(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+    });
+  }
+
+""" + _ancla_ev, 1)
+
+# ── Videos en la guía de uso ──
+# Cada término de la guía puede llevar su vídeo. Los que no tengan
+# enlace en _tablero_videos.py no muestran nada.
+# Se ancla en «+esc(g.red)+», que es código y no texto: los rótulos
+# de alrededor ya los reescribió quitar_guiones más arriba.
+_ancla_vid = "+esc(g.red)+'</div></div>'+"
+if _ancla_vid not in t:
+    raise SystemExit('ERROR: no se encontró el cuerpo del acordeón de la guía')
+t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
+
+t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + '\n</style>', 1)
+
+# El JS de los dos módulos va DENTRO del IIFE del tablero, justo
+# antes de que se cierre.
+#
+# Se intentó ponerlo después de «</script>» y falló con «esc is not
+# defined»: todo el tablero vive dentro de «(function(){ … })()», así
+# que esc(), state y saveState() no existen fuera. Aquí sí los ve.
+_cierre = '/* ============================ INIT ============================ */'
+if _cierre not in t:
+    raise SystemExit('ERROR: no se encontró el bloque INIT del tablero')
+t = t.replace(_cierre,
+              _tablero_importar.JS + '\n' + _tablero_videos.js() + '\n\n' + _cierre, 1)
+
 t = encabezar(t, 'Tablero financiero del Centro de Desarrollo Profesional de la Universidad de La Sabana: precio minimo, punto de equilibrio, runway y flujo de caja para emprendimientos en traccion temprana.')
 t = t.replace('</style>', PIE_CSS + '\n</style>', 1)
 # La barra de vuelta, lo primero del cuerpo.
@@ -338,6 +410,30 @@ f, n_gf = quitar_guiones(f, [
     ('TOKENS — "Ledger de negocio"', 'TOKENS · "Ledger de negocio"'),
 ])
 
+# ── La pregunta de contratación estatal, más ancha ──
+# «¿Piensas contratar con el Estado?» se leía como «¿vas a ganarte una
+# licitación?», y mucha gente que sí entra en el supuesto respondía que
+# no: quien le vende a una empresa de servicios públicos, quien es
+# proveedor de un contratista, quien maneja productos regulados por una
+# entidad estatal. El RUP y los requisitos les aplican igual, así que
+# una respuesta equivocada aquí les borra un trámite de su ficha.
+f, n_est = quitar_guiones(f, [
+    ('"¿Piensas contratar con el Estado (alcaldías, gobernaciones, entidades públicas)?"',
+     '"¿Piensas trabajar con el Estado o el gobierno: venderles, ser proveedor de '
+     'entidades relacionadas, o manejar productos vinculados a ellas?"'),
+    ('"Esto aplica sin importar tu sector, y define si más adelante necesitas '
+     'inscribirte en el Registro Único de Proponentes (RUP)."',
+     '"Cuenta también si le vendes a alcaldías, gobernaciones, entidades públicas, '
+     'empresas estatales o a un contratista de ellas. Aplica sin importar tu sector '
+     'y define si más adelante necesitas inscribirte en el Registro Único de '
+     'Proponentes (RUP)."'),
+    # La ficha de resultado tiene que decir lo mismo que la pregunta.
+    ('"Piensa contratar con el Estado → Registro Único de Proponentes (RUP)."',
+     '"Piensa trabajar con el Estado o entidades relacionadas: Registro Único de '
+     'Proponentes (RUP)."'),
+])
+n_f += n_est
+
 # El asistente vive en una columna estrecha; el pie es de ancho
 # completo, así que sale del contenedor.
 f = f.replace('.app-shell {\n    max-width: 760px;', '.app-shell {\n    max-width: 760px;')
@@ -364,8 +460,46 @@ PIE_FICHA = pie(
     version=VERSION)
 
 f = encabezar(f, 'Ficha de identificacion de negocio del Centro de Desarrollo Profesional de la Universidad de La Sabana: que tramites, entidades y documentos le corresponden a tu emprendimiento en Colombia.')
+# ── La ficha, de corrido ──
+# El motor nuevo sustituye a render(), navRow() y updateProgress().
+# Se inserta justo antes de la llamada final a render(), así que las
+# definiciones viejas quedan arriba y estas las pisan: en JavaScript
+# la última declaración de una función es la que manda.
+# Las etiquetas venían numeradas por tema, no por paso: tres bloques
+# seguidos decían «1. Actividad». En una sola página eso se lee como
+# una numeración rota. Se deja el tema, que es lo que informa.
+for _viejo, _nuevo in [
+    ('"1. Actividad"',        '"Actividad"'),
+    ('"2. Ubicación"',        '"Ubicación"'),
+    ('"3. Figura jurídica"',  '"Figura jurídica"'),
+    ('"4. Infraestructura"',  '"Infraestructura"'),
+    ('"5. Escala"',           '"Escala"'),
+    ('"6. Cualquier sector"', '"Cualquier sector"'),
+]:
+    f = f.replace('section-tag" }, ' + _viejo, 'section-tag" }, ' + _nuevo)
+
+# Sin botón «Siguiente» ya no hay «.btn-primary» en las tarjetas, y
+# los tres sitios que lo desactivaban escriben sobre null: cada tecla
+# lanzaba «Cannot set properties of null». El estado sí se guarda
+# —esas líneas se conservan—, solo se protege el acceso al botón.
+for _v, _n in [
+    ('nextBtn.disabled = state.actividadDescripcion.trim().length < 5;',
+     'if (nextBtn) nextBtn.disabled = state.actividadDescripcion.trim().length < 5;'),
+    ('card.querySelector(".btn-primary").disabled = !isValid();',
+     'var _b = card.querySelector(".btn-primary"); if (_b) _b.disabled = !isValid();'),
+]:
+    if _v not in f:
+        raise SystemExit('ERROR: no se encontró para proteger: ' + _v[:50])
+    f = f.replace(_v, _n)
+
+f = f.replace('</style>', _ficha_corrido.CSS + '\n</style>', 1)
+antes = '  render();\n})();'
+if antes not in f:
+    raise SystemExit('ERROR: no se encontró la llamada final a render() en la ficha')
+f = f.replace(antes, _ficha_corrido.MOTOR + '\n' + antes, 1)
+
 f = f.replace('</style>', PIE_CSS + '\n</style>', 1)
-f = f.replace('<body>\n', '<body>\n' + barra_volver(), 1)
+f = f.replace('<body>\n', '<body>\n' + barra_volver() + _ficha_corrido.MARCADO, 1)
 f = f.replace('</body>', PIE_FICHA + '\n</body>', 1)
 io.open('ficha-negocio.html', 'w', encoding='utf-8').write(f)
 print('ficha    · tokens:', n_f, '· oscuros fuera:', fuera_f, '· guiones reescritos:', n_gf)
