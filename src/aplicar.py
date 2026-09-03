@@ -15,7 +15,8 @@
 
 import io, re
 from _comun import PALETA, PIE_CSS, pie, barra_volver
-import _ficha_corrido, _ficha_formulario, _tablero_importar, _tablero_videos, _tipografia
+import _ficha_corrido, _ficha_formulario, _ficha_descargar
+import _tablero_importar, _tablero_videos, _tipografia
 
 VERSION = "2026.08.31"
 
@@ -528,11 +529,21 @@ for _v, _n in [
 # y «.choice-btn», y en CSS con la misma especificidad gana el
 # último. Invertirlos deja el aspecto de ficha a medias.
 f = f.replace('</style>',
-              _ficha_corrido.CSS + '\n' + _ficha_formulario.CSS + '\n</style>', 1)
+              _ficha_corrido.CSS + '\n' + _ficha_formulario.CSS + '\n'
+              + _ficha_descargar.CSS + '\n</style>', 1)
+
+# La caja de descarga, junto a los botones que ya había en el
+# resultado. El texto de la ficha ya lo arma buildPlainTextFicha().
+_ancla_desc = 'card.appendChild(actions);'
+if _ancla_desc not in f:
+    raise SystemExit('ERROR: no se encontró la fila de acciones del resultado')
+f = f.replace(_ancla_desc,
+              'card.appendChild(bloqueDescargar(plainText));\n    ' + _ancla_desc, 1)
 antes = '  render();\n})();'
 if antes not in f:
     raise SystemExit('ERROR: no se encontró la llamada final a render() en la ficha')
-f = f.replace(antes, _ficha_corrido.MOTOR + '\n' + antes, 1)
+f = f.replace(antes,
+              _ficha_corrido.MOTOR + '\n' + _ficha_descargar.JS + '\n' + antes, 1)
 
 f = f.replace('</style>', PIE_CSS + '\n</style>', 1)
 f = f.replace('<body>\n', '<body>\n' + barra_volver() + _ficha_corrido.MARCADO, 1)

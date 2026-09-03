@@ -292,7 +292,7 @@ MOTOR = r"""
     if (bloqueEnCurso) hechoPorBloque.set(bloqueEnCurso, listo);
 
     if (!listo) {
-      card.appendChild(el("p", { class: "bloque-pendiente" }, "Contesta para continuar."));
+      card.appendChild(el("p", { class: "bloque-pendiente" }, "Falta contestar esta pregunta."));
       return;
     }
     const fila = el("div", { class: "bloque-hecho" });
@@ -365,6 +365,7 @@ MOTOR = r"""
 
     aMostrar.forEach(id => vistos.add(id));
     pintarRacha();
+    pintarQueFalta();
 
     /* «resultado» solo se muestra cuando todas están contestadas,
        pero eso no se sabe hasta terminar de pintar: cada navRow()
