@@ -27,6 +27,24 @@
 CSS = """
 /* ═══════════════ FICHA DE CORRIDO ═══════════════ */
 
+/* Fondo blanco en toda la página, no solo en las tarjetas.
+   El archivo original imitaba papel de libreta: un azulado claro
+   con rayas horizontales cada 34 px. Con las preguntas de corrido
+   esas rayas corren por toda la página y compiten con el texto,
+   así que se retiran las dos cosas: el tinte y las líneas.
+
+   Va con «!important» porque la regla original está en el mismo
+   documento y usa el mismo selector: sin él, gana la que venga
+   después y el cambio no se ve. */
+html, body {
+  background: #FFFFFF !important;
+  background-image: none !important;
+}
+/* Las tarjetas ya no necesitan destacarse contra un fondo teñido:
+   sobre blanco, un borde suave basta y evita el efecto de «caja
+   blanca sobre caja blanca». */
+.card { background: #FFFFFF; }
+
 /* La barra de «Paso 3 de 10» sobra: contaba una navegación que ya
    no existe, y la racha de arriba dice lo mismo mejor. Se oculta
    en vez de borrarla del marcado porque los renderers todavía la

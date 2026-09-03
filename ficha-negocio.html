@@ -7,8 +7,6 @@
 <meta name="theme-color" content="#001459">
 <meta name="description" content="Ficha de identificacion de negocio del Centro de Desarrollo Profesional de la Universidad de La Sabana: que tramites, entidades y documentos le corresponden a tu emprendimiento en Colombia.">
 <title>Ficha de Identificación de Negocio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   /* ============================================================
      TOKENS · "Ledger de negocio": papel de libro contable rayado,
@@ -64,10 +62,10 @@
     --shadow-sm: 0 1px 2px rgba(0,20,89,.05);
     --shadow-lg: 0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22);
     --radius: 10px;
-    --sans-pie: "Public Sans", -apple-system, "Segoe UI", sans-serif;
-    --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
-    --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans-pie: "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans: "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono: ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
   }
 
   
@@ -502,6 +500,24 @@
   }
 
 /* ═══════════════ FICHA DE CORRIDO ═══════════════ */
+
+/* Fondo blanco en toda la página, no solo en las tarjetas.
+   El archivo original imitaba papel de libreta: un azulado claro
+   con rayas horizontales cada 34 px. Con las preguntas de corrido
+   esas rayas corren por toda la página y compiten con el texto,
+   así que se retiran las dos cosas: el tinte y las líneas.
+
+   Va con «!important» porque la regla original está en el mismo
+   documento y usa el mismo selector: sin él, gana la que venga
+   después y el cambio no se ve. */
+html, body {
+  background: #FFFFFF !important;
+  background-image: none !important;
+}
+/* Las tarjetas ya no necesitan destacarse contra un fondo teñido:
+   sobre blanco, un borde suave basta y evita el efecto de «caja
+   blanca sobre caja blanca». */
+.card { background: #FFFFFF; }
 
 /* La barra de «Paso 3 de 10» sobra: contaba una navegación que ya
    no existe, y la racha de arriba dice lo mismo mejor. Se oculta

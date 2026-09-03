@@ -15,7 +15,7 @@
 
 import io, re
 from _comun import PALETA, PIE_CSS, pie, barra_volver
-import _ficha_corrido, _tablero_importar, _tablero_videos
+import _ficha_corrido, _tablero_importar, _tablero_videos, _tipografia
 
 VERSION = "2026.08.31"
 
@@ -91,6 +91,27 @@ def quitar_guiones(s, frases):
             continue
         s = s.replace(viejo, nuevo)
         n += 1
+    return s, n
+
+
+def quitar_fuentes_de_google(s):
+    """Retira las descargas de Fraunces, Public Sans e IBM Plex.
+
+    Los dos archivos las traían de fonts.googleapis.com. Al pasar a
+    las fuentes del sistema esas peticiones ya no pintan nada: solo
+    retrasan la apertura y, sin conexión, la dejan esperando.
+
+    Quitarlas es lo que hace de verdad que estas herramientas
+    funcionen sin internet, que es lo que su propio pie promete."""
+    n = 0
+    patrones = [
+        r'<link[^>]*rel="preconnect"[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*',
+        r'<link[^>]*fonts\.googleapis\.com/css2[^>]*>\s*',
+        r'@import\s+url\([^)]*fonts\.googleapis\.com[^)]*\)\s*;',
+    ]
+    for pat in patrones:
+        s, k = re.subn(pat, '', s, flags=re.I)
+        n += k
     return s, n
 
 
@@ -182,7 +203,13 @@ t = t.replace('''.bizrow input, .bizrow select{ width:100%; }''',
 t = t.replace('''  .mobile-tabbar{ display:flex; overflow-x:auto; gap:6px; padding:8px 14px 14px; border-top:1px solid var(--line); }''',
 '''  .mobile-tabbar{ display:flex; overflow-x:auto; gap:6px; padding:8px 14px 14px; border-top:1px solid var(--line); background:var(--azul); }''')
 
-t = t.replace('--font-display:', '--sans-pie:\'IBM Plex Sans\', -apple-system, \'Segoe UI\', sans-serif;\n  --font-display:')
+t = t.replace('--font-display:', '--sans-pie:' + _tipografia.BODY + ';\n  --font-display:')
+
+# ── La tipografía del Centro ──
+# Iowan Old Style, Segoe UI y la mono del sistema, como en Pitch y
+# el portafolio. Fraunces e IBM Plex se van.
+t, n_ft = sustituir_tokens(t, _tipografia.TABLERO)
+t, n_dt = quitar_fuentes_de_google(t)
 
 # ── Fuera los guiones largos de redacción ──
 # Cada frase se reescribe entera, no se le quita el guión y ya: una
@@ -330,7 +357,8 @@ t = t.replace(
     '  height:calc(100vh - var(--alto-volver)); overflow-y:auto;')
 t = t.replace('</body>', PIE_TABLERO + '\n</body>', 1)
 io.open('tablero-financiero.html', 'w', encoding='utf-8').write(t)
-print('tablero  · tokens:', n_t, '· oscuros fuera:', fuera_t, '· guiones reescritos:', n_gt)
+print('tablero  · tokens:', n_t, '· oscuros:', fuera_t, '· guiones:', n_gt,
+      '· fuentes:', n_ft, '· descargas de Google fuera:', n_dt)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -366,7 +394,11 @@ f, n_f = sustituir_tokens(f, {
     '--shadow-lg':        '0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22)',
 })
 
-f = f.replace('--serif:', '--sans-pie: "Public Sans", -apple-system, "Segoe UI", sans-serif;\n    --serif:')
+f = f.replace('--serif:', '--sans-pie: ' + _tipografia.BODY + ';\n    --serif:')
+
+# ── La tipografía del Centro ──
+f, n_ff = sustituir_tokens(f, _tipografia.FICHA)
+f, n_df = quitar_fuentes_de_google(f)
 
 # ── Fuera el emoji de la cabecera ──
 # El 📇 era el único emoji de las dos herramientas. Se va entero, no
@@ -502,4 +534,5 @@ f = f.replace('</style>', PIE_CSS + '\n</style>', 1)
 f = f.replace('<body>\n', '<body>\n' + barra_volver() + _ficha_corrido.MARCADO, 1)
 f = f.replace('</body>', PIE_FICHA + '\n</body>', 1)
 io.open('ficha-negocio.html', 'w', encoding='utf-8').write(f)
-print('ficha    · tokens:', n_f, '· oscuros fuera:', fuera_f, '· guiones reescritos:', n_gf)
+print('ficha    · tokens:', n_f, '· oscuros:', fuera_f, '· guiones:', n_gf,
+      '· fuentes:', n_ff, '· descargas de Google fuera:', n_df)
