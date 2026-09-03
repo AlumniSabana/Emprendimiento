@@ -341,6 +341,14 @@ MOTOR = r"""
     main.innerHTML = "";
     const aMostrar = STEP_IDS.filter(visible);
 
+    /* La franja de título del documento, como en la ficha oficial
+       que sirvió de referencia. Va dentro de main y no en la
+       cabecera de la página para que se imprima pegada a la
+       rejilla, sin un hueco entre el título y la primera celda. */
+    const franja = el("div", { class: "ficha-encabezado" },
+                      "Ficha de identificación de negocio");
+    main.appendChild(franja);
+
     aMostrar.forEach(id => {
       const card = el("div", { class: "card bloque" });
       card.id = "bloque-" + id;

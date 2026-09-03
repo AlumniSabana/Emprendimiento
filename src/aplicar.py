@@ -15,7 +15,7 @@
 
 import io, re
 from _comun import PALETA, PIE_CSS, pie, barra_volver
-import _ficha_corrido, _tablero_importar, _tablero_videos, _tipografia
+import _ficha_corrido, _ficha_formulario, _tablero_importar, _tablero_videos, _tipografia
 
 VERSION = "2026.08.31"
 
@@ -524,7 +524,11 @@ for _v, _n in [
         raise SystemExit('ERROR: no se encontró para proteger: ' + _v[:50])
     f = f.replace(_v, _n)
 
-f = f.replace('</style>', _ficha_corrido.CSS + '\n</style>', 1)
+# El de formulario va DESPUÉS del de corrido: los dos tocan «.card»
+# y «.choice-btn», y en CSS con la misma especificidad gana el
+# último. Invertirlos deja el aspecto de ficha a medias.
+f = f.replace('</style>',
+              _ficha_corrido.CSS + '\n' + _ficha_formulario.CSS + '\n</style>', 1)
 antes = '  render();\n})();'
 if antes not in f:
     raise SystemExit('ERROR: no se encontró la llamada final a render() en la ficha')
