@@ -25,7 +25,7 @@ CSS = """
 /* El documento entero es una hoja: fondo blanco, borde negro
    marcado y nada de sombras. Un formulario impreso no flota. */
 .card.bloque {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-radius: 0;
   box-shadow: none;
   padding: 0;
@@ -37,7 +37,7 @@ CSS = """
    Sustituye a la etiqueta pequeña de color que había antes. */
 .bloque .section-tag {
   display: block; width: 100%;
-  background: #111827; color: #FFFFFF;
+  background: var(--accent-btn); color: #FFFFFF;
   border: 0; border-radius: 0;
   padding: .42rem .9rem;
   font-family: var(--sans);
@@ -52,10 +52,10 @@ CSS = """
   margin: 0;
   padding: .62rem .9rem;
   background: #E9EBF0;
-  border-bottom: 1px solid #111827;
+  border-bottom: 1px solid #C3CFE3;
   font-family: var(--sans);
   font-size: .95rem; font-weight: 700;
-  color: #111827; line-height: 1.4;
+  color: var(--ink); line-height: 1.4;
 }
 .bloque .hint {
   margin: 0;
@@ -178,9 +178,9 @@ CSS = """
 /* Cabecera del documento: franja de título como la del formulario
    de referencia, con el nombre de la ficha en versales. */
 .ficha-encabezado {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-bottom: 0;
-  background: #111827;
+  background: var(--accent-btn);
   color: #FFFFFF;
   padding: .6rem 1rem;
   text-align: center;
@@ -192,7 +192,7 @@ CSS = """
 /* Las subpreguntas que aparecen dentro de un bloque (el «¿atiende
    público?» de infraestructura) mantienen el mismo tratamiento. */
 .bloque .field-group + .btn-grid,
-.bloque .btn-grid + .question { border-top: 1px solid #111827; }
+.bloque .btn-grid + .question { border-top: 1px solid #C3CFE3; }
 
 /* En pantallas estrechas, una casilla por fila: dos columnas de
    190 px no caben y partirían los rótulos largos. */

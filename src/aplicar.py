@@ -15,7 +15,7 @@
 
 import io, re
 from _comun import PALETA, PIE_CSS, pie, barra_volver
-import _ficha_corrido, _ficha_formulario, _ficha_descargar
+import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
 import _tablero_importar, _tablero_videos, _tipografia
 
 VERSION = "2026.08.31"
@@ -530,7 +530,24 @@ for _v, _n in [
 # último. Invertirlos deja el aspecto de ficha a medias.
 f = f.replace('</style>',
               _ficha_corrido.CSS + '\n' + _ficha_formulario.CSS + '\n'
-              + _ficha_descargar.CSS + '\n</style>', 1)
+              + _ficha_descargar.CSS + '\n' + _ficha_entidades.CSS + '\n</style>', 1)
+
+# ── El nombre de la entidad es su enlace ──
+_ancla_ent = 'el("h4", {}, nombre),'
+if _ancla_ent not in f:
+    raise SystemExit('ERROR: no se encontró el título de las tarjetas de entidad')
+f = f.replace(_ancla_ent, 'tituloEntidad(nombre),', 1)
+
+# ── Fuera el bloque de botones sueltos ──
+# Los cuatro enlaces de «Gestiona tus documentos base aquí» ahora
+# viven en el nombre de cada entidad, donde la persona los está
+# leyendo. Repetirlos abajo obliga a bajar a buscar el que
+# corresponde, y solo cubrían cuatro de las ocho entidades.
+_i = f.find('const linksSection = el("div", { class: "map-section" }, [')
+_j = f.find('card.appendChild(linksSection);')
+if _i < 0 or _j < 0:
+    raise SystemExit('ERROR: no se encontró el bloque de enlaces sueltos')
+f = f[:_i] + f[_j + len('card.appendChild(linksSection);'):]
 
 # La caja de descarga, junto a los botones que ya había en el
 # resultado. El texto de la ficha ya lo arma buildPlainTextFicha().
@@ -543,7 +560,8 @@ antes = '  render();\n})();'
 if antes not in f:
     raise SystemExit('ERROR: no se encontró la llamada final a render() en la ficha')
 f = f.replace(antes,
-              _ficha_corrido.MOTOR + '\n' + _ficha_descargar.JS + '\n' + antes, 1)
+              _ficha_corrido.MOTOR + '\n' + _ficha_descargar.JS + '\n'
+              + _ficha_entidades.js() + '\n' + antes, 1)
 
 f = f.replace('</style>', PIE_CSS + '\n</style>', 1)
 f = f.replace('<body>\n', '<body>\n' + barra_volver() + _ficha_corrido.MARCADO, 1)

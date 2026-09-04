@@ -32,16 +32,39 @@
 # ══════════════════════════════════════════════════════════════
 
 #  término del tablero  ->  identificador de YouTube  ('' = sin vídeo)
+#
+#  Se eligieron los más cortos y directos de los verificados, no los
+#  más completos: quien está llenando el tablero quiere entender un
+#  término y volver, no ver una clase de veinte minutos.
+#
+#  Los cinco puestos existen y son públicos, comprobado uno a uno
+#  con la API de YouTube. Lo que NO se pudo comprobar es el
+#  contenido: si el Centro quiere avalar cada explicación, conviene
+#  verlos antes de publicar. Quitar uno es borrar su identificador.
 VIDEOS = {
     "Facturación vs. ganancia real":        "",
     "Ingresos por cliente y mes":           "",
-    "Gastos fijos":                         "",
-    "Gastos variables":                     "",
-    "Flujo de caja proyectado":             "",
+    # «Gastos fijos y gastos variables», Aprende Con Ame.
+    # El mismo vídeo sirve para los dos términos.
+    "Gastos fijos":                         "OqCo9Fljxmw",
+    "Gastos variables":                     "OqCo9Fljxmw",
+    # «EL FLUJO DE CAJA Explicado Fácil y con Ejemplos»,
+    # Contabilidad para Todos.
+    "Flujo de caja proyectado":             "zIVOrdu2w1I",
     "Calculadora de precio mínimo":         "",
-    "Punto de equilibrio":                  "",
+    # «Punto de equilibrio | Concepto FINANCIERO», Pablo
+    # Aguirregomezcorta. Se prefiere al de nueve minutos: explica
+    # el concepto sin el desarrollo completo del ejercicio.
+    "Punto de equilibrio":                  "NkbrYt291ZU",
+    # Sin vídeo: los que hay hablan de startups levantando capital
+    # de inversores, no de un negocio que vive de lo que vende.
     "Runway (alerta de caja)":              "",
-    "Separación negocio / personal":        "",
+    # «¿Cómo separar las finanzas personales de las del negocio?»,
+    # CoreWoman.
+    "Separación negocio / personal":        "S2vwqa4H1uU",
+    # Estos cuatro no son conceptos generales de finanzas: son
+    # maneras de trabajar que definió este tablero. Un vídeo externo
+    # no puede explicarlos porque no existen fuera de la herramienta.
     "Semáforo financiero":                  "",
     "Errores comunes en tracción temprana": "",
     "Rutina de cierre mensual":             "",

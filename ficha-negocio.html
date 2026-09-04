@@ -636,7 +636,7 @@ html, body {
 /* El documento entero es una hoja: fondo blanco, borde negro
    marcado y nada de sombras. Un formulario impreso no flota. */
 .card.bloque {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-radius: 0;
   box-shadow: none;
   padding: 0;
@@ -648,7 +648,7 @@ html, body {
    Sustituye a la etiqueta pequeña de color que había antes. */
 .bloque .section-tag {
   display: block; width: 100%;
-  background: #111827; color: #FFFFFF;
+  background: var(--accent-btn); color: #FFFFFF;
   border: 0; border-radius: 0;
   padding: .42rem .9rem;
   font-family: var(--sans);
@@ -663,10 +663,10 @@ html, body {
   margin: 0;
   padding: .62rem .9rem;
   background: #E9EBF0;
-  border-bottom: 1px solid #111827;
+  border-bottom: 1px solid #C3CFE3;
   font-family: var(--sans);
   font-size: .95rem; font-weight: 700;
-  color: #111827; line-height: 1.4;
+  color: var(--ink); line-height: 1.4;
 }
 .bloque .hint {
   margin: 0;
@@ -789,9 +789,9 @@ html, body {
 /* Cabecera del documento: franja de título como la del formulario
    de referencia, con el nombre de la ficha en versales. */
 .ficha-encabezado {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-bottom: 0;
-  background: #111827;
+  background: var(--accent-btn);
   color: #FFFFFF;
   padding: .6rem 1rem;
   text-align: center;
@@ -803,7 +803,7 @@ html, body {
 /* Las subpreguntas que aparecen dentro de un bloque (el «¿atiende
    público?» de infraestructura) mantienen el mismo tratamiento. */
 .bloque .field-group + .btn-grid,
-.bloque .btn-grid + .question { border-top: 1px solid #111827; }
+.bloque .btn-grid + .question { border-top: 1px solid #C3CFE3; }
 
 /* En pantallas estrechas, una casilla por fila: dos columnas de
    190 px no caben y partirían los rótulos largos. */
@@ -849,7 +849,7 @@ html, body {
 
 /* ═══════════════ DESCARGAR ═══════════════ */
 .descargar {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-top: 0;
   background: #F5F6FA;
   padding: .95rem 1.1rem;
@@ -864,6 +864,27 @@ html, body {
 
 @media print {
   .falta-aviso, .descargar { display: none !important; }
+}
+
+
+/* ═══════════════ EL TÍTULO ES EL ENLACE ═══════════════ */
+.entity-card h4 a {
+  color: var(--accent-ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s, color .15s;
+  display: inline-flex; align-items: baseline; gap: .3rem;
+}
+.entity-card h4 a:hover {
+  color: var(--accent-btn);
+  border-bottom-color: currentColor;
+}
+.entity-card h4 a .flecha { font-size: .82em; }
+/* Las entidades sin enlace no fingen tenerlo: el nombre va en
+   texto plano y una nota explica por qué. */
+.entity-card .sin-enlace {
+  display: block; margin-top: .35rem;
+  font-size: .76rem; color: var(--text-muted); line-height: 1.45;
 }
 
 
@@ -1870,7 +1891,7 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     for (const [nombre, info] of entidades.entries()) {
       grid.appendChild(
         el("div", { class: `entity-card ${info.tipo}` }, [
-          el("h4", {}, nombre),
+          tituloEntidad(nombre),
           el("ul", {}, info.items.map((i) => el("li", {}, i))),
         ])
       );
@@ -1879,17 +1900,7 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     card.appendChild(mapSection2);
 
     // Enlaces oficiales para gestionar documentos
-    const linksSection = el("div", { class: "map-section" }, [
-      el("h3", {}, "Gestiona tus documentos base aquí"),
-      el("p", { class: "hint" }, "Estos dos trámites son el punto de partida para casi cualquier negocio formal en Colombia."),
-      el("div", { class: "link-row" }, [
-        el("a", { class: "link-btn", href: "https://www.rues.org.co", target: "_blank", rel: "noopener noreferrer" }, "Cámara de Comercio · RUES"),
-        el("a", { class: "link-btn", href: "https://www.confecamaras.co", target: "_blank", rel: "noopener noreferrer" }, "Confirmar tu Cámara de Comercio"),
-        el("a", { class: "link-btn", href: "https://www.dian.gov.co", target: "_blank", rel: "noopener noreferrer" }, "RUT · DIAN"),
-        el("a", { class: "link-btn", href: "https://www.vue.gov.co", target: "_blank", rel: "noopener noreferrer" }, "Preliquidador · Ventanilla Única Empresarial"),
-      ]),
-    ]);
-    card.appendChild(linksSection);
+    
 
     // Preguntas abiertas
     const openSection = el("div", { class: "map-section" }, [
@@ -2289,6 +2300,27 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
 
     caja.appendChild(fila);
     return caja;
+  }
+
+
+  /* El nombre de cada entidad, enlazado a su sitio oficial. */
+  var ENLACES_ENTIDAD = {"Cámara de Comercio": ["https://www.rues.org.co", "Consulta el RUES y encuentra tu Cámara de Comercio"], "DIAN": ["https://www.dian.gov.co", "Inscripción y actualización del RUT"], "ARL / Sistema de Seguridad Social (PILA)": ["https://www.miplanilla.com", "Aportes a seguridad social por PILA"], "INVIMA": ["https://www.invima.gov.co/tramites-y-servicios", "Trámites y registros sanitarios"], "Superintendencia de Industria y Comercio (SIC)": ["https://www.sic.gov.co", "Registro de marca y protección al consumidor"], "Alcaldía / Curaduría municipal": [null, null], "Secretaría de Salud departamental o distrital": [null, null], "Secretaría de Salud municipal": [null, null]};
+
+  function tituloEntidad(nombre) {
+    var e = ENLACES_ENTIDAD[nombre];
+    var url = e && e[0];
+    if (!url) {
+      var h = el("h4", {}, nombre);
+      h.appendChild(el("span", { class: "sin-enlace" },
+        "Depende de tu municipio: búscala por el nombre de tu alcaldía."));
+      return h;
+    }
+    var a = el("a", {
+      href: url, target: "_blank", rel: "noopener noreferrer",
+      title: e[1] || ""
+    }, nombre);
+    a.appendChild(el("span", { class: "flecha", "aria-hidden": "true" }, "↗"));
+    return el("h4", {}, [a]);
   }
 
   render();

@@ -48,7 +48,7 @@ CSS = """
 
 /* ═══════════════ DESCARGAR ═══════════════ */
 .descargar {
-  border: 2px solid #111827;
+  border: 1px solid #C3CFE3;
   border-top: 0;
   background: #F5F6FA;
   padding: .95rem 1.1rem;
