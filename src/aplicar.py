@@ -17,7 +17,7 @@ import io, re, json
 from _comun import PALETA, PIE_CSS, pie, barra_volver
 import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
 import _ficha_cifras
-import _tablero_importar, _tablero_videos, _tipografia
+import _tablero_importar, _tablero_videos, _tablero_campanas, _tipografia
 
 VERSION = "2026.08.31"
 
@@ -328,7 +328,7 @@ if _ancla_vid not in t:
     raise SystemExit('ERROR: no se encontró el cuerpo del acordeón de la guía')
 t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
 
-t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + '\n</style>', 1)
+t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + _tablero_campanas.CSS + '\n</style>', 1)
 
 # El JS de los dos módulos va DENTRO del IIFE del tablero, justo
 # antes de que se cierre.
@@ -341,6 +341,23 @@ if _cierre not in t:
     raise SystemExit('ERROR: no se encontró el bloque INIT del tablero')
 t = t.replace(_cierre,
               _tablero_importar.JS + '\n' + _tablero_videos.js() + '\n\n' + _cierre, 1)
+
+# ── Guía de campañas publicitarias ──
+# La etapa 3 de la portada, dentro del tablero: ahí ya están el tipo
+# de negocio y las cifras, así que no vuelve a preguntar lo que la
+# persona ya escribió.
+_a = '    {id:"guia", label:"Guía de uso"},'
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró la entrada «Guía de uso» del menú')
+t = t.replace(_a, '    {id:"campanas", label:"Campañas publicitarias"},\n' + _a, 1)
+
+_a = 'asignacion:panelAsignacion, guia:panelGuia, cierre:panelCierre'
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el despachador de paneles')
+t = t.replace(_a, 'asignacion:panelAsignacion, campanas:panelCampanas, guia:panelGuia, cierre:panelCierre', 1)
+
+_a = '/* ============================ INIT ============================ */'
+t = t.replace(_a, _tablero_campanas.JS + '\n\n' + _a, 1)
 
 t = encabezar(t, 'Tablero financiero del Centro de Desarrollo Profesional de la Universidad de La Sabana: precio minimo, punto de equilibrio, runway y flujo de caja para emprendimientos en traccion temprana.')
 t = t.replace('</style>', PIE_CSS + '\n</style>', 1)

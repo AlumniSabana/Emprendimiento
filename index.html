@@ -565,18 +565,23 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
 
     <div class="tarjetas">
 
-      <!-- ── Guía de campañas · todavía no existe ── -->
-      <article class="tarjeta" data-pronto>
-        <span class="marca-pronto">Próximamente</span>
+      <!-- ── Guía de campañas · vive dentro del Tablero ──
+           No es una herramienta aparte: necesita el tipo de negocio
+           y las cifras que la persona ya escribió en el tablero, y
+           el presupuesto que propone sale de sus ingresos reales.
+           Por eso el botón lleva al tablero, a su pestaña. -->
+      <article class="tarjeta">
+        <span class="eyebrow">Disponible</span>
         <h3>Guía de campañas publicitarias</h3>
-        <p class="lema">Qué campaña tiene sentido para tu tipo de negocio: en qué canal, con qué presupuesto mínimo, con qué mensaje y cómo saber si funcionó. Distinta si vendes a empresas, si tienes local a la calle o si vendes en línea.</p>
+        <p class="lema">Por dónde empezar a darte a conocer, en orden y con lo que tu negocio puede pagar de verdad. El presupuesto sale de tus propios ingresos, y te avisa si todavía no es momento de invertir en publicidad.</p>
         <dl>
           <dt>¿Para qué sirve?</dt><dd>Para invertir en publicidad con un plan y no a ver qué pasa.</dd>
-          <dt>¿Qué necesitas?</dt><dd>Saber a quién le vendes y cuánto puedes destinar al mes.</dd>
-          <dt>¿Qué te llevas?</dt><dd>Tu campaña armada: canal, mensaje, presupuesto y qué medir.</dd>
+          <dt>¿Qué necesitas?</dt><dd>Tener registrados tus ingresos y gastos fijos en el tablero.</dd>
+          <dt>¿Qué te llevas?</dt><dd>Tres canales en orden, cuánto poner en cada uno y qué medir.</dd>
+          <dt>¿Dónde está?</dt><dd>Dentro del Tablero, en la pestaña «Campañas publicitarias».</dd>
         </dl>
         <div class="ir">
-          <span class="boton-pronto">En construcción</span>
+          <a class="boton" data-destino="tablero" href="#">Abrir la guía <span class="flecha" aria-hidden="true">→</span></a>
         </div>
       </article>
 
