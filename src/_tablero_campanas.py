@@ -85,6 +85,58 @@ CSS = """
 .camp-medir { margin-top: 6px; }
 .camp-medir li { font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
 
+/* ── Las piezas de ejemplo ──
+   Recreadas en CSS y no incrustadas como imagen: pesan casi nada,
+   se ven nítidas en cualquier pantalla, y si el Centro cambia un
+   mensaje se edita el texto sin volver a generar la pieza. Además
+   así llevan el azul institucional exacto, no el que aproximó la
+   herramienta que las generó. */
+.camp-piezas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px; margin: 14px 0 16px;
+}
+.pieza {
+  aspect-ratio: 4 / 5;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(168deg, #0A2166 0%, var(--accent) 62%);
+  color: #FFFFFF;
+  padding: 20px 18px;
+  display: flex; flex-direction: column;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 12px 28px -14px rgba(0,20,89,.5);
+}
+.pieza .marca {
+  font-family: var(--font-display);
+  font-size: 15px; line-height: 1.1; font-weight: 600;
+  text-align: center; color: #FFFFFF;
+  padding-bottom: 10px; margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,.28);
+}
+.pieza .marca span { display: block; }
+.pieza h5 {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.4vw, 21px); line-height: 1.15;
+  margin: 0 0 10px; text-align: center; font-weight: 600;
+  text-wrap: balance;
+}
+.pieza p {
+  /* 13.5 y no 12.5: el contraste ya era correcto (9:1), lo que se
+     veía apagado era la escala junto a un titular de 21 px. */
+  font-size: 13.5px; line-height: 1.5; text-align: center;
+  color: #C8D6EC; margin: 0 0 auto;
+}
+.pieza .pie-pieza {
+  font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
+  text-align: center; color: #8FA5C6; margin-top: 14px;
+}
+.camp-fuente {
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin-top: 16px; background: var(--paper-raised);
+}
+.camp-fuente h4 { margin: 0 0 4px; font-size: 14px; }
+.camp-fuente p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+.camp-fuente a.btn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
 /* El botón de IA, desactivado hasta que el Centro autorice. */
 .camp-ia {
   border: 1px dashed var(--line-strong); border-radius: 10px;
@@ -230,8 +282,62 @@ function panelCampanas(){
     '<li><b>Si subieron las ventas:</b> compara el mes de campaña con el anterior en la pestaña de Ingresos.</li>' +
     '</ul>';
 
+  h += bloqueEjemplos();
   h += bloqueCampanaIA();
   h += '</div>';
+  return h;
+}
+
+/* ══════════════════════════════════════════════════════════
+   EJEMPLOS DE PIEZAS
+   ----------------------------------------------------------
+   Cuatro piezas reales, generadas con Pomelli a partir de la
+   página del Centro. Se recrean en CSS en vez de incrustarse
+   como imagen: así llevan el azul institucional exacto y el
+   texto se puede corregir sin regenerar nada.
+
+   Están aquí porque ver una pieza terminada explica mejor «a
+   qué se parece esto» que cualquier párrafo describiéndolo.
+   ══════════════════════════════════════════════════════════ */
+var PIEZAS_EJEMPLO = [
+  {t:"Mes del Emprendimiento: activa tu idea",
+   d:"Estructura tu negocio paso a paso, de forma autónoma y gratuita.",
+   marca:false},
+  {t:"Guías financieras y legales gratis",
+   d:"Herramientas interactivas para transformar tu proyecto en empresa real.",
+   marca:false},
+  {t:"Aprende a tu propio ritmo",
+   d:"Acceso directo a contenido de planeación sin registro previo.",
+   marca:true},
+  {t:"Haz realidad tu empresa hoy",
+   d:"Aprovecha los recursos digitales de tu comunidad universitaria.",
+   marca:true}
+];
+
+function bloqueEjemplos(){
+  var h = '<div class="camp-fuente">' +
+    '<h4>Las piezas gráficas</h4>' +
+    '<p>Este plan te dice qué publicar y dónde, pero no diseña las imágenes. ' +
+    'Para eso hay herramientas gratuitas que las generan a partir de la página web de tu negocio. ' +
+    'Estos cuatro ejemplos se hicieron así, con la página del Centro:</p>';
+
+  h += '<div class="camp-piezas">';
+  PIEZAS_EJEMPLO.forEach(function(p){
+    h += '<div class="pieza">';
+    if(p.marca) h += '<div class="marca"><span>Alumni</span><span>Sabana</span></div>';
+    h += '<h5>' + esc(p.t) + '</h5>' +
+         '<p>' + esc(p.d) + '</p>' +
+         '<div class="pie-pieza">Ejemplo</div>' +
+         '</div>';
+  });
+  h += '</div>';
+
+  h += '<p>Pomelli es de Google y su uso es gratuito. Lee tu página, toma tus colores y ' +
+    'tu tipografía, y propone piezas para redes. Revisa siempre lo que genere antes de ' +
+    'publicarlo: la herramienta a veces cambia detalles del producto o del logo.</p>' +
+    '<a class="btn small" href="https://labs.google/pomelli" target="_blank" rel="noopener noreferrer">' +
+    'Abrir Pomelli ↗</a>' +
+    '</div>';
   return h;
 }
 
