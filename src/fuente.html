@@ -126,7 +126,21 @@ a { color: var(--azul); text-underline-offset: 3px; }
 .masthead .volver:hover { color: #FFFFFF; border-bottom-color: #FFFFFF; }
 
 /* ═══════════════ 4 · PORTADA ═══════════════ */
-.hero { background: var(--azul); color: #FFFFFF; padding: 2.4rem 0 3rem; }
+/* La banda azul termina ANTES de que acaben las tarjetas, no
+   detrás de ellas. Con el azul corriendo por debajo quedaban azul
+   sobre azul y perdían su borde: se leían como bloques dentro de un
+   fondo, no como piezas apoyadas sobre la página.
+
+   El corte se mide desde abajo con la misma variable que usa el
+   margen del recorrido, así que si cambia una cambia la otra y no
+   se descuadran. */
+.hero {
+  --sobresale: 5.5rem;
+  background: linear-gradient(to bottom,
+              var(--azul) 0 calc(100% - var(--sobresale)),
+              var(--paper) calc(100% - var(--sobresale)) 100%);
+  color: #FFFFFF; padding: 2.4rem 0 0;
+}
 .hero h1 {
   font-size: clamp(1.65rem, 4.2vw, 3.1rem); font-style: italic;
   letter-spacing: -.01em; line-height: 1.16; max-width: 20ch;
@@ -154,36 +168,69 @@ a { color: var(--azul); text-underline-offset: 3px; }
 /* El recorrido: las tres etapas como índice de la página. No es
    decoración —es el único sitio donde se ve el camino entero de un
    vistazo, y cada una lleva a su sección. */
+/* ── Las tres etapas, como piezas ──
+   Antes eran franjas planas dentro de la banda azul: un borde de un
+   píxel y texto pequeño. Ahora son tarjetas de proporción cartel
+   que SALEN de la banda y se apoyan sobre el papel, con el titular
+   grande y centrado.
+
+   Es la composición de las piezas de campaña que aprobó el Centro:
+   fondo azul institucional, serif de la Universidad, mucho aire, y
+   la frase debajo en un cuerpo menor. Lo que se toma de allí es el
+   PESO VISUAL; el azul, la tipografía y el escudo siguen siendo
+   los de la Sabana. */
 .recorrido {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: .9rem; margin-top: 2rem; list-style: none; padding: 0;
-  counter-reset: etapa;
+  gap: 1.15rem; list-style: none; padding: 0;
+  /* Sobresalen media tarjeta por debajo de la banda azul: es lo que
+     las convierte en objetos sobre la página en vez de bloques
+     dentro de un fondo. El margen inferior negativo lo compensa
+     para que no empujen el resto de la página. */
+  margin: 2.6rem 0 -5.5rem;
+  position: relative; z-index: 2;
 }
 .recorrido a {
-  display: block; text-decoration: none; height: 100%;
-  border: 1px solid rgba(255,255,255,.22); border-radius: 7px;
-  padding: .95rem 1.1rem 1.05rem;
-  background: rgba(255,255,255,.05);
-  transition: background .16s, border-color .16s, transform .12s;
+  display: flex; flex-direction: column; text-decoration: none;
+  height: 100%; min-height: 270px;
+  border-radius: 14px;
+  padding: 1.5rem 1.4rem 1.6rem;
+  background: linear-gradient(168deg, #0A2166 0%, var(--azul) 62%);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 2px 4px rgba(0,20,89,.12), 0 22px 44px -20px rgba(0,20,89,.55);
+  transition: transform .18s ease, box-shadow .18s ease;
 }
 .recorrido a:hover {
-  background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.5);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0,20,89,.16), 0 30px 56px -22px rgba(0,20,89,.65);
 }
+/* El número es una regla con su cifra, no un círculo: marca la
+   etapa sin competir con el titular, que es lo que se lee. */
 .recorrido .num {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(255,255,255,.16); color: #FFFFFF;
-  font-size: .72rem; font-weight: 700; margin-bottom: .5rem;
+  display: block; width: 100%;
+  font-family: var(--sans); font-size: .68rem; font-weight: 700;
+  letter-spacing: .18em; color: #A9BEDE;
+  padding-bottom: .85rem; margin-bottom: 1.4rem;
+  border-bottom: 1px solid rgba(255,255,255,.2);
+  text-align: center;
 }
+.recorrido .num::before { content: "ETAPA "; }
 .recorrido b {
-  display: block; font-family: var(--serif); font-size: 1.06rem;
-  font-weight: 600; color: #FFFFFF; line-height: 1.25;
+  display: block; font-family: var(--serif);
+  font-size: clamp(1.35rem, 2.1vw, 1.72rem);
+  font-weight: 600; color: #FFFFFF; line-height: 1.18;
+  text-align: center; text-wrap: balance;
+  margin-bottom: .9rem;
 }
 .recorrido span.q {
-  display: block; margin-top: .3rem; font-size: .82rem;
-  color: #A9BEDE; line-height: 1.5;
+  display: block; font-size: .87rem;
+  color: #BCCDE8; line-height: 1.55;
+  text-align: center; margin-top: auto;
 }
+/* El aire que dejan las tarjetas al sobresalir. El panel de la
+   cuenta subía -2.6rem para solaparse con la banda azul; ahora ese
+   sitio lo ocupan las tarjetas, así que vuelve al flujo. */
+.hero + main { padding-top: 6.6rem; }
+.hero + main > .panel { margin-top: 0; }
 
 /* ═══════════════ 5 · PANEL DE QUIEN ENTRÓ ═══════════════ */
 .panel {
@@ -349,13 +396,26 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
 
 /* ═══════════════ 9 · RESPONSIVE ═══════════════ */
 @media (max-width: 1000px) { .pie-rejilla { grid-template-columns: 1fr 1fr; gap: 2rem; } }
-@media (max-width: 760px)  { .recorrido { grid-template-columns: 1fr; gap: .6rem; } }
+/* En una columna las tarjetas no necesitan la proporción de cartel
+   —ocuparían tres pantallas— ni sobresalir de la banda: apiladas,
+   ese efecto solo deja un hueco enorme. */
+@media (max-width: 760px) {
+  .recorrido {
+    grid-template-columns: 1fr; gap: .8rem;
+    margin: 2rem 0 -3rem;
+  }
+  .hero { --sobresale: 3rem; }
+  .recorrido a { min-height: 0; padding: 1.2rem 1.2rem 1.3rem; }
+  .recorrido .num { margin-bottom: 1rem; padding-bottom: .7rem; }
+  .recorrido b { font-size: 1.3rem; margin-bottom: .6rem; }
+  .hero + main { padding-top: 4rem; }
+}
 @media (max-width: 620px) {
   .pie-rejilla { grid-template-columns: 1fr; }
   .masthead .divisor { padding-left: 0; border-left: 0; }
   .masthead .volver { margin-left: 0; }
   .privacidad { flex-direction: column; }
-  .etapa.primera, .panel { margin-top: -1.8rem; }
+  .etapa.primera { margin-top: -1.8rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
