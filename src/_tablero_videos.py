@@ -42,8 +42,11 @@
 #  contenido: si el Centro quiere avalar cada explicación, conviene
 #  verlos antes de publicar. Quitar uno es borrar su identificador.
 VIDEOS = {
-    "Facturación vs. ganancia real":        "",
-    "Ingresos por cliente y mes":           "",
+    # «Diferencia entre Ingresos y Ganancias», Grupo Verona.
+    # Es el concepto central del tablero —facturar no es ganar— y
+    # el mismo que confunde a quien llena «ingresos» en la ficha.
+    "Facturación vs. ganancia real":        "JRxuCwqW0J8",
+    "Ingresos por cliente y mes":           "JRxuCwqW0J8",
     # «Gastos fijos y gastos variables», Aprende Con Ame.
     # El mismo vídeo sirve para los dos términos.
     "Gastos fijos":                         "OqCo9Fljxmw",

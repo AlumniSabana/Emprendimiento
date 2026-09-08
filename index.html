@@ -128,8 +128,22 @@ a { color: var(--azul); text-underline-offset: 3px; }
 /* ═══════════════ 4 · PORTADA ═══════════════ */
 .hero { background: var(--azul); color: #FFFFFF; padding: 2.4rem 0 3rem; }
 .hero h1 {
-  font-size: clamp(1.55rem, 3.4vw, 2.45rem); font-style: italic;
-  letter-spacing: -.005em; line-height: 1.22; max-width: 22ch;
+  font-size: clamp(1.65rem, 4.2vw, 3.1rem); font-style: italic;
+  letter-spacing: -.01em; line-height: 1.16; max-width: 20ch;
+}
+/* El titular ocupa la franja, no una columna estrecha.
+   Con «22ch» se partía en tres líneas cortas y dejaba media banda
+   azul vacía a la derecha. Ahora crece con el ancho —hasta 3.1rem—
+   y llena el espacio en vez de flotar en él. El límite de 20ch se
+   mantiene para que en pantallas muy anchas no se estire en una
+   sola línea de 90 caracteres, que se lee peor. */
+@media (min-width: 900px) {
+  /* Sin límite de caracteres: el titular usa el ancho del
+     contenedor, que ya está acotado a 1140 px. Con «15ch» seguía
+     partiéndose en cuatro líneas cortas y dejaba la mitad derecha
+     de la banda azul vacía, que es justo lo que había que quitar. */
+  .hero h1 { max-width: none; font-size: clamp(2.2rem, 4.4vw, 3.2rem); }
+  .hero p  { font-size: 1.12rem; max-width: 68ch; }
 }
 .hero p {
   margin-top: 1.1rem; font-size: 1.05rem;

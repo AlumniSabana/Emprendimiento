@@ -13,9 +13,10 @@
 #  una fórmula. Si algo de eso cambia, es un error.
 # ══════════════════════════════════════════════════════════════
 
-import io, re
+import io, re, json
 from _comun import PALETA, PIE_CSS, pie, barra_volver
 import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
+import _ficha_cifras
 import _tablero_importar, _tablero_videos, _tipografia
 
 VERSION = "2026.08.31"
@@ -511,6 +512,52 @@ for _viejo, _nuevo in [
 ]:
     f = f.replace('section-tag" }, ' + _viejo, 'section-tag" }, ' + _nuevo)
 
+# ── Los tres campos de cifras: solo dígitos ──
+# Eran «type: text» y aceptaban «cinco millones». La validación solo
+# miraba que no estuvieran vacíos, así que eso pasaba, y después
+# fmtCOP() no sabía qué hacer con ello: la ficha final mostraba un
+# guión donde debía ir la cifra.
+#
+# Ahora el estado guarda SOLO los dígitos, así que la validación de
+# «no vacío» que ya existía pasa a ser correcta sin tocarla.
+for _campo, _formatea in [('activos', True), ('ingresos', True), ('numPersonal', False)]:
+    _viejo = ('oninput: (e) => { state.%s = e.target.value; refreshNext(); },'
+              % _campo)
+    if _viejo not in f:
+        raise SystemExit('ERROR: no se encontró el campo ' + _campo)
+    f = f.replace(_viejo, '', 1)
+
+# Enganchar la vigilancia justo después de crear cada input.
+# El de personas NO lleva puntos de miles: son 0, 2, 15 — «1.500»
+# personas trabajando contigo no tiene sentido.
+for _grupo, _var, _campo, _formatea in [
+        ('activosGroup',  'activosInput',  'activos',     'true'),
+        ('ingresosGroup', 'ingresosInput', 'ingresos',    'true'),
+        ('numGroup',      'numInput',      'numPersonal', 'false')]:
+    _ancla = '%s.appendChild(%s);' % (_grupo, _var)
+    if _ancla not in f:
+        raise SystemExit('ERROR: no se encontró el input de ' + _campo)
+    # La ayuda va entre la etiqueta y el campo. «Activos» e «ingresos»
+    # son los dos términos donde la gente se traba en esta pantalla:
+    # sin la aclaración, se meten deudas en los activos y se confunde
+    # el ingreso con la ganancia.
+    _ayuda = _ficha_cifras.AYUDAS.get(_campo, '')
+    _ins = ''
+    if _ayuda:
+        _ins = ('%s.appendChild(el("span", { class: "ayuda-campo" }, %s));\n    '
+                % (_grupo, json.dumps(_ayuda, ensure_ascii=False)))
+    f = f.replace(_ancla,
+        '%s%s.classList.add("cifra");\n'
+        '    vigilarCifra(%s, function (d) { state.%s = d; refreshNext(); }, %s);\n'
+        '    %s' % (_ins, _var, _var, _campo, _formatea, _ancla), 1)
+
+# Los tres campos arrancan mostrando la cifra ya formateada cuando
+# se vuelve a pintar el bloque: sin esto, al repintar se veía el
+# valor crudo del estado («5000000») en vez de «5.000.000».
+for _var, _campo in [('activosInput', 'activos'), ('ingresosInput', 'ingresos')]:
+    f = f.replace('value: state.%s,' % _campo,
+                  'value: conPuntosDeMiles(state.%s),' % _campo, 1)
+
 # Sin botón «Siguiente» ya no hay «.btn-primary» en las tarjetas, y
 # los tres sitios que lo desactivaban escriben sobre null: cada tecla
 # lanzaba «Cannot set properties of null». El estado sí se guarda
@@ -530,7 +577,8 @@ for _v, _n in [
 # último. Invertirlos deja el aspecto de ficha a medias.
 f = f.replace('</style>',
               _ficha_corrido.CSS + '\n' + _ficha_formulario.CSS + '\n'
-              + _ficha_descargar.CSS + '\n' + _ficha_entidades.CSS + '\n</style>', 1)
+              + _ficha_descargar.CSS + '\n' + _ficha_entidades.CSS + '\n'
+              + _ficha_cifras.CSS + '\n</style>', 1)
 
 # ── El nombre de la entidad es su enlace ──
 _ancla_ent = 'el("h4", {}, nombre),'
@@ -561,7 +609,7 @@ if antes not in f:
     raise SystemExit('ERROR: no se encontró la llamada final a render() en la ficha')
 f = f.replace(antes,
               _ficha_corrido.MOTOR + '\n' + _ficha_descargar.JS + '\n'
-              + _ficha_entidades.js() + '\n' + antes, 1)
+              + _ficha_entidades.js() + '\n' + _ficha_cifras.JS + '\n' + antes, 1)
 
 f = f.replace('</style>', PIE_CSS + '\n</style>', 1)
 f = f.replace('<body>\n', '<body>\n' + barra_volver() + _ficha_corrido.MARCADO, 1)

@@ -675,6 +675,11 @@ html, body {
   color: var(--text);
   border-bottom: 1px solid #C9CFDC;
   background: #FFFFFF;
+  /* La ayuda llena su celda. Traía «max-width: 62ch», que en una
+     columna de texto corrido es lo correcto —una línea muy larga
+     cansa— pero dentro de una celda de formulario deja un hueco a
+     la derecha y rompe la rejilla: la celda se ve a medio pintar. */
+  max-width: none;
 }
 
 /* Los campos: celda con borde, sin esquinas redondeadas.
@@ -885,6 +890,23 @@ html, body {
 .entity-card .sin-enlace {
   display: block; margin-top: .35rem;
   font-size: .76rem; color: var(--text-muted); line-height: 1.45;
+}
+
+
+/* ═══════════════ CAMPOS DE CIFRAS ═══════════════ */
+/* La explicación bajo la etiqueta, en la misma celda. */
+.bloque .ayuda-campo {
+  display: block;
+  margin: .1rem .9rem .45rem;
+  font-size: .78rem; line-height: 1.45;
+  color: var(--text-muted);
+}
+/* Los dígitos alineados a la derecha se comparan mejor: es lo que
+   hace cualquier planilla contable. Y en tabular-nums todos los
+   números ocupan lo mismo, así que la cifra no «baila» al escribir. */
+.bloque input.cifra {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
 }
 
 
@@ -1571,20 +1593,26 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     const activosGroup = el("div", { class: "field-group" });
     activosGroup.appendChild(el("label", { class: "field-label" }, "Activos iniciales estimados (en pesos, COP)"));
     const activosInput = el("input", {
-      type: "text", inputmode: "numeric", value: state.activos,
+      type: "text", inputmode: "numeric", value: conPuntosDeMiles(state.activos),
       placeholder: "Ej: 8.000.000",
-      oninput: (e) => { state.activos = e.target.value; refreshNext(); },
+      
     });
+    activosGroup.appendChild(el("span", { class: "ayuda-campo" }, "Todo lo que ya tiene el negocio y se puede valorar: equipos, herramientas, inventario, muebles, dinero en caja. No cuentan las deudas."));
+    activosInput.classList.add("cifra");
+    vigilarCifra(activosInput, function (d) { state.activos = d; refreshNext(); }, true);
     activosGroup.appendChild(activosInput);
     card.appendChild(activosGroup);
 
     const ingresosGroup = el("div", { class: "field-group" });
     ingresosGroup.appendChild(el("label", { class: "field-label" }, "Ingresos mensuales proyectados (en pesos, COP)"));
     const ingresosInput = el("input", {
-      type: "text", inputmode: "numeric", value: state.ingresos,
+      type: "text", inputmode: "numeric", value: conPuntosDeMiles(state.ingresos),
       placeholder: "Ej: 3.000.000",
-      oninput: (e) => { state.ingresos = e.target.value; refreshNext(); },
+      
     });
+    ingresosGroup.appendChild(el("span", { class: "ayuda-campo" }, "Lo que esperas que ENTRE al mes por ventas, antes de descontar gastos. No es lo que te queda: eso es la ganancia."));
+    ingresosInput.classList.add("cifra");
+    vigilarCifra(ingresosInput, function (d) { state.ingresos = d; refreshNext(); }, true);
     ingresosGroup.appendChild(ingresosInput);
     card.appendChild(ingresosGroup);
 
@@ -1593,8 +1621,10 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     const numInput = el("input", {
       type: "text", inputmode: "numeric", value: state.numPersonal,
       placeholder: "Ej: 0",
-      oninput: (e) => { state.numPersonal = e.target.value; refreshNext(); },
+      
     });
+    numInput.classList.add("cifra");
+    vigilarCifra(numInput, function (d) { state.numPersonal = d; refreshNext(); }, false);
     numGroup.appendChild(numInput);
     card.appendChild(numGroup);
 
@@ -2321,6 +2351,66 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     }, nombre);
     a.appendChild(el("span", { class: "flecha", "aria-hidden": "true" }, "↗"));
     return el("h4", {}, [a]);
+  }
+
+
+  /* ══════════════════════════════════════════════════════════
+     SOLO DÍGITOS, CON PUNTOS DE MILES
+     ══════════════════════════════════════════════════════════ */
+
+  /* Deja únicamente los dígitos de lo que se haya escrito o pegado. */
+  function soloDigitos(txt) {
+    return String(txt == null ? "" : txt).replace(/\D+/g, "");
+  }
+
+  /* «5000000» -> «5.000.000». El punto es el separador de miles en
+     Colombia; la coma es decimal, y aquí no hay decimales porque
+     nadie estima los activos de su negocio con centavos. */
+  function conPuntosDeMiles(digitos) {
+    if (!digitos) return "";
+    return digitos.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  /* Vigila un campo para que solo acepte cifras.
+     «formatear» decide si además se ponen los puntos de miles. */
+  function vigilarCifra(input, alCambiar, formatear) {
+    function limpiar() {
+      var antes = input.value;
+      var cursor = input.selectionStart;
+
+      /* Cuántos dígitos hay a la izquierda del cursor. Es lo único
+         que no cambia al reformatear, así que sirve de ancla para
+         devolver el cursor a su sitio. */
+      var digitosIzquierda = soloDigitos(antes.slice(0, cursor)).length;
+
+      var digitos = soloDigitos(antes);
+      var nuevo = formatear ? conPuntosDeMiles(digitos) : digitos;
+
+      if (nuevo !== antes) {
+        input.value = nuevo;
+        /* Recolocar el cursor tras el mismo dígito que antes. */
+        var pos = 0, vistos = 0;
+        while (pos < nuevo.length && vistos < digitosIzquierda) {
+          if (/\d/.test(nuevo[pos])) vistos++;
+          pos++;
+        }
+        try { input.setSelectionRange(pos, pos); } catch (_) {}
+      }
+      if (alCambiar) alCambiar(digitos);
+    }
+
+    input.addEventListener("input", limpiar);
+    /* Al pegar, el navegador dispara «input» después, así que
+       «limpiar» ya se encarga. Pero un pegado con letras deja el
+       campo un instante sucio; esto lo adelanta. */
+    input.addEventListener("paste", function () { setTimeout(limpiar, 0); });
+    /* Bloquear las teclas que no son dígito evita el parpadeo de
+       ver la letra aparecer y desaparecer. Se dejan pasar las de
+       control: borrar, tabular, flechas, y los atajos con Ctrl/Cmd. */
+    input.addEventListener("keydown", function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key && e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+    });
   }
 
   render();

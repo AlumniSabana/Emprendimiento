@@ -64,6 +64,11 @@ CSS = """
   color: var(--text);
   border-bottom: 1px solid #C9CFDC;
   background: #FFFFFF;
+  /* La ayuda llena su celda. Traía «max-width: 62ch», que en una
+     columna de texto corrido es lo correcto —una línea muy larga
+     cansa— pero dentro de una celda de formulario deja un hueco a
+     la derecha y rompe la rejilla: la celda se ve a medio pintar. */
+  max-width: none;
 }
 
 /* Los campos: celda con borde, sin esquinas redondeadas.
