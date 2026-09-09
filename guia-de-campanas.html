@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#001459">
+<meta name="description" content="Guia de campanas publicitarias del Centro de Desarrollo Profesional de la Universidad de La Sabana: por donde empezar a darte a conocer, en orden y con el presupuesto que tu negocio puede pagar.">
+<title>Guía de campañas publicitarias · Alumni Sabana</title>
+<style>
+:root {
+  /* Superficies y texto: neutros con matiz azul */
+  --paper: #EEF1F8;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FC;
+  --ink: #0A1330;
+  --ink-soft: #4B5670;
+  --ink-faint: #8895A4;
+  --rule: #D9E1EE;
+  --rule-soft: #E9EEF7;
+
+  /* Color institucional */
+  --azul: #001459;
+  --azul-700: #1E306E;
+  --azul-500: #25409A;
+  --azul-300: #7FA6D0;
+  --azul-soft: #E3EAF7;
+
+  /* Estados. El ámbar NO es el rojo de alerta: un dato pendiente
+     no es un error, y pintarlo de rojo hace que quien lo lee
+     cierre la herramienta en vez de completarlo. */
+  --ok: #158A5E;
+  --ok-soft: #E4F2EC;
+  --ambar: #8A5200;
+  --ambar-soft: #FBEFDD;
+  --alerta: #A3252F;
+  --alerta-soft: #FAE8E9;
+
+  --on-azul: #FFFFFF;
+  --shadow: 0 1px 2px rgba(0,20,89,.05), 0 8px 24px -16px rgba(0,20,89,.22);
+
+
+  --paper-raised: #FFFFFF;
+  --paper-sunken: #F5F7FC;
+  --line: #D9E1EE;
+  --line-strong: #C3CFE3;
+  --accent: #001459;
+  --accent-strong: #25409A;
+  --accent-soft: #E3EAF7;
+  --gold: #8A5200;
+  --gold-soft: #FBEFDD;
+  --warn-soft: #FBEFDD;
+  --critical: #A3252F;
+  --critical-soft: #FAE8E9;
+  --font-display: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --font-body: "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-sans: "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-mono: ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  --sans-pie: "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  color-scheme: light;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--font-body); font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+/* Los encabezados NO llevan «color». Lo heredan de body, que ya es
+   var(--ink), y así cualquier bloque que declare el suyo se lo pasa
+   a los suyos.
+
+   Llevarlo aquí costó una regresión: «color:var(--ink)» en esta
+   regla ganaba por especificidad al blanco que .pieza hereda a sus
+   hijos, y los titulares de las piezas de ejemplo salían azul marino
+   sobre azul marino. Se veía el texto de apoyo y el titular no.
+   Dentro del tablero no pasaba porque allí ninguna regla de elemento
+   pinta los encabezados. */
+h1,h2,h3,h4,h5{ font-family:var(--font-display); font-weight:600; line-height:1.2; }
+a{ color:var(--accent); }
+ul,ol{ padding-left:1.15rem; }
+
+.envoltura{ max-width:940px; margin:0 auto; padding:0 clamp(1.1rem,4vw,2rem); }
+
+/* ── La cabecera azul ──
+   La misma franja que abre las otras herramientas del Centro:
+   es lo que hace que se reconozcan como un mismo servicio. */
+.cab{ background:var(--azul); color:#FFFFFF; padding:2.6rem 0 2.8rem; }
+.cab .eyebrow{
+  display:block; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase;
+  color:#A9BEDE; font-weight:600; margin-bottom:.6rem;
+}
+.cab h1{ color:#FFFFFF; font-size:clamp(1.75rem,4.2vw,2.5rem); margin-bottom:.7rem; }
+.cab p{ color:#C7D6F0; font-size:1rem; line-height:1.65; max-width:60ch; }
+
+main{ padding:2.2rem 0 3rem; }
+
+/* ── Los campos, cuando hay que pedirlos ── */
+.campos{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+.campo label{
+  display:block; font-size:12px; font-weight:600; color:var(--ink);
+  margin-bottom:5px;
+}
+.campo .pista{ display:block; font-size:11.5px; color:var(--ink-soft); font-weight:400; margin-top:2px; }
+.campo input, .campo select{
+  width:100%; font-family:inherit; font-size:14px; color:var(--ink);
+  background:var(--paper-raised); border:1px solid var(--line-strong);
+  border-radius:6px; padding:9px 11px;
+}
+.campo input{ font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+.campo input:focus, .campo select:focus{
+  outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+}
+
+/* ── De dónde salieron las cifras ──
+   Quien ve un presupuesto tiene derecho a saber de dónde sale.
+   Si vino del tablero se dice, y se ofrece cambiarlo. */
+.origen{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  font-size:12.5px; color:var(--ink-soft); margin-top:12px;
+}
+.origen button{
+  background:none; border:none; padding:0; font:inherit;
+  color:var(--accent); font-weight:600; cursor:pointer;
+  text-decoration:underline; text-underline-offset:2px;
+}
+
+.btn{
+  display:inline-block; background:var(--accent); color:#FFFFFF;
+  border:1px solid var(--accent); border-radius:6px;
+  padding:9px 16px; font-size:13.5px; font-weight:600;
+  font-family:var(--font-sans); cursor:pointer; text-decoration:none;
+}
+.btn:hover{ background:var(--accent-strong); border-color:var(--accent-strong); }
+.btn.small{ padding:7px 13px; font-size:13px; }
+.btn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+/* Las tarjetas y el encabezado de panel, copiados del tablero para
+   que las dos herramientas se lean igual. */
+.card{
+  background:var(--paper-raised); border:1px solid var(--line);
+  border-radius:12px; padding:20px 22px; box-shadow:var(--shadow);
+}
+.card + .card{ margin-top:16px; }
+.card h3{ font-size:15px; margin-bottom:4px; }
+.panel-head{ margin-bottom:20px; }
+.panel-head h2{ font-size:24px; }
+.panel-head p{ color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:62ch; }
+
+@media print{
+  .cab{ background:none; color:#000; padding:1rem 0; }
+  .cab h1, .cab p, .cab .eyebrow{ color:#000; }
+  .origen button{ display:none; }
+}
+
+/* ═══════════════ GUÍA DE CAMPAÑAS ═══════════════ */
+.camp-aviso {
+  background: var(--warn-soft); border: 1px solid var(--gold);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 16px;
+  font-size: 13px; line-height: 1.6; color: var(--ink);
+}
+.camp-aviso b { color: var(--gold); }
+
+.camp-cifras {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; margin-bottom: 18px;
+}
+.camp-cifra {
+  background: var(--paper-sunken); border: 1px solid var(--line);
+  border-radius: 9px; padding: 12px 14px;
+}
+.camp-cifra .k {
+  display: block; font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-soft); margin-bottom: 4px;
+}
+.camp-cifra .v {
+  display: block; font-family: var(--font-mono); font-size: 19px;
+  font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.camp-cifra .n { display: block; font-size: 11.5px; color: var(--ink-soft); margin-top: 3px; }
+.camp-cifra.alerta { border-color: var(--critical); background: var(--critical-soft); }
+.camp-cifra.alerta .v { color: var(--critical); }
+
+/* Cada canal es una ficha con su porqué, no una lista de nombres. */
+.camp-canal {
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 12px; background: var(--paper-raised);
+}
+.camp-canal-cab {
+  display: flex; align-items: baseline; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 6px;
+}
+.camp-canal h4 { margin: 0; font-size: 15px; }
+.camp-canal .orden {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .1em; color: var(--gold);
+}
+.camp-canal .plata {
+  margin-left: auto; font-family: var(--font-mono); font-size: 13px;
+  font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.camp-canal p { margin: 0 0 8px; font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+.camp-canal .porque {
+  font-size: 12.5px; color: var(--ink); background: var(--accent-soft);
+  border-radius: 6px; padding: 8px 10px; line-height: 1.55;
+}
+.camp-canal .porque b { color: var(--accent); }
+
+.camp-medir { margin-top: 6px; }
+.camp-medir li { font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
+
+/* ── Las piezas de ejemplo ──
+   Recreadas en CSS y no incrustadas como imagen: pesan casi nada,
+   se ven nítidas en cualquier pantalla, y si el Centro cambia un
+   mensaje se edita el texto sin volver a generar la pieza. Además
+   así llevan el azul institucional exacto, no el que aproximó la
+   herramienta que las generó. */
+.camp-piezas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px; margin: 14px 0 16px;
+}
+.pieza {
+  /* «min-height» y no «aspect-ratio».
+     Con la proporción fija, la caja no puede crecer: en una columna
+     estrecha el texto más largo desbordaba y la palabra «EJEMPLO» se
+     cortaba contra el borde de abajo. Una pieza de redes sí tiene
+     proporción fija, pero esto no es la pieza: es su vista previa, y
+     vale más que se lea entera a que conserve el 4:5 exacto.
+     El mínimo mantiene el aire de cartel cuando el texto es corto. */
+  min-height: 260px;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(168deg, #0A2166 0%, var(--accent) 62%);
+  color: #FFFFFF;
+  padding: 20px 18px;
+  display: flex; flex-direction: column;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 12px 28px -14px rgba(0,20,89,.5);
+}
+.pieza .marca {
+  font-family: var(--font-display);
+  font-size: 15px; line-height: 1.1; font-weight: 600;
+  text-align: center; color: #FFFFFF;
+  padding-bottom: 10px; margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,.28);
+}
+.pieza .marca span { display: block; }
+.pieza h5 {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.4vw, 21px); line-height: 1.15;
+  margin: 0 0 10px; text-align: center; font-weight: 600;
+  text-wrap: balance;
+}
+.pieza p {
+  /* 13.5 y no 12.5: el contraste ya era correcto (9:1), lo que se
+     veía apagado era la escala junto a un titular de 21 px. */
+  font-size: 13.5px; line-height: 1.5; text-align: center;
+  color: #C8D6EC; margin: 0 0 auto;
+}
+.pieza .pie-pieza {
+  font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
+  text-align: center; color: #8FA5C6; margin-top: 14px;
+}
+.camp-fuente {
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin-top: 16px; background: var(--paper-raised);
+}
+.camp-fuente h4 { margin: 0 0 4px; font-size: 14px; }
+/* «> p» y no «p» a secas. Las piezas viven DENTRO de este bloque, y
+   con el selector suelto esta regla —que va después y tiene la misma
+   especificidad— le ganaba a «.pieza p» y pintaba de gris pizarra el
+   texto de las piezas, sobre su fondo azul oscuro: 2:1 de contraste,
+   ilegible. Se veía apagado y se atribuyó al tamaño de letra; era
+   esto. El hijo directo deja fuera lo que está dentro de las piezas. */
+.camp-fuente > p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+.camp-fuente a.btn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+/* El botón de IA, desactivado hasta que el Centro autorice. */
+.camp-ia {
+  border: 1px dashed var(--line-strong); border-radius: 10px;
+  padding: 14px 16px; margin-top: 18px; background: var(--paper-sunken);
+}
+.camp-ia h4 { margin: 0 0 4px; font-size: 14px; }
+.camp-ia p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+.camp-ia button[disabled] {
+  background: transparent; color: var(--ink-soft);
+  border: 1px solid var(--line-strong); border-radius: 6px;
+  padding: 8px 14px; font-size: 13px; font-weight: 600;
+  cursor: not-allowed; font-family: var(--font-sans);
+}
+@media print { .camp-ia { display: none !important; } }
+
+/* ═══════════════ PIE INSTITUCIONAL ═══════════════
+   Idéntico al de «Estudio de Pitch» y «Construye tu portafolio»,
+   para que las herramientas del Centro se lean como un solo
+   servicio y no como cinco páginas sueltas. */
+/* Sin «margin-top». Lo llevaba, y en el tablero dejaba una franja
+   de papel de 48 px entre el final del índice lateral azul y el
+   pie azul: dos bloques del mismo color separados por una línea
+   clara que parecía un error de montaje. El aire que necesita el
+   pie ya lo pone su propio «padding» de arriba. */
+footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
+
+/* ═══════════════ VOLVER A LA PORTADA ═══════════════
+   Arriba, antes de nada. Estuvo en el pie y era un error: para
+   salir de una herramienta había que recorrerla entera hasta el
+   final. La salida se busca donde se entró, no al fondo.
+
+   No es fijo ni flotante: en el tablero cualquier elemento fijo
+   tapa una columna de cifras, y en la ficha se comería el paso
+   del asistente. Va en el flujo, lo primero del documento. */
+/* La altura de la barra vive en una variable porque el índice
+   lateral del tablero la necesita para calcular la suya. Si aquí
+   cambia el «padding», allí se ajusta solo. */
+:root { --alto-volver: 51px; }
+.volver-barra {
+  background: var(--azul);
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  position: sticky; top: 0; z-index: 50;
+}
+.volver-barra .env {
+  max-width: 1440px; margin: 0 auto;
+  padding: .62rem clamp(1.1rem, 4vw, 2.75rem);
+  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+}
+.volver-barra a {
+  display: inline-flex; align-items: center; gap: .5rem;
+  color: #FFFFFF; text-decoration: none;
+  font-family: var(--sans-pie); font-size: .87rem; font-weight: 600;
+  padding: .3rem .2rem; border-radius: 4px;
+  transition: color .15s;
+}
+.volver-barra a:hover { color: #C7D6F0; }
+.volver-barra a:hover .flecha { transform: translateX(-3px); }
+.volver-barra .flecha {
+  font-size: 1.05em; line-height: 1;
+  transition: transform .15s;
+}
+.volver-barra small { color: #A9BEDE; font-size: .78rem; line-height: 1.5; }
+.volver-barra a:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+@media (max-width: 560px) { .volver-barra small { display: none; } }
+@media print { .volver-barra { display: none !important; } }
+.pie-envoltura { max-width: 1440px; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 2.75rem); }
+.pie-rejilla {
+  display: grid; grid-template-columns: 1.15fr 1fr 1.35fr 1fr;
+  gap: 2.5rem; padding-bottom: 2.2rem; border-bottom: 1px solid rgba(255,255,255,.17);
+}
+.pie-logo { height: 48px; width: auto; display: block; margin-bottom: 1.15rem; }
+.pie-col h4 {
+  font-family: var(--sans-pie); font-size: .68rem; letter-spacing: .14em;
+  text-transform: uppercase; color: #FFFFFF; font-weight: 700; margin: 0 0 .9rem;
+}
+.pie-col p { font-size: .82rem; line-height: 1.65; color: #B9C9E2; margin: 0 0 .7rem; }
+.pie-col p:last-child { margin-bottom: 0; }
+.pie-col strong { color: #E7EEF9; font-weight: 600; }
+.pie-marca p { font-size: .78rem; color: #9FB2CE; }
+.pie-enlace {
+  color: #C7D6F0; text-decoration: none; border-bottom: 1px solid rgba(199,214,240,.4);
+  padding-bottom: 1px; transition: color .15s, border-color .15s;
+}
+.pie-enlace:hover { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+.pie-legal {
+  display: flex; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;
+  padding-top: 1.4rem; font-size: .74rem; color: #8FA5C6; line-height: 1.6;
+}
+.pie-legal .pie-enlace { font-weight: 500; color: #B9C9E2; }
+@media (max-width: 1000px) { .pie-rejilla { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+@media (max-width: 640px)  { .pie-rejilla { grid-template-columns: 1fr; } }
+@media print { footer.pie { display: none !important; } }
+
+</style>
+</head>
+<body>
+<div class="volver-barra">
+  <div class="env">
+    <a href="./"><span class="flecha" aria-hidden="true">&larr;</span> Volver a las herramientas</a>
+    <small>Herramientas de emprendimiento &middot; Centro de Desarrollo Profesional</small>
+  </div>
+</div>
+
+<header class="cab">
+  <div class="envoltura">
+    <span class="eyebrow">Crecimiento de negocio</span>
+    <h1>Guía de campañas publicitarias</h1>
+    <p>Por dónde empezar a darte a conocer, en orden y con lo que tu negocio puede pagar de verdad.</p>
+  </div>
+</header>
+
+<main>
+  <div class="envoltura">
+    <div id="cifras"></div>
+    <div id="guia"></div>
+  </div>
+</main>
+
+<footer class="pie">
+  <div class="pie-envoltura">
+    <div class="pie-rejilla">
+
+      <div class="pie-col pie-marca">
+        <img class="pie-logo" src="data:image/png;base64,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" alt="Universidad de La Sabana" width="241" height="64">
+        <p>Institución de educación superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.</p>
+        <p>Carácter Académico: Universidad.</p>
+      </div>
+
+      <div class="pie-col">
+        <h4>El servicio</h4>
+        <p><strong>Guía de Campañas Publicitarias</strong> es una herramienta de trabajo autónomo del Centro de Desarrollo Profesional, Alumni Sabana, para negocios que ya venden y quieren darse a conocer.</p><p>Propone por dónde empezar, en qué orden y con cuánto, a partir de tus propias cifras. El plan está armado con reglas explícitas, no con inteligencia artificial. <strong>No es una agencia ni una asesoría de mercadeo</strong>: es un punto de partida para que la primera inversión en publicidad no sea a ciegas.</p>
+      </div>
+
+      <!-- TRATAMIENTO DE DATOS · el bloque que hay que cambiar el día
+           que estas herramientas guarden en la cuenta Alumni Sabana.
+           Hoy dicen lo que de verdad hacen. Cuando se conecte
+           Supabase, la frase de «por ahora» se sustituye por la del
+           portafolio: «se guarda en tu cuenta de la Universidad, por
+           eso lo recuperas desde cualquier computador». -->
+      <div class="pie-col">
+        <h4>Tratamiento de datos</h4>
+        <p>Esta herramienta funciona <strong>sin cuenta y sin enviar nada a ningún servidor</strong>. Si ya usaste el Tablero de apoyo financiero en este mismo navegador, toma de allí tus cifras para no volver a preguntártelas; si no, lo que escribas se guarda <strong>únicamente en este navegador</strong>.</p><p>Las piezas de ejemplo se generaron con una herramienta externa y se muestran recreadas aquí: abrirlas o no en su sitio es decisión tuya, y esta página no envía nada allí.</p>
+        <p><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos de la Universidad ↗</a></p>
+      </div>
+
+      <div class="pie-col">
+        <h4>Contacto</h4>
+        <p>Centro de Desarrollo Profesional<br>Alumni Sabana</p>
+        <p><a class="pie-enlace" href="mailto:desarrolloprofesional@unisabana.edu.co">desarrolloprofesional@unisabana.edu.co</a></p>
+        <p>Contact center: (601) 861 5555</p>
+        <p>Campus del Puente del Común<br>Km. 7, Autopista Norte de Bogotá<br>Chía, Cundinamarca, Colombia</p>
+      </div>
+
+    </div>
+
+    <div class="pie-legal">
+      <span>Universidad de La Sabana &middot; Personería Jurídica: Resolución 130 del 14 de enero de 1980, Ministerio de Educación Nacional<br>Versión del archivo: <b>2026.08.31</b></span>
+      <span><a class="pie-enlace" href="https://www.unisabana.edu.co/politica-de-proteccion-de-datos" target="_blank" rel="noopener">Política de Protección de Datos</a> &middot; Vigilada Mineducación</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.CAMPANAS_SUELTA = true;
+
+(function(){
+"use strict";
+
+/* ══════════════════════════════════════════════════════════
+   LO QUE LA GUÍA ESPERABA DEL TABLERO
+   Cuatro funciones y un objeto «state». Se recrean aquí con lo
+   justo: la guía se copia sin tocar desde _tablero_campanas.py,
+   así que tiene que encontrar lo mismo que encontraba allí.
+   ══════════════════════════════════════════════════════════ */
+
+var CLAVE_TABLERO = "tf_dashboard_v1";
+var CLAVE_PROPIA  = "guia_campanas_v1";
+
+var fmtCOP = new Intl.NumberFormat("es-CO", {
+  style:"currency", currency:"COP", maximumFractionDigits:0
+});
+function money(n){ if(!isFinite(n)) return "—"; return fmtCOP.format(Math.round(n)); }
+function esc(s){
+  return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function currentMonthStr(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function bizLabels(){
+  var t = state.bizType;
+  if(t==="freelancer") return {unit:"cliente", unitPlural:"clientes", item:"proyecto", itemPlural:"proyectos"};
+  if(t==="productos")  return {unit:"cliente", unitPlural:"clientes", item:"producto/pedido", itemPlural:"pedidos"};
+  return {unit:"cliente", unitPlural:"clientes", item:"proyecto o pedido", itemPlural:"proyectos o pedidos"};
+}
+
+/* El estado de ESTA página. «origen» dice de dónde salieron las
+   cifras, que es lo que decide qué nota se muestra debajo. */
+var state = {
+  bizType: "otro",
+  ingresos: 0,
+  fijos: 0,
+  equilibrio: null,   /* solo si vino del tablero: necesita historial */
+  origen: "vacio"     /* vacio | tablero | manual */
+};
+
+/* Las tres funciones que la guía llama por su nombre del tablero.
+   Aquí devuelven lo que tenga «state», venga de donde venga. */
+function incomeForMonth(){ return state.ingresos; }
+function totalFixed(){ return state.fijos; }
+function breakevenUnits(){ return state.equilibrio; }
+
+/* ══════════════════════════════════════════════════════════
+   LEER EL TABLERO
+   Mismo origen, misma clave. Se lee y NUNCA se escribe: si esta
+   página guardara ahí, una cifra tecleada de memoria pisaría el
+   registro detallado del tablero sin que nadie se entere.
+   ══════════════════════════════════════════════════════════ */
+function leerTablero(){
+  var crudo;
+  try{ crudo = localStorage.getItem(CLAVE_TABLERO); }catch(e){ return null; }
+  if(!crudo) return null;
+
+  var d;
+  try{ d = JSON.parse(crudo); }catch(e){ return null; }
+  if(!d || typeof d !== "object") return null;
+
+  var mes = currentMonthStr();
+  var ingresos = (d.income || []).reduce(function(s,e){
+    return s + (e && e.month === mes ? (Number(e.amount)||0) : 0);
+  }, 0);
+  var fijos = (d.fixedExpenses || []).reduce(function(s,e){
+    return s + (Number(e && e.amount)||0);
+  }, 0);
+
+  /* Un tablero abierto y nunca llenado no cuenta como cifras: sin
+     ingresos del mes no hay presupuesto que calcular, y decir que
+     «vienen del tablero» sería señalar a un sitio vacío. */
+  if(ingresos <= 0) return null;
+
+  return {
+    bizType: d.bizType || "otro",
+    ingresos: ingresos,
+    fijos: fijos,
+    equilibrio: equilibrioDe(d)
+  };
+}
+
+/* El punto de equilibrio necesita el ticket promedio, que sale del
+   historial de ingresos. Por eso solo existe cuando las cifras
+   vienen del tablero: tecleando tres números no hay historial.
+   Se replica el cálculo del tablero, no se inventa otro. */
+function equilibrioDe(d){
+  var ingresos = d.income || [];
+  if(!ingresos.length) return null;
+
+  /* Ticket promedio: lo que entra dividido entre las entradas. */
+  var suma = 0, cuenta = 0;
+  ingresos.forEach(function(e){
+    var v = Number(e && e.amount)||0;
+    if(v > 0){ suma += v; cuenta++; }
+  });
+  if(!cuenta) return null;
+  var ticket = suma / cuenta;
+  if(ticket <= 0) return null;
+
+  /* Gastos fijos más el promedio de variables por mes. */
+  var fijos = (d.fixedExpenses || []).reduce(function(s,e){
+    return s + (Number(e && e.amount)||0);
+  }, 0);
+  var meses = {};
+  (d.variableExpenses || []).forEach(function(e){
+    if(!e || !e.month) return;
+    meses[e.month] = (meses[e.month]||0) + (Number(e.amount)||0);
+  });
+  var claves = Object.keys(meses);
+  var variables = claves.length
+    ? claves.reduce(function(s,k){ return s + meses[k]; }, 0) / claves.length
+    : 0;
+
+  return Math.ceil((fijos + variables) / ticket);
+}
+
+/* Lo que se teclee aquí vive en su propia clave, nunca en la del
+   tablero. Así las dos herramientas pueden convivir sin pisarse. */
+function leerPropio(){
+  try{
+    var d = JSON.parse(localStorage.getItem(CLAVE_PROPIA) || "null");
+    if(d && typeof d === "object" && (Number(d.ingresos)||0) > 0) return d;
+  }catch(e){}
+  return null;
+}
+function guardarPropio(){
+  try{
+    localStorage.setItem(CLAVE_PROPIA, JSON.stringify({
+      bizType: state.bizType, ingresos: state.ingresos, fijos: state.fijos
+    }));
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOS CAMPOS
+   Tres preguntas, no un tablero. Si el tablero ya las respondió,
+   ni siquiera se muestran: se muestra de dónde salieron.
+   ══════════════════════════════════════════════════════════ */
+
+var TIPOS = [
+  {v:"freelancer", n:"Servicios por horas o por proyecto"},
+  {v:"productos",  n:"Productos físicos o pedidos"},
+  {v:"otro",       n:"Otro, o una mezcla de los dos"}
+];
+
+var pidiendo = false;   /* true cuando los campos están a la vista */
+
+function conPuntos(digitos){
+  if(!digitos) return "";
+  return String(digitos).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function soloDigitos(txt){ return String(txt==null?"":txt).replace(/\D+/g, ""); }
+
+function pintarCifras(){
+  var caja = document.getElementById("cifras");
+
+  /* Cifras del tablero, y nadie ha pedido cambiarlas. */
+  if(state.origen === "tablero" && !pidiendo){
+    caja.innerHTML =
+      '<div class="card"><div class="origen">' +
+      '<span>Estas cifras vienen del Tablero de apoyo financiero: ' +
+      money(state.ingresos) + ' de ingresos este mes y ' + money(state.fijos) +
+      ' de gastos fijos.</span>' +
+      '<button type="button" id="cambiar">Usar otras cifras</button>' +
+      '</div></div>';
+    document.getElementById("cambiar").addEventListener("click", function(){
+      pidiendo = true; pintarCifras();
+    });
+    return;
+  }
+
+  /* Cifras tecleadas aquí y ya guardadas: la misma nota, con la
+     opción de corregirlas. */
+  if(state.origen === "manual" && !pidiendo){
+    caja.innerHTML =
+      '<div class="card"><div class="origen">' +
+      '<span>Con ' + money(state.ingresos) + ' de ingresos al mes y ' +
+      money(state.fijos) + ' de gastos fijos.</span>' +
+      '<button type="button" id="cambiar">Cambiar las cifras</button>' +
+      '</div></div>';
+    document.getElementById("cambiar").addEventListener("click", function(){
+      pidiendo = true; pintarCifras();
+    });
+    return;
+  }
+
+  /* Los campos. */
+  var opciones = TIPOS.map(function(t){
+    return '<option value="' + t.v + '"' +
+      (state.bizType === t.v ? ' selected' : '') + '>' + esc(t.n) + '</option>';
+  }).join("");
+
+  caja.innerHTML =
+    '<div class="card">' +
+      '<h3>Tus cifras</h3>' +
+      '<p style="font-size:13px;color:var(--ink-soft);margin:4px 0 14px;line-height:1.6">' +
+        'Tres datos para que el presupuesto salga de tu negocio y no de una cifra inventada. ' +
+        'Si ya usas el Tablero de apoyo financiero, se toman de allí solos.</p>' +
+      '<div class="campos">' +
+        '<div class="campo"><label for="cType">Qué vendes</label>' +
+          '<select id="cType">' + opciones + '</select></div>' +
+        '<div class="campo"><label for="cIng">Lo que entra al mes' +
+          '<span class="pista">Ventas antes de descontar gastos</span></label>' +
+          '<input id="cIng" type="text" inputmode="numeric" autocomplete="off" ' +
+            'value="' + conPuntos(state.ingresos || "") + '" placeholder="0"></div>' +
+        '<div class="campo"><label for="cFij">Gastos fijos al mes' +
+          '<span class="pista">Arriendo, servicios, plataformas, sueldos</span></label>' +
+          '<input id="cFij" type="text" inputmode="numeric" autocomplete="off" ' +
+            'value="' + conPuntos(state.fijos || "") + '" placeholder="0"></div>' +
+      '</div>' +
+      '<div style="margin-top:14px"><button class="btn" type="button" id="verPlan">Ver el plan</button></div>' +
+    '</div>';
+
+  /* Solo dígitos, con puntos de miles. Mismo comportamiento que en
+     la ficha: un número de siete cifras sin separar es donde
+     alguien se equivoca de un cero en su propio negocio. */
+  ["cIng","cFij"].forEach(function(id){
+    var inp = document.getElementById(id);
+    inp.addEventListener("input", function(){
+      var izquierda = soloDigitos(inp.value.slice(0, inp.selectionStart)).length;
+      var nuevo = conPuntos(soloDigitos(inp.value));
+      if(nuevo === inp.value) return;
+      inp.value = nuevo;
+      var pos = 0, vistos = 0;
+      while(pos < nuevo.length && vistos < izquierda){
+        if(/\d/.test(nuevo[pos])) vistos++;
+        pos++;
+      }
+      try{ inp.setSelectionRange(pos, pos); }catch(e){}
+    });
+    inp.addEventListener("keydown", function(e){
+      if(e.ctrlKey || e.metaKey || e.altKey) return;
+      if(e.key && e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+    });
+  });
+
+  document.getElementById("cType").addEventListener("change", function(e){
+    state.bizType = e.target.value;
+  });
+
+  document.getElementById("verPlan").addEventListener("click", function(){
+    state.ingresos = Number(soloDigitos(document.getElementById("cIng").value)) || 0;
+    state.fijos    = Number(soloDigitos(document.getElementById("cFij").value)) || 0;
+    state.bizType  = document.getElementById("cType").value;
+    /* Tecleadas a mano no hay historial, así que no hay punto de
+       equilibrio que comprobar. Se dice callando: no se muestra. */
+    state.equilibrio = null;
+    state.origen = state.ingresos > 0 ? "manual" : "vacio";
+    pidiendo = false;
+    guardarPropio();
+    pintar();
+    document.getElementById("guia").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+}
+
+function pintar(){
+  pintarCifras();
+  document.getElementById("guia").innerHTML = panelCampanas();
+}
+
+/* ══════════════════════════════════════════════════════════
+   ARRANQUE
+   El tablero manda sobre lo tecleado aquí: son cifras
+   registradas mes a mes contra tres números de memoria.
+   ══════════════════════════════════════════════════════════ */
+var delTablero = leerTablero();
+if(delTablero){
+  state.bizType    = delTablero.bizType;
+  state.ingresos   = delTablero.ingresos;
+  state.fijos      = delTablero.fijos;
+  state.equilibrio = delTablero.equilibrio;
+  state.origen     = "tablero";
+} else {
+  var propio = leerPropio();
+  if(propio){
+    state.bizType  = propio.bizType || "otro";
+    state.ingresos = Number(propio.ingresos)||0;
+    state.fijos    = Number(propio.fijos)||0;
+    state.origen   = "manual";
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   GUÍA DE CAMPAÑAS PUBLICITARIAS
+   ══════════════════════════════════════════════════════════ */
+
+/* Mientras el Centro no autorice el uso de IA para esto —el
+   semáforo pone «investigación de mercados» en condicionado— el
+   botón de afinar con Gemini queda visible pero desactivado.
+   Para activarlo: poner true, y añadir la ruta /campanas en
+   auth.js copiando el patrón de /observaciones. */
+var CAMPANAS_IA_ACTIVA = false;
+
+/* Qué porcentaje de los ingresos es razonable invertir. No es una
+   cifra inventada: por debajo del punto de equilibrio no sobra
+   nada, y en tracción temprana pasar del 10% suele salir del
+   sueldo del dueño antes que de la ganancia. */
+function presupuestoCampana(){
+  var ing = incomeForMonth(currentMonthStr());
+  var fijos = totalFixed();
+  var libre = ing - fijos;
+  if(!isFinite(ing) || ing <= 0) return {estado:"sin-datos", monto:0, ing:0, libre:0};
+  if(libre <= 0)                 return {estado:"sin-margen", monto:0, ing:ing, libre:libre};
+  /* El 30% de lo que sobra, con techo del 10% de lo que entra:
+     el que apenas cubre gastos no debe poner el margen entero en
+     publicidad, y el que va holgado tampoco necesita más. */
+  var monto = Math.min(libre * 0.30, ing * 0.10);
+  return {estado:"ok", monto: Math.round(monto/10000)*10000, ing:ing, libre:libre};
+}
+
+/* Los canales según el tipo de negocio. El orden importa: es por
+   dónde empezar, no una lista de opciones. */
+var CANALES = {
+  freelancer: [
+    {n:"LinkedIn y tu red directa", pct:0,
+     q:"Escribe a diez personas que ya te conocen y cuéntales qué haces ahora. No es publicidad, es recordar que existes.",
+     por:"Un servicio por horas se contrata por confianza, no por anuncio. La primera venta casi siempre viene de alguien que ya te conoce."},
+    {n:"Contenido en LinkedIn", pct:0,
+     q:"Un caso real al mes: qué problema tenía el cliente, qué hiciste, qué cambió. Sin cifras confidenciales.",
+     por:"Demuestra criterio, que es lo que se compra en un servicio. Cuesta tiempo, no dinero."},
+    {n:"Anuncios en LinkedIn o Google", pct:100,
+     q:"Solo cuando los dos anteriores ya traigan clientes. Empieza por el servicio que más margen te deja.",
+     por:"Pagar por llegar a desconocidos antes de saber qué mensaje convierte es quemar presupuesto aprendiendo."}
+  ],
+  productos: [
+    {n:"Instagram o TikTok orgánico", pct:0,
+     q:"El producto en uso, no el producto solo. Tres publicaciones por semana, constantes.",
+     por:"Un producto se vende por deseo y se ve. La constancia importa más que la producción."},
+    {n:"Google Maps y ficha de negocio", pct:0,
+     q:"Registra el negocio con fotos, horario y dirección. Pide reseñas a los clientes que ya tienes.",
+     por:"Quien busca «cerca de mí» tiene la intención de comprar hoy. Es gratis y casi nadie lo hace bien."},
+    {n:"Anuncios en Meta (Instagram y Facebook)", pct:100,
+     q:"Empieza por tu ciudad y por el producto que ya se vende solo. Sube el presupuesto cuando sepas cuánto te cuesta cada venta.",
+     por:"Con producto físico puedes medir cuánto cuesta traer una venta y decidir con esa cifra, no con intuición."}
+  ],
+  otro: [
+    {n:"Tu red directa", pct:0,
+     q:"Cuéntale a quien ya te conoce qué vendes ahora. Diez conversaciones antes de un peso en publicidad.",
+     por:"La primera venta casi nunca viene de un anuncio, y te dice qué mensaje funciona."},
+    {n:"Google Maps y redes", pct:0,
+     q:"Registra el negocio y publica con constancia. Elige UNA red, la que ya usas.",
+     por:"Dos redes a medias rinden menos que una bien llevada."},
+    {n:"Anuncios pagados", pct:100,
+     q:"Cuando ya sepas qué mensaje hace que te compren. Empieza pequeño y mide.",
+     por:"Pagar por difundir un mensaje que aún no funciona multiplica el problema, no las ventas."}
+  ]
+};
+
+/* La guía se muestra en dos sitios y el texto no puede ser el mismo
+   en los dos. Dentro del tablero, «faltan tus cifras» se resuelve
+   yendo a otra pestaña; como página aparte, se resuelve llenando los
+   campos de arriba, y el titular sobra porque ya lo lleva la cabecera.
+
+   La página suelta lo anuncia poniendo «window.CAMPANAS_SUELTA = true»
+   antes de este bloque. El tablero no pone nada, así que allí vale
+   «false» y todo sigue como estaba.
+
+   Se mira en «window» y no con «typeof CAMPANAS_SUELTA»: este código
+   va dentro de un IIFE en las dos páginas, y un «var» aquí dentro se
+   iza al principio de esa función. Con «typeof» el valor global
+   quedaba tapado por el local todavía sin asignar, así que la página
+   suelta se veía como si estuviera dentro del tablero. Costó una
+   prueba en rojo descubrirlo: no da error, solo cambia dos frases. */
+var CAMPANAS_SUELTA = (typeof window !== "undefined") && window.CAMPANAS_SUELTA === true;
+
+function panelCampanas(){
+  var tipo = state.bizType || "otro";
+  var p = presupuestoCampana();
+  var be = breakevenUnits();
+  var canales = CANALES[tipo] || CANALES.otro;
+
+  var h = CAMPANAS_SUELTA ? '' :
+    '<div class="panel-head"><h2>Guía de campañas publicitarias</h2>' +
+    '<p>Por dónde empezar a darte a conocer, con lo que tu negocio puede pagar de verdad.</p></div>';
+
+  /* Sin cifras no hay guía honesta: lo que saldría es un consejo
+     genérico disfrazado de recomendación personalizada. */
+  if(p.estado === "sin-datos"){
+    return h + '<div class="card"><div class="camp-aviso">' +
+      '<b>Faltan tus cifras.</b> ' +
+      (CAMPANAS_SUELTA
+        ? 'Escribe arriba lo que entra al mes y lo que se va en gastos fijos. '
+        : 'Registra los ingresos y los gastos fijos del mes en las pestañas de arriba. ') +
+      'Sin eso, cualquier presupuesto de campaña que te proponga aquí sería inventado.</div></div>';
+  }
+
+  h += '<div class="card">';
+
+  if(p.estado === "sin-margen"){
+    h += '<div class="camp-aviso"><b>Todavía no es momento de invertir en publicidad.</b> ' +
+      'Tus gastos fijos (' + money(totalFixed()) + ') se llevan todo lo que entra (' + money(p.ing) + '). ' +
+      'Publicidad ahora saldría de tu bolsillo, no del negocio. Primero cierra esa brecha: ' +
+      'sube precios, baja gastos fijos, o vende más con lo que ya tienes.</div>';
+    h += '<p style="font-size:13px;color:var(--ink-soft);line-height:1.65">' +
+      'Lo de abajo sigue sirviendo: los dos primeros canales de tu tipo de negocio no cuestan dinero, solo tiempo.</p>';
+  } else {
+    h += '<div class="camp-cifras">' +
+      '<div class="camp-cifra"><span class="k">Entra al mes</span><span class="v">' + money(p.ing) + '</span></div>' +
+      '<div class="camp-cifra"><span class="k">Te queda tras gastos fijos</span><span class="v">' + money(p.libre) + '</span></div>' +
+      '<div class="camp-cifra"><span class="k">Para campaña</span><span class="v">' + money(p.monto) + '</span>' +
+        '<span class="n">30% de lo que te queda, con techo del 10% de lo que entra</span></div>' +
+      '</div>';
+    if(be != null){
+      h += '<div class="camp-aviso" style="background:var(--accent-soft);border-color:var(--accent-strong);border-left-color:var(--accent)">' +
+        '<b>Compruébalo contra tu punto de equilibrio.</b> Necesitas ' + be + ' ' +
+        (be === 1 ? bizLabels().item : bizLabels().itemPlural) +
+        ' al mes solo para cubrir gastos. La campaña tiene que traerte por encima de eso para que valga la pena.</div>';
+    }
+  }
+
+  h += '<h3 style="margin-top:18px">Por dónde empezar, en este orden</h3>';
+  canales.forEach(function(c, i){
+    var plata = (p.estado === "ok" && c.pct > 0)
+      ? money(Math.round(p.monto * c.pct / 100))
+      : "Sin costo";
+    h += '<div class="camp-canal">' +
+      '<div class="camp-canal-cab"><span class="orden">PASO ' + (i+1) + '</span>' +
+      '<h4>' + esc(c.n) + '</h4><span class="plata">' + plata + '</span></div>' +
+      '<p>' + esc(c.q) + '</p>' +
+      '<div class="porque"><b>Por qué este orden:</b> ' + esc(c.por) + '</div>' +
+      '</div>';
+  });
+
+  h += '<h3 style="margin-top:18px">Qué medir</h3><ul class="camp-medir">' +
+    '<li><b>Cuánto te cuesta traer un cliente:</b> lo que gastaste dividido entre los clientes nuevos del mes. ' +
+    'Si eso supera lo que te deja cada cliente, la campaña te está costando dinero.</li>' +
+    '<li><b>De dónde llegaron:</b> pregúntaselo a cada cliente nuevo. Es la medición más barata y la más fiable.</li>' +
+    '<li><b>Si subieron las ventas:</b> compara el mes de campaña con el anterior' +
+    (CAMPANAS_SUELTA
+      ? ' en el Tablero de apoyo financiero, en la pestaña de Ingresos.'
+      : ' en la pestaña de Ingresos.') + '</li>' +
+    '</ul>';
+
+  h += bloqueEjemplos();
+  h += bloqueCampanaIA();
+  h += '</div>';
+  return h;
+}
+
+/* ══════════════════════════════════════════════════════════
+   EJEMPLOS DE PIEZAS
+   ----------------------------------------------------------
+   Cuatro piezas reales, generadas con Pomelli a partir de la
+   página del Centro. Se recrean en CSS en vez de incrustarse
+   como imagen: así llevan el azul institucional exacto y el
+   texto se puede corregir sin regenerar nada.
+
+   Están aquí porque ver una pieza terminada explica mejor «a
+   qué se parece esto» que cualquier párrafo describiéndolo.
+   ══════════════════════════════════════════════════════════ */
+var PIEZAS_EJEMPLO = [
+  {t:"Mes del Emprendimiento: activa tu idea",
+   d:"Estructura tu negocio paso a paso, de forma autónoma y gratuita.",
+   marca:false},
+  {t:"Guías financieras y legales gratis",
+   d:"Herramientas interactivas para transformar tu proyecto en empresa real.",
+   marca:false},
+  {t:"Aprende a tu propio ritmo",
+   d:"Acceso directo a contenido de planeación sin registro previo.",
+   marca:true},
+  {t:"Haz realidad tu empresa hoy",
+   d:"Aprovecha los recursos digitales de tu comunidad universitaria.",
+   marca:true}
+];
+
+function bloqueEjemplos(){
+  var h = '<div class="camp-fuente">' +
+    '<h4>Las piezas gráficas</h4>' +
+    '<p>Este plan te dice qué publicar y dónde, pero no diseña las imágenes. ' +
+    'Para eso hay herramientas gratuitas que las generan a partir de la página web de tu negocio. ' +
+    'Estos cuatro ejemplos se hicieron así, con la página del Centro:</p>';
+
+  h += '<div class="camp-piezas">';
+  PIEZAS_EJEMPLO.forEach(function(p){
+    h += '<div class="pieza">';
+    if(p.marca) h += '<div class="marca"><span>Alumni</span><span>Sabana</span></div>';
+    h += '<h5>' + esc(p.t) + '</h5>' +
+         '<p>' + esc(p.d) + '</p>' +
+         '<div class="pie-pieza">Ejemplo</div>' +
+         '</div>';
+  });
+  h += '</div>';
+
+  h += '<p>Pomelli es de Google y su uso es gratuito. Lee tu página, toma tus colores y ' +
+    'tu tipografía, y propone piezas para redes. Revisa siempre lo que genere antes de ' +
+    'publicarlo: la herramienta a veces cambia detalles del producto o del logo.</p>' +
+    '<a class="btn small" href="https://labs.google/pomelli" target="_blank" rel="noopener noreferrer">' +
+    'Abrir Pomelli ↗</a>' +
+    '</div>';
+  return h;
+}
+
+/* El botón de IA: construido, visible y desactivado.
+   Se deja a la vista a propósito, para que el Centro vea qué se
+   activaría, en vez de esconderlo hasta que alguien se acuerde. */
+function bloqueCampanaIA(){
+  if(CAMPANAS_IA_ACTIVA){
+    return '<div class="camp-ia"><h4>Afinar este plan con IA</h4>' +
+      '<p>Se enviarán tu tipo de negocio y tus cifras al servicio de IA de la Universidad para adaptar el plan a tu caso. No se envía el nombre de tus clientes.</p>' +
+      '<button class="btn small" id="campIA" type="button">Afinar con IA</button></div>';
+  }
+  return '<div class="camp-ia"><h4>Afinar este plan con IA</h4>' +
+    '<p>Pendiente de autorización del Centro de Desarrollo Profesional para el uso de inteligencia artificial en esta herramienta. ' +
+    'El plan de arriba está armado con reglas, no con IA.</p>' +
+    '<button type="button" disabled>Disponible próximamente</button></div>';
+}
+
+
+pintar();
+
+})();
+
+</script>
+</body>
+</html>

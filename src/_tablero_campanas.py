@@ -1,10 +1,20 @@
 # ══════════════════════════════════════════════════════════════
-#  GUÍA DE CAMPAÑAS PUBLICITARIAS
+#  GUÍA DE CAMPAÑAS PUBLICITARIAS · EL CONTENIDO
 #
-#  La etapa 3 de la portada —«Crecimiento de negocio»— dejó de ser
-#  «Próximamente». Vive DENTRO del tablero y no como herramienta
-#  aparte, porque ahí ya están el tipo de negocio y las cifras: la
-#  persona no vuelve a escribir lo que ya escribió.
+#  La etapa 3 de la portada, «Crecimiento de negocio».
+#
+#  ── DÓNDE VIVE ────────────────────────────────────────────────
+#  En su propia página: guia-de-campanas.html. Estuvo dentro del
+#  tablero, en una pestaña, y se sacó porque es una etapa distinta
+#  del recorrido: quien ya vende y solo quiere saber dónde
+#  anunciarse no debería entrar a un tablero financiero para
+#  encontrarla.
+#
+#  Este archivo es SOLO el contenido —el CSS y el JS de la guía—.
+#  El armazón de la página (cabecera, campos de cifras, lectura del
+#  tablero) vive en _guia_campanas.py. Separados así, el contenido
+#  no sabe dónde se muestra, y por eso la única bifurcación que hay
+#  es «CAMPANAS_SUELTA», para los dos textos que cambian.
 #
 #  ── LO QUE LA HACE ÚTIL ───────────────────────────────────────
 #  El presupuesto sale de sus ingresos reales, no de una cifra
@@ -96,7 +106,14 @@ CSS = """
   gap: 12px; margin: 14px 0 16px;
 }
 .pieza {
-  aspect-ratio: 4 / 5;
+  /* «min-height» y no «aspect-ratio».
+     Con la proporción fija, la caja no puede crecer: en una columna
+     estrecha el texto más largo desbordaba y la palabra «EJEMPLO» se
+     cortaba contra el borde de abajo. Una pieza de redes sí tiene
+     proporción fija, pero esto no es la pieza: es su vista previa, y
+     vale más que se lea entera a que conserve el 4:5 exacto.
+     El mínimo mantiene el aire de cartel cuando el texto es corto. */
+  min-height: 260px;
   border-radius: 12px; overflow: hidden;
   background: linear-gradient(168deg, #0A2166 0%, var(--accent) 62%);
   color: #FFFFFF;
@@ -134,7 +151,13 @@ CSS = """
   padding: 14px 16px; margin-top: 16px; background: var(--paper-raised);
 }
 .camp-fuente h4 { margin: 0 0 4px; font-size: 14px; }
-.camp-fuente p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+/* «> p» y no «p» a secas. Las piezas viven DENTRO de este bloque, y
+   con el selector suelto esta regla —que va después y tiene la misma
+   especificidad— le ganaba a «.pieza p» y pintaba de gris pizarra el
+   texto de las piezas, sobre su fondo azul oscuro: 2:1 de contraste,
+   ilegible. Se veía apagado y se atribuyó al tamaño de letra; era
+   esto. El hijo directo deja fuera lo que está dentro de las piezas. */
+.camp-fuente > p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
 .camp-fuente a.btn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 
 /* El botón de IA, desactivado hasta que el Centro autorice. */
@@ -221,20 +244,41 @@ var CANALES = {
   ]
 };
 
+/* La guía se muestra en dos sitios y el texto no puede ser el mismo
+   en los dos. Dentro del tablero, «faltan tus cifras» se resuelve
+   yendo a otra pestaña; como página aparte, se resuelve llenando los
+   campos de arriba, y el titular sobra porque ya lo lleva la cabecera.
+
+   La página suelta lo anuncia poniendo «window.CAMPANAS_SUELTA = true»
+   antes de este bloque. El tablero no pone nada, así que allí vale
+   «false» y todo sigue como estaba.
+
+   Se mira en «window» y no con «typeof CAMPANAS_SUELTA»: este código
+   va dentro de un IIFE en las dos páginas, y un «var» aquí dentro se
+   iza al principio de esa función. Con «typeof» el valor global
+   quedaba tapado por el local todavía sin asignar, así que la página
+   suelta se veía como si estuviera dentro del tablero. Costó una
+   prueba en rojo descubrirlo: no da error, solo cambia dos frases. */
+var CAMPANAS_SUELTA = (typeof window !== "undefined") && window.CAMPANAS_SUELTA === true;
+
 function panelCampanas(){
   var tipo = state.bizType || "otro";
   var p = presupuestoCampana();
   var be = breakevenUnits();
   var canales = CANALES[tipo] || CANALES.otro;
 
-  var h = '<div class="panel-head"><h2>Guía de campañas publicitarias</h2>' +
+  var h = CAMPANAS_SUELTA ? '' :
+    '<div class="panel-head"><h2>Guía de campañas publicitarias</h2>' +
     '<p>Por dónde empezar a darte a conocer, con lo que tu negocio puede pagar de verdad.</p></div>';
 
   /* Sin cifras no hay guía honesta: lo que saldría es un consejo
      genérico disfrazado de recomendación personalizada. */
   if(p.estado === "sin-datos"){
     return h + '<div class="card"><div class="camp-aviso">' +
-      '<b>Faltan tus cifras.</b> Registra los ingresos y los gastos fijos del mes en las pestañas de arriba. ' +
+      '<b>Faltan tus cifras.</b> ' +
+      (CAMPANAS_SUELTA
+        ? 'Escribe arriba lo que entra al mes y lo que se va en gastos fijos. '
+        : 'Registra los ingresos y los gastos fijos del mes en las pestañas de arriba. ') +
       'Sin eso, cualquier presupuesto de campaña que te proponga aquí sería inventado.</div></div>';
   }
 
@@ -279,7 +323,10 @@ function panelCampanas(){
     '<li><b>Cuánto te cuesta traer un cliente:</b> lo que gastaste dividido entre los clientes nuevos del mes. ' +
     'Si eso supera lo que te deja cada cliente, la campaña te está costando dinero.</li>' +
     '<li><b>De dónde llegaron:</b> pregúntaselo a cada cliente nuevo. Es la medición más barata y la más fiable.</li>' +
-    '<li><b>Si subieron las ventas:</b> compara el mes de campaña con el anterior en la pestaña de Ingresos.</li>' +
+    '<li><b>Si subieron las ventas:</b> compara el mes de campaña con el anterior' +
+    (CAMPANAS_SUELTA
+      ? ' en el Tablero de apoyo financiero, en la pestaña de Ingresos.'
+      : ' en la pestaña de Ingresos.') + '</li>' +
     '</ul>';
 
   h += bloqueEjemplos();

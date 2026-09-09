@@ -328,7 +328,7 @@ if _ancla_vid not in t:
     raise SystemExit('ERROR: no se encontró el cuerpo del acordeón de la guía')
 t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
 
-t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + _tablero_campanas.CSS + '\n</style>', 1)
+t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + '\n</style>', 1)
 
 # El JS de los dos módulos va DENTRO del IIFE del tablero, justo
 # antes de que se cierre.
@@ -342,22 +342,14 @@ if _cierre not in t:
 t = t.replace(_cierre,
               _tablero_importar.JS + '\n' + _tablero_videos.js() + '\n\n' + _cierre, 1)
 
-# ── Guía de campañas publicitarias ──
-# La etapa 3 de la portada, dentro del tablero: ahí ya están el tipo
-# de negocio y las cifras, así que no vuelve a preguntar lo que la
-# persona ya escribió.
-_a = '    {id:"guia", label:"Guía de uso"},'
-if _a not in t:
-    raise SystemExit('ERROR: no se encontró la entrada «Guía de uso» del menú')
-t = t.replace(_a, '    {id:"campanas", label:"Campañas publicitarias"},\n' + _a, 1)
-
-_a = 'asignacion:panelAsignacion, guia:panelGuia, cierre:panelCierre'
-if _a not in t:
-    raise SystemExit('ERROR: no se encontró el despachador de paneles')
-t = t.replace(_a, 'asignacion:panelAsignacion, campanas:panelCampanas, guia:panelGuia, cierre:panelCierre', 1)
-
-_a = '/* ============================ INIT ============================ */'
-t = t.replace(_a, _tablero_campanas.JS + '\n\n' + _a, 1)
+# ── La guía de campañas ya NO va aquí ──
+# Estuvo como pestaña del tablero. Se sacó a su propia página
+# (guia-de-campanas.html, más abajo en este mismo archivo) porque es
+# la etapa 3 del recorrido y no un apartado de la etapa 2.
+#
+# Lo que compartían —las cifras— no se perdió: la página suelta LEE
+# el localStorage del tablero, así que quien ya lo llenó no vuelve a
+# escribir nada. Por eso aquí no queda ni un rastro que quitar.
 
 t = encabezar(t, 'Tablero financiero del Centro de Desarrollo Profesional de la Universidad de La Sabana: precio minimo, punto de equilibrio, runway y flujo de caja para emprendimientos en traccion temprana.')
 t = t.replace('</style>', PIE_CSS + '\n</style>', 1)
@@ -634,3 +626,106 @@ f = f.replace('</body>', PIE_FICHA + '\n</body>', 1)
 io.open('ficha-negocio.html', 'w', encoding='utf-8').write(f)
 print('ficha    · tokens:', n_f, '· oscuros:', fuera_f, '· guiones:', n_gf,
       '· fuentes:', n_ff, '· descargas de Google fuera:', n_df)
+
+
+# ══════════════════════════════════════════════════════════════
+#  3 · GUÍA DE CAMPAÑAS PUBLICITARIAS
+#
+#  Las dos de arriba se construyen transformando un archivo que
+#  llegó hecho: se les cambia la paleta, se les quita el modo
+#  oscuro, se les pone el pie. Esta no. Esta se monta entera desde
+#  cero, porque no existía: es la etapa 3 del recorrido, que hasta
+#  ahora vivía como pestaña dentro del tablero.
+#
+#  Se separa por lo que es, no por lo que hace: quien ya vende y
+#  quiere saber dónde anunciarse está en otro momento que quien
+#  está cuadrando sus cifras, y no tiene por qué entrar a un
+#  tablero financiero para encontrarla.
+#
+#  Lo que compartían no se pierde. La página lee el localStorage
+#  del tablero —mismo origen, misma clave— así que quien ya llenó
+#  sus ingresos no vuelve a escribirlos. Y quien no ha usado el
+#  tablero responde tres campos, en vez de un tablero entero.
+# ══════════════════════════════════════════════════════════════
+import _guia_campanas
+
+PIE_CAMPANAS = pie(
+    servicio=(
+        '<p><strong>Guía de Campañas Publicitarias</strong> es una herramienta de trabajo autónomo '
+        'del Centro de Desarrollo Profesional, Alumni Sabana, para negocios que ya venden y '
+        'quieren darse a conocer.</p>'
+        '<p>Propone por dónde empezar, en qué orden y con cuánto, a partir de tus propias cifras. '
+        'El plan está armado con reglas explícitas, no con inteligencia artificial. '
+        '<strong>No es una agencia ni una asesoría de mercadeo</strong>: es un punto de partida '
+        'para que la primera inversión en publicidad no sea a ciegas.</p>'
+    ),
+    datos=(
+        '<p>Esta herramienta funciona <strong>sin cuenta y sin enviar nada a ningún servidor</strong>. '
+        'Si ya usaste el Tablero de apoyo financiero en este mismo navegador, toma de allí tus '
+        'cifras para no volver a preguntártelas; si no, lo que escribas se guarda '
+        '<strong>únicamente en este navegador</strong>.</p>'
+        '<p>Las piezas de ejemplo se generaron con una herramienta externa y se muestran '
+        'recreadas aquí: abrirlas o no en su sitio es decisión tuya, y esta página no envía '
+        'nada allí.</p>'
+    ),
+    version=VERSION,
+)
+
+g = ('<!DOCTYPE html>\n<html lang="es">\n<head>\n'
+     '<meta charset="UTF-8">\n'
+     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+     '<meta name="color-scheme" content="light">\n'
+     '<meta name="theme-color" content="#001459">\n'
+     '<meta name="description" content="Guia de campanas publicitarias del Centro de Desarrollo '
+     'Profesional de la Universidad de La Sabana: por donde empezar a darte a conocer, en orden y '
+     'con el presupuesto que tu negocio puede pagar.">\n'
+     '<title>Guía de campañas publicitarias · Alumni Sabana</title>\n'
+     '<style>\n'
+     ':root {' + PALETA + '\n'
+     # Los mismos tokens finales que quedan en el tablero después de
+     # sustituir_tokens(). Se escriben aquí ya resueltos y no se
+     # copian de allí en tiempo de ejecución a propósito: esta página
+     # no transforma un archivo ajeno, lo declara.
+     '''
+  --paper-raised: #FFFFFF;
+  --paper-sunken: #F5F7FC;
+  --line: #D9E1EE;
+  --line-strong: #C3CFE3;
+  --accent: #001459;
+  --accent-strong: #25409A;
+  --accent-soft: #E3EAF7;
+  --gold: #8A5200;
+  --gold-soft: #FBEFDD;
+  --warn-soft: #FBEFDD;
+  --critical: #A3252F;
+  --critical-soft: #FAE8E9;
+  --font-display: ''' + _tipografia.DISPLAY + ''';
+  --font-body: ''' + _tipografia.BODY + ''';
+  --font-sans: ''' + _tipografia.BODY + ''';
+  --font-mono: ''' + _tipografia.MONO + ''';
+  --sans-pie: ''' + _tipografia.BODY + ''';
+  color-scheme: light;
+}
+'''
+     + _guia_campanas.CSS_PAGINA
+     + _tablero_campanas.CSS
+     + PIE_CSS
+     + '\n</style>\n</head>\n<body>\n'
+     + barra_volver()
+     + _guia_campanas.CUERPO
+     + PIE_CAMPANAS
+     + '\n<script>\n'
+     # Le dice a la guía dónde se está mostrando. Es lo único que
+     # cambia entre las dos formas: dos frases que señalaban a
+     # pestañas que aquí no existen, y el titular, que ya lo lleva
+     # la cabecera de la página.
+     #
+     # Va en «window» y no como variable suelta porque la guía se
+     # monta dentro de un IIFE: su propio «var CAMPANAS_SUELTA» se
+     # izaría por encima de una global con el mismo nombre.
+     + 'window.CAMPANAS_SUELTA = true;\n'
+     + _guia_campanas.js(_tablero_campanas.JS)
+     + '\n</script>\n</body>\n</html>\n')
+
+io.open('guia-de-campanas.html', 'w', encoding='utf-8').write(g)
+print('campañas · página nueva ·', len(g), 'bytes')
