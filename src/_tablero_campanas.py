@@ -160,6 +160,30 @@ CSS = """
 .camp-fuente > p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
 .camp-fuente a.btn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 
+/* ── El bloque de Pomelli ──
+   Separado del texto de las piezas por una línea: es una
+   herramienta de terceros, no una parte más de la guía, y
+   conviene que se lea como tal antes de pulsar el botón. */
+.camp-pomelli { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+.camp-pomelli h4 {
+  margin: 0 0 8px; font-size: 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.camp-pomelli p { margin: 0 0 9px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.65; }
+.camp-pomelli p b { color: var(--ink); }
+/* El idioma, junto al nombre y no enterrado en el párrafo: es lo
+   primero que alguien necesita saber antes de decidir si entra. */
+.camp-idioma {
+  font-family: var(--font-sans); font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); background: var(--gold-soft);
+  border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+}
+.camp-pomelli .camp-nota {
+  background: var(--paper-sunken); border-radius: 7px;
+  padding: 9px 11px; font-size: 12px; margin-bottom: 11px;
+}
+
 /* El botón de IA, desactivado hasta que el Centro autorice. */
 .camp-ia {
   border: 1px dashed var(--line-strong); border-radius: 10px;
@@ -379,13 +403,51 @@ function bloqueEjemplos(){
   });
   h += '</div>';
 
-  h += '<p>Pomelli es de Google y su uso es gratuito. Lee tu página, toma tus colores y ' +
-    'tu tipografía, y propone piezas para redes. Revisa siempre lo que genere antes de ' +
-    'publicarlo: la herramienta a veces cambia detalles del producto o del logo.</p>' +
+  h += bloquePomelli();
+  h += '</div>';
+  return h;
+}
+
+/* ══════════════════════════════════════════════════════════
+   POMELLI
+   ----------------------------------------------------------
+   Qué es, en qué idioma está y para qué sirve DENTRO de este
+   plan. Sin eso, el botón es un enlace a una página en inglés
+   que pide iniciar sesión: quien no sabe qué va a encontrar,
+   se devuelve.
+
+   El enlace es a la página general y no a una campaña concreta.
+   Una dirección del tipo «/campaigns/<código>» es la de una
+   campaña guardada DENTRO de una cuenta: a quien no tenga esa
+   cuenta le sale la pantalla de inicio de sesión de Google, y
+   si entra con la suya llega a su propio Pomelli vacío, no a la
+   campaña que se quiso mostrar. Las piezas de esa campaña ya
+   están arriba, recreadas.
+   ══════════════════════════════════════════════════════════ */
+function bloquePomelli(){
+  return '<div class="camp-pomelli">' +
+    '<h4>Pomelli, de Google <span class="camp-idioma">En inglés</span></h4>' +
+
+    '<p>Es gratis y funciona así: le das la dirección de tu página web y la lee para ' +
+    'sacar lo que llama tu «ADN de marca», que son tus colores, tus tipografías y tu ' +
+    'forma de hablar. Con eso te propone ideas de campaña y te arma las piezas: la ' +
+    'imagen y el texto listos para publicar. Puedes editar lo que genere y descargarlo. ' +
+    'Necesitas una cuenta de Google y tarda unos minutos en analizar la página.</p>' +
+
+    '<p><b>Para qué te sirve aquí.</b> Este plan te dice en qué canal empezar, con ' +
+    'cuánto y qué medir, pero no diseña las imágenes. Pomelli cubre justo esa parte, y ' +
+    'la cubre bien en los pasos 1 y 2, que son los que no cuestan dinero: si vas a ' +
+    'publicar constante en redes, el trabajo de tener algo decente que publicar cada ' +
+    'semana es el que suele hacer que la gente abandone.</p>' +
+
+    '<p class="camp-nota">Está todo en inglés, aunque puede generar las piezas en ' +
+    'español si se lo pides. Google lo ofrece por ahora en unos pocos países, así que ' +
+    'puede que no te abra desde Colombia. Y revisa siempre lo que genere antes de ' +
+    'publicarlo: a veces cambia detalles del producto o del logo.</p>' +
+
     '<a class="btn small" href="https://labs.google/pomelli" target="_blank" rel="noopener noreferrer">' +
     'Abrir Pomelli ↗</a>' +
     '</div>';
-  return h;
 }
 
 /* El botón de IA: construido, visible y desactivado.

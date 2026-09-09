@@ -88,6 +88,14 @@ mirar('guia-de-campanas.html', herramienta + [
               and 'setItem("tf_dashboard_v1"' not in s),
     ("sabe que se muestra suelta",
         lambda s: 'window.CAMPANAS_SUELTA = true;' in s),
+    # El enlace a Pomelli tiene que ser el general. Una dirección
+    # «/campaigns/<código>» es la de una campaña guardada dentro de
+    # UNA cuenta: a los demás les sale la pantalla de inicio de
+    # sesión de Google y nunca llegan a la campaña.
+    ("el enlace a Pomelli es el público",
+        lambda s: 'labs.google/pomelli' in s and '/pomelli/campaigns/' not in s),
+    ("dice que Pomelli está en inglés",
+        lambda s: 'En inglés' in s or 'en inglés' in s),
 ])
 
 # El JavaScript de las tres tiene que ser válido. Un error de coma
