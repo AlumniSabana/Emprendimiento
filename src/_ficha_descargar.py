@@ -47,11 +47,15 @@ CSS = """
 @media (prefers-reduced-motion: reduce) { .bloque-senalado { animation: none; } }
 
 /* ═══════════════ DESCARGAR ═══════════════ */
+/* Sin recuadro. Llevaba borde azul por los cuatro lados y, pegado
+   al bloque de acciones que ya tiene el suyo, se veían dos marcos
+   encajados uno dentro de otro. Basta una línea arriba para
+   separarlo de lo anterior. */
 .descargar {
-  border: 1px solid #C3CFE3;
-  border-top: 0;
-  background: #F5F6FA;
-  padding: .95rem 1.1rem;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  padding: 1rem 0 .2rem;
 }
 .descargar h3 {
   margin: 0 0 .2rem; font-size: .95rem;
@@ -116,50 +120,31 @@ JS = r"""
      Nada se guarda: al recargar se pierde todo. Así que lo
      mínimo es poder llevársela.
      ══════════════════════════════════════════════════════════ */
-  function nombreArchivo(ext) {
-    const d = new Date();
-    const p = n => String(n).padStart(2, "0");
-    return "ficha-de-negocio-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "." + ext;
-  }
+  /* Aquí vivían «nombreArchivo» y «descargarTexto», que armaban el
+     .txt. Se fueron con su botón: una función sin quien la llame
+     solo deja a quien lea esto buscando el botón que la usa. */
 
-  function descargarTexto(texto) {
-    /* El BOM al principio es lo que hace que Excel y el Bloc de
-       notas de Windows abran las tildes bien en vez de «GutiÃ©rrez». */
-    const blob = new Blob(["﻿" + texto], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = nombreArchivo("txt");
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  }
 
+  /* Un solo botón, y en PDF.
+     Eran tres —archivo de texto, PDF y portapapeles— y sobraban
+     dos: el .txt pierde el formato de la ficha y el portapapeles se
+     borra al copiar cualquier otra cosa, que es justo lo que no
+     sirve cuando el aviso dice «guárdala antes de salir».
+
+     El PDF sale del diálogo de impresión del navegador, donde hay
+     que elegir «Guardar como PDF». Se dice en el texto, porque
+     quien pulsa «Descargar en PDF» y ve aparecer una impresora
+     piensa que se equivocó de botón. */
   function bloqueDescargar(plainText) {
     const caja = el("div", { class: "descargar" });
     caja.appendChild(el("h3", {}, "Guarda tu ficha antes de salir"));
-    caja.appendChild(el("p", {}, "Esta herramienta todavía no guarda nada: al cerrar o recargar la pestaña se pierde. Descárgala o imprímela para conservarla."));
+    caja.appendChild(el("p", {}, "Esta herramienta todavía no guarda nada: al cerrar o recargar la pestaña se pierde. Se abrirá el cuadro de impresión: elige «Guardar como PDF» como destino."));
 
     const fila = el("div", { class: "descargar-fila" });
 
-    const bTxt = el("button", { class: "btn btn-primary", type: "button" }, "Descargar como archivo");
-    bTxt.addEventListener("click", () => descargarTexto(plainText));
-    fila.appendChild(bTxt);
-
-    const bPdf = el("button", { class: "btn btn-ghost", type: "button" }, "Imprimir o guardar en PDF");
+    const bPdf = el("button", { class: "btn btn-primary", type: "button" }, "Descargar en PDF");
     bPdf.addEventListener("click", () => window.print());
     fila.appendChild(bPdf);
-
-    const bCopiar = el("button", { class: "btn btn-ghost", type: "button" }, "Copiar al portapapeles");
-    bCopiar.addEventListener("click", () => {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(plainText).then(() => {
-          bCopiar.textContent = "Copiada";
-          setTimeout(() => { bCopiar.textContent = "Copiar al portapapeles"; }, 1800);
-        }).catch(() => {});
-      }
-    });
-    fila.appendChild(bCopiar);
 
     caja.appendChild(fila);
     return caja;

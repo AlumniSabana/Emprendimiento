@@ -66,13 +66,53 @@ mirar('index.html', comunes + [
     ("enlaza al tablero",   lambda s: 'tablero-financiero.html' in s),
     ("enlaza a la guía",    lambda s: 'guia-de-campanas.html' in s),
 ])
-mirar('ficha-negocio.html', herramienta)
+mirar('ficha-negocio.html', herramienta + [
+    # Los enlaces van en cada DOCUMENTO y llevan al trámite, no a la
+    # portada de la entidad. Si alguien vuelve a poner una portada
+    # pelada, el enlace «funciona» pero deja a la persona buscando.
+    ("los enlaces llevan al trámite, no a una portada",
+        lambda s: 'vue.gov.co/tramites-y-consultas/' in s
+              and 'registro-unico-proponentes-rup' in s),
+    ("el RUT enlaza a su propia página",
+        lambda s: 'RUT/Paginas/Inscripcion-y-actualizacion-RUT' in s),
+    # El RUES se quitó a propósito: responde 200 con página vacía a
+    # cualquier dirección, así que un enlace roto ahí es indetectable.
+    ("no vuelve a colgar de rues.org.co",
+        lambda s: 'rues.org.co' not in s),
+    ("cada tarjeta lleva su casilla de completado",
+        lambda s: 'casillaHecho' in s and 'aria-checked' in s),
+    ("está el aviso de vigencia",
+        lambda s: 'aviso-vigencia' in s and 'vencido' in s),
+    # La Resolución 1732 de 2026 fue revocada por la 2080 de 2026.
+    # Decirle a un negocio de salud que puede acogerse a ella lo
+    # manda a habilitarse con una norma que no existe.
+    ("no afirma que la Resolución 1732 esté vigente",
+        lambda s: 'la Resolución 1732 de 2026 reemplaza' not in s),
+    ("dice que rige la 3100 de 2019",
+        lambda s: 'En salud rige la Resolución 3100 de 2019' in s),
+    ("un solo botón de descarga, y en PDF",
+        lambda s: 'Descargar en PDF' in s
+              and 'Descargar como archivo' not in s
+              and 'Copiar al portapapeles' not in s),
+])
 mirar('tablero-financiero.html', herramienta + [
     # La guía salió del tablero a su propia página. Si un día vuelve
     # a colarse una pestaña aquí, habría dos copias de lo mismo y
     # solo una recibiría las correcciones.
     ("la guía de campañas ya no está dentro",
         lambda s: 'panelCampanas' not in s),
+    # Cinco grupos plegables, y en este orden.
+    ("el índice tiene los cinco grupos, en orden",
+        lambda s: [g for g in re.findall(r'group:"([^"]+)"', s)]
+                  == ["Guía", "Datos del mes", "Cálculos", "Rutina", "Resumen"]),
+    ("los grupos se pliegan",
+        lambda s: 'navgroup-btn' in s and 'aria-expanded' in s),
+    ("los cálculos llevan su explicación en palabras sencillas",
+        lambda s: 'no perder ni ganar' in s and 'Cuántos meses aguantas' in s),
+    # La guía de uso salió de Rutina para ser el primer grupo: es lo
+    # que alguien necesita cuando entra y no sabe qué es un runway.
+    ("la guía de uso ya no está dentro de Rutina",
+        lambda s: '{group:"Rutina", items:[\n    {id:"cierre"' in s),
 ])
 mirar('guia-de-campanas.html', herramienta + [
     # Lee el localStorage del tablero para no volver a preguntar lo

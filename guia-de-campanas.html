@@ -83,6 +83,13 @@ ul,ol{ padding-left:1.15rem; }
 
 .envoltura{ max-width:940px; margin:0 auto; padding:0 clamp(1.1rem,4vw,2rem); }
 
+/* La barra de «Volver» es sticky: al bajar queda flotando encima del
+   contenido. Sin esto, al pulsar «Ver el plan» la página salta a
+   #guia y la barra corta por la mitad las tres tarjetas de cifras,
+   que es justo lo que la persona acaba de pedir ver. Se les reserva
+   su alto. Vale para cualquier salto a un ancla, no solo ese. */
+#cifras, #guia, .card, .camp-cifras { scroll-margin-top: calc(var(--alto-volver) + 12px); }
+
 /* ── La cabecera azul ──
    La misma franja que abre las otras herramientas del Centro:
    es lo que hace que se reconozcan como un mismo servicio. */

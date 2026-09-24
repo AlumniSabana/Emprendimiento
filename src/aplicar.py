@@ -18,6 +18,7 @@ from _comun import PALETA, PIE_CSS, pie, barra_volver
 import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
 import _ficha_cifras
 import _tablero_importar, _tablero_videos, _tablero_campanas, _tipografia
+import _tablero_menu
 
 VERSION = "2026.08.31"
 
@@ -328,7 +329,75 @@ if _ancla_vid not in t:
     raise SystemExit('ERROR: no se encontró el cuerpo del acordeón de la guía')
 t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
 
-t = t.replace('</style>', _tablero_importar.CSS + _tablero_videos.CSS + '\n</style>', 1)
+t = t.replace('</style>',
+              _tablero_importar.CSS + _tablero_videos.CSS
+              + _tablero_menu.CSS + '\n</style>', 1)
+
+# ══════════════════════════════════════════════════════════════
+#  EL ÍNDICE LATERAL: CINCO GRUPOS PLEGABLES
+#
+#  Orden nuevo: Guía, Datos del mes, Cálculos, Rutina, Resumen.
+#  «Guía de uso» sale de Rutina y pasa a ser su propio grupo, el
+#  primero; el Resumen baja al final.
+# ══════════════════════════════════════════════════════════════
+_TABS_VIEJO = '''var TABS = [
+  {group:"Resumen", items:[
+    {id:"resumen", label:"Resumen", }
+  ]},
+  {group:"Datos del mes", items:[
+    {id:"ingresos", label:"Ingresos"},
+    {id:"fijos", label:"Gastos fijos"},
+    {id:"variables", label:"Gastos variables"},
+    {id:"flujo", label:"Flujo de caja (6 meses)"}
+  ]},
+  {group:"Cálculos", items:[
+    {id:"precio", label:"Precio mínimo"},
+    {id:"equilibrio", label:"Punto de equilibrio"},
+    {id:"runway", label:"Runway"},
+    {id:"asignacion", label:"Asignación de dinero"}
+  ]},
+  {group:"Rutina", items:[
+    {id:"guia", label:"Guía de uso"},
+    {id:"cierre", label:"Cierre mensual"}
+  ]}
+];'''
+
+_TABS_NUEVO = '''var TABS = [
+  {group:"Guía", items:[
+    {id:"guia", label:"Guía de uso"}
+  ]},
+  {group:"Datos del mes", items:[
+    {id:"ingresos", label:"Ingresos"},
+    {id:"fijos", label:"Gastos fijos"},
+    {id:"variables", label:"Gastos variables"},
+    {id:"flujo", label:"Flujo de caja (6 meses)"}
+  ]},
+  {group:"Cálculos", items:[
+    {id:"precio", label:"Precio mínimo"},
+    {id:"equilibrio", label:"Punto de equilibrio"},
+    {id:"runway", label:"Runway"},
+    {id:"asignacion", label:"Asignación de dinero"}
+  ]},
+  {group:"Rutina", items:[
+    {id:"cierre", label:"Cierre mensual"}
+  ]},
+  {group:"Resumen", items:[
+    {id:"resumen", label:"Resumen"}
+  ]}
+];'''
+
+if _TABS_VIEJO not in t:
+    raise SystemExit('ERROR: no se encontró el bloque TABS del tablero')
+t = t.replace(_TABS_VIEJO, _TABS_NUEVO, 1)
+
+# El buildNav de antes pintaba rótulos muertos. Se sustituye entero
+# por el plegable, que además saca el botón de cada opción a su
+# propia función para compartirlo con el menú de móvil.
+_I = t.find('function buildNav(container, mobile){')
+_J = t.find('function renderShellStatic(){')
+if _I < 0 or _J < 0:
+    raise SystemExit('ERROR: no se encontró buildNav en el tablero')
+t = t[:_I] + _tablero_menu.js().strip() + '\n\n' + t[_J:]
 
 # El JS de los dos módulos va DENTRO del IIFE del tablero, justo
 # antes de que se cierre.
@@ -477,6 +546,31 @@ f, n_est = quitar_guiones(f, [
 ])
 n_f += n_est
 
+# ── La Resolución 1732 de 2026 fue REVOCADA ──
+# La ficha le decía a los negocios de salud que la 1732 reemplazaba
+# a la 3100 «con 12 meses de transición» y que podían acogerse a
+# cualquiera de las dos. Eso ya no es cierto y mandaría a alguien a
+# habilitarse con una norma que no existe.
+#
+# Comprobado en el PDF oficial de MinSalud: la Resolución 2080 del
+# 8 de septiembre de 2026 «revoca en su integridad la Resolución
+# 1732 del 5 de agosto de 2026». La 1732 nunca llegó a ser
+# obligatoria porque no se publicó en el Diario Oficial (art. 65 de
+# la Ley 1437 de 2011), así que la 3100 de 2019 nunca dejó de regir.
+#
+# Se corrige aquí y no en el archivo original para no tocarlo, que
+# es la regla de este build.
+f, n_res = quitar_guiones(f, [
+    ('"En salud, la Resolución 1732 de 2026 reemplaza a la 3100 de 2019, con 12 '
+     'meses de transición: si te inscribes por primera vez puedes acogerte a '
+     'cualquiera de las dos. Verifica con tu secretaría de salud cuál te conviene más."',
+     '"En salud rige la Resolución 3100 de 2019. La Resolución 1732 de 2026 iba a '
+     'reemplazarla, pero fue revocada por la Resolución 2080 del 8 de septiembre de '
+     '2026 y nunca entró en vigor. Si leíste que había un periodo de transición, ya '
+     'no aplica: confirma con tu secretaría de salud antes de inscribirte."'),
+])
+n_f += n_res
+
 # El asistente vive en una columna estrecha; el pie es de ancho
 # completo, así que sale del contenedor.
 f = f.replace('.app-shell {\n    max-width: 760px;', '.app-shell {\n    max-width: 760px;')
@@ -589,11 +683,34 @@ f = f.replace('</style>',
               + _ficha_descargar.CSS + '\n' + _ficha_entidades.CSS + '\n'
               + _ficha_cifras.CSS + '\n</style>', 1)
 
-# ── El nombre de la entidad es su enlace ──
+# ── Cada documento con su enlace, y la casilla de «ya lo tengo» ──
+# El enlace pasa del NOMBRE DE LA ENTIDAD a CADA DOCUMENTO: antes
+# «Registro Único de Proponentes» obligaba a pulsar «Cámara de
+# Comercio» y buscar el RUP en una portada con veinte opciones.
 _ancla_ent = 'el("h4", {}, nombre),'
 if _ancla_ent not in f:
     raise SystemExit('ERROR: no se encontró el título de las tarjetas de entidad')
 f = f.replace(_ancla_ent, 'tituloEntidad(nombre),', 1)
+
+_ancla_items = 'el("ul", {}, info.items.map((i) => el("li", {}, i))),'
+if _ancla_items not in f:
+    raise SystemExit('ERROR: no se encontró la lista de documentos de la tarjeta')
+f = f.replace(_ancla_items,
+              'el("ul", {}, info.items.map(documentoLi)),\n'
+              '          casillaHecho(nombre),', 1)
+
+# ── El aviso de vigencia, encima de las tarjetas ──
+# Va antes de la rejilla y no después: quien ya tiene sus papeles
+# necesita leerlo ANTES de ir marcando casillas, no al final.
+_ancla_aviso = 'el("h3", {}, "Mapa de entidades y documentos que te corresponden"),'
+if _ancla_aviso not in f:
+    raise SystemExit('ERROR: no se encontró el título del mapa de entidades')
+f = f.replace(
+    _ancla_aviso,
+    _ancla_aviso + '\n      el("div", { class: "aviso-vigencia" }, [\n'
+    '        el("b", {}, "Tenerlo no basta: tiene que estar vigente. "),\n'
+    '        el("span", {}, ' + json.dumps(_ficha_entidades.AVISO_VIGENCIA, ensure_ascii=False) + '),\n'
+    '      ]),', 1)
 
 # ── Fuera el bloque de botones sueltos ──
 # Los cuatro enlaces de «Gestiona tus documentos base aquí» ahora
