@@ -387,6 +387,110 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
   .calc-figura { border-color: #999; box-shadow: none; page-break-inside: avoid; }
 }
 
+/* ═══════════════ EL AVISO DE LA ASIGNACIÓN ═══════════════
+   Tres estados con tres pesos distintos. Pasarse del 100% es el
+   único que es un error de verdad, así que es el único que grita:
+   los otros dos informan. */
+.alloc-aviso {
+  margin: 14px 0 4px; padding: 11px 13px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px; line-height: 1.55;
+}
+.alloc-aviso b { display: block; margin-bottom: 2px; }
+.alloc-aviso span { display: block; }
+
+.alloc-aviso.pasado {
+  background: var(--critical-soft);
+  border: 1px solid var(--critical);
+  border-left-width: 4px;
+  color: var(--ink);
+}
+.alloc-aviso.pasado b { color: var(--critical); font-size: 13.5px; }
+
+.alloc-aviso.corto {
+  background: var(--warn-soft);
+  border-left: 3px solid var(--warn);
+  color: var(--ink);
+}
+.alloc-aviso.corto b { color: var(--warn); }
+
+.alloc-aviso.bien {
+  background: var(--good-soft);
+  border-left: 3px solid var(--good);
+  color: var(--ink);
+}
+.alloc-aviso.bien b { color: var(--good); }
+
+/* La marca de dónde estaba el 100%, cuando se cruzó. Va encima de
+   la barra, así que la barra tiene que dejar de recortar por los
+   lados para que la etiqueta no se corte. */
+.alloc-bar { position: relative; overflow: visible !important; }
+.alloc-bar > .alloc-seg:first-child { border-radius: 7px 0 0 7px; }
+.alloc-bar > .alloc-seg:last-of-type { border-radius: 0 7px 7px 0; }
+.alloc-limite {
+  position: absolute; top: -5px; bottom: -5px; width: 0;
+  border-left: 2px dashed var(--critical);
+  pointer-events: none;
+}
+.alloc-limite span {
+  position: absolute; top: -17px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  color: var(--critical); background: var(--paper-raised);
+  padding: 0 4px; white-space: nowrap;
+}
+
+/* ═══════════════ EL ÁRBOL DE LA GUÍA ═══════════════ */
+.arbol-caja {
+  display: flex; align-items: center; gap: 18px;
+  background: var(--paper-raised); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.arbol-dibujo {
+  flex: none; width: 96px; height: 116px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.arbol-dibujo svg { width: 100%; height: 100%; overflow: visible; }
+
+/* Al pasar de etapa, la planta entra creciendo desde su base. Es
+   el único movimiento de la herramienta y dura poco: lo que tiene
+   que notarse es que algo cambió, no la animación. */
+@keyframes arbol-crece {
+  from { transform: scale(.82); opacity: .3; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.arbol-dibujo.creciendo svg {
+  animation: arbol-crece .5s cubic-bezier(.2,.8,.3,1);
+  transform-origin: 50% 90%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arbol-dibujo.creciendo svg { animation: none; }
+}
+
+.arbol-texto { min-width: 0; flex: 1; }
+.arbol-texto h3 { margin: 0 0 3px; font-size: 15px; }
+.arbol-texto p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+.arbol-barra {
+  height: 7px; border-radius: 99px; background: var(--paper-sunken);
+  overflow: hidden; margin-bottom: 7px;
+}
+.arbol-barra span {
+  display: block; height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #4DA882, #158A5E);
+  transition: width .5s cubic-bezier(.2,.8,.3,1);
+}
+.arbol-cuenta {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--ink-soft);
+}
+.arbol-cuenta b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 560px) {
+  .arbol-caja { flex-direction: column; align-items: flex-start; }
+  .arbol-dibujo { width: 78px; height: 94px; align-self: center; }
+}
+@media print { .arbol-caja { display: none !important; } }
+
 
 /* ═══════════════ PIE INSTITUCIONAL ═══════════════
    Idéntico al de «Estudio de Pitch» y «Construye tu portafolio»,
@@ -1095,25 +1199,44 @@ function panelAsignacion(){
   var segs = "", legend = "";
   ["operacion","impuestos","reserva","sueldo"].forEach(function(k){
     var w = sum>0 ? (vals[k]/Math.max(sum,100))*100 : vals[k];
-    segs += '<div class="alloc-seg" style="width:'+Math.max(vals[k],0)+'%; background:'+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';
+    segs += '<div class="alloc-seg" style="width:'+Math.max(w,0)+'%; background:'+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';
     legend += '<div class="alloc-item"><span class="swatch" style="background:'+colors[k]+'"></span>'+labels[k]+': <span class="mono">'+money(inc*vals[k]/100)+'</span></div>';
   });
-  var warnMsg = sum!==100 ? '<div class="hint" style="color:var(--critical); font-weight:600; margin-top:6px">Los porcentajes suman '+sum+'%. Deben sumar 100%.</div>' : '<div class="hint" style="color:var(--good); font-weight:600; margin-top:6px">Suman 100%. Asignación válida.</div>';
+  var warnMsg;
+  if(sum > 100){
+    warnMsg = '<div class="alloc-aviso pasado" role="alert">'+
+      '<b>Te estás repartiendo más de lo que entra.</b>'+
+      '<span>Los porcentajes suman '+sum+'%, es decir '+(sum-100)+'% de más. '+
+      'Todo peso que saques por encima del 100% sale de otro balde: normalmente '+
+      'de los impuestos o de la reserva, y eso se nota cuando toca pagarlos. '+
+      'Baja '+(sum-100)+' punto'+((sum-100)===1?'':'s')+' en cualquiera de los cuatro.</span>'+
+      '</div>';
+  } else if(sum < 100){
+    warnMsg = '<div class="alloc-aviso corto">'+
+      '<b>Falta por asignar '+(100-sum)+'%.</b>'+
+      '<span>Suman '+sum+'%. Lo que no asignes se queda en la caja general, '+
+      'que es de donde cuesta saber de quién era cada peso.</span>'+
+      '</div>';
+  } else {
+    warnMsg = '<div class="alloc-aviso bien">'+
+      '<b>Suman 100%.</b><span>Cada peso que entre ya tiene destino.</span>'+
+      '</div>';
+  }
 
   return (
     '<div class="panel-head"><h2>A dónde va cada peso que entra</h2><p>Cada peso que entra se reparte por adelantado. Así el dueño no vive del efectivo de la caja general.</p></div>'+
     '<div class="card">'+
       '<h3>Porcentajes de asignación</h3><div class="hint">Defínelos tú. Deben sumar 100%. Se aplican sobre los ingresos de '+monthLabel(m)+' ('+money(inc)+').</div>'+
-      '<div class="grid3">'+
+      '<div class="grid2">'+
         allocField("operacion","Operación %",a.operacion)+
         allocField("impuestos","Impuestos %",a.impuestos)+
         allocField("reserva","Reserva %",a.reserva)+
-      '</div>'+
-      '<div class="grid3" style="margin-top:16px; max-width:33%">'+
         allocField("sueldo","Sueldo del dueño %",a.sueldo)+
       '</div>'+
       warnMsg+
-      '<div class="alloc-bar">'+segs+'</div>'+
+      '<div class="alloc-bar">'+segs+
+        (sum>100 ? '<div class="alloc-limite" style="left:'+(100/sum*100)+'%"><span>100%</span></div>' : '')+
+      '</div>'+
       '<div class="alloc-legend">'+legend+'</div>'+
     '</div>'
   );
@@ -1145,7 +1268,8 @@ function panelGuia(){
     '</div>';
   }).join("");
   return (
-    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Once secciones, tu referencia rápida del tablero.</p></div>'+
+    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Tu referencia rápida del tablero.</p></div>'+
+    bloqueArbol()+
     '<div class="card">'+items+'</div>'
   );
 }
@@ -1318,7 +1442,13 @@ function attachHandlers(){
   // guide accordion
   root.querySelectorAll(".accordion-head").forEach(function(btn){
     btn.addEventListener("click", function(){
-      btn.parentElement.classList.toggle("open");
+      var item = btn.parentElement;
+      item.classList.toggle("open");
+      /* Se apunta solo al ABRIR. Contando también el cierre, un
+         clic de ida y vuelta sumaría dos veces la misma sección. */
+      if(item.classList.contains("open")){
+        apuntarGuia("seccion", item.getAttribute("data-idx"));
+      }
     });
   });
 
@@ -1805,6 +1935,10 @@ document.addEventListener("click", function(e){
   var b = e.target.closest ? e.target.closest("[data-video]") : null;
   if(!b) return;
   var id = b.getAttribute("data-video");
+  /* El árbol de la guía crece también con los videos. Se apunta
+     antes de insertar el reproductor: después, el botón ya no
+     existe y no habría de dónde sacar el identificador. */
+  if(typeof apuntarGuia === "function") apuntarGuia("video", id);
   var caja = b.parentNode;
   var marco = document.createElement("div");
   marco.className = "vid-marco";
@@ -1835,6 +1969,104 @@ function bloqueFigura(tab){
            f[1] +
            '<p class="pie-figura">' + esc(f[2]) + '</p>' +
          '</aside>';
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   EL ÁRBOL QUE CRECE CON LA GUÍA
+   ══════════════════════════════════════════════════════════ */
+var ARBOL_ETAPAS  = ["<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <ellipse cx=\"60\" cy=\"130\" rx=\"6\" ry=\"4.5\" fill=\"#8A5200\"/>\n  <path d=\"M60 126 L60 122\" stroke=\"#158A5E\" stroke-width=\"2\" stroke-linecap=\"round\"/>", "<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <path d=\"M60 132 L60 112\" stroke=\"#0E6644\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n  <path d=\"M60 118 Q47 112 45 120 Q54 124 60 118 Z\" fill=\"#158A5E\"/>\n  <path d=\"M60 115 Q73 109 75 117 Q66 121 60 115 Z\" fill=\"#4DA882\"/>", "<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <path d=\"M60 132 L60 96\" stroke=\"#8A5200\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n  <path d=\"M60 120 Q44 113 41 123 Q53 128 60 120 Z\" fill=\"#158A5E\"/>\n  <path d=\"M60 116 Q76 109 79 119 Q67 124 60 116 Z\" fill=\"#4DA882\"/>\n  <path d=\"M60 104 Q47 98 45 106 Q55 110 60 104 Z\" fill=\"#158A5E\"/>\n  <path d=\"M60 100 Q73 94 75 102 Q65 106 60 100 Z\" fill=\"#4DA882\"/>", "<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <path d=\"M60 132 L60 88\" stroke=\"#8A5200\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n  <path d=\"M60 104 L47 94 M60 100 L73 90\" stroke=\"#8A5200\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n  <circle cx=\"60\" cy=\"76\" r=\"17\" fill=\"#158A5E\"/>\n  <circle cx=\"47\" cy=\"84\" r=\"11\" fill=\"#4DA882\"/>\n  <circle cx=\"73\" cy=\"84\" r=\"11\" fill=\"#0E6644\"/>", "<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <path d=\"M60 132 L60 80\" stroke=\"#8A5200\" stroke-width=\"5\" stroke-linecap=\"round\"/>\n  <path d=\"M60 100 L44 88 M60 96 L76 84\" stroke=\"#8A5200\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n  <circle cx=\"60\" cy=\"62\" r=\"22\" fill=\"#158A5E\"/>\n  <circle cx=\"40\" cy=\"74\" r=\"15\" fill=\"#4DA882\"/>\n  <circle cx=\"80\" cy=\"74\" r=\"15\" fill=\"#0E6644\"/>\n  <circle cx=\"60\" cy=\"80\" r=\"14\" fill=\"#158A5E\"/>", "<ellipse cx=\"60\" cy=\"134\" rx=\"42\" ry=\"7\" fill=\"#C9D3E4\"/><path d=\"M22 134 Q60 126 98 134\" fill=\"none\" stroke=\"#A9B7CE\" stroke-width=\"1.5\"/>\n  <path d=\"M60 132 L60 76\" stroke=\"#6E4200\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path d=\"M60 98 L41 84 M60 94 L79 80 M60 108 L48 100\" stroke=\"#6E4200\"\n        stroke-width=\"3\" stroke-linecap=\"round\"/>\n  <circle cx=\"60\" cy=\"54\" r=\"25\" fill=\"#158A5E\"/>\n  <circle cx=\"35\" cy=\"70\" r=\"17\" fill=\"#4DA882\"/>\n  <circle cx=\"85\" cy=\"70\" r=\"17\" fill=\"#0E6644\"/>\n  <circle cx=\"60\" cy=\"76\" r=\"17\" fill=\"#158A5E\"/>\n  <circle cx=\"44\" cy=\"50\" r=\"13\" fill=\"#4DA882\"/>\n  <circle cx=\"77\" cy=\"50\" r=\"13\" fill=\"#0E6644\"/>\n  <circle cx=\"47\" cy=\"66\" r=\"4\" fill=\"#A3252F\"/>\n  <circle cx=\"72\" cy=\"60\" r=\"4\" fill=\"#A3252F\"/>\n  <circle cx=\"60\" cy=\"80\" r=\"4\" fill=\"#A3252F\"/>\n  <circle cx=\"63\" cy=\"44\" r=\"4\" fill=\"#A3252F\"/>"];
+var ARBOL_ROTULOS = ["Aquí está la semilla.", "Salió el primer brote.", "Ya echó hojas.", "Se está haciendo árbol.", "Árbol joven, con buena copa.", "Árbol completo, y dando fruto."];
+
+/* Lo visto, guardado donde el tablero guarda todo lo demás. */
+function progresoGuia(){
+  if(!state.guiaVistas || typeof state.guiaVistas !== "object") state.guiaVistas = {};
+  if(!state.guiaVideos || typeof state.guiaVideos !== "object") state.guiaVideos = {};
+  return state.guiaVistas;
+}
+
+function cuentaGuia(){
+  progresoGuia();
+  var secciones = Object.keys(state.guiaVistas).length;
+  var videos    = Object.keys(state.guiaVideos).length;
+  var totalSec  = GUIDE.length;
+  /* Cuántos términos de la guía tienen vídeo. Se cuenta en vez de
+     escribir el número a mano: al añadir o quitar uno en
+     _tablero_videos.py, la barra sigue cuadrando sola. */
+  var totalVid = 0;
+  for(var k in VIDEOS_GUIA){ if(VIDEOS_GUIA[k]) totalVid++; }
+  return {
+    secciones: Math.min(secciones, totalSec), totalSec: totalSec,
+    videos: Math.min(videos, totalVid),       totalVid: totalVid,
+    hechos: Math.min(secciones, totalSec) + Math.min(videos, totalVid),
+    total:  totalSec + totalVid
+  };
+}
+
+function etapaArbol(c){
+  if(c.hechos <= 0) return 0;
+  /* Cinco saltos repartidos por igual sobre el total. El primero
+     llega pronto a propósito: la planta tiene que moverse la
+     primera vez que alguien abre algo, o no se entiende que el
+     dibujo responde a lo que uno hace. */
+  var paso = c.total / 5;
+  return Math.min(5, Math.max(1, Math.ceil(c.hechos / paso)));
+}
+
+function bloqueArbol(){
+  var c = cuentaGuia();
+  var etapa = etapaArbol(c);
+  var pct = c.total > 0 ? Math.round((c.hechos / c.total) * 100) : 0;
+
+  return '<div class="arbol-caja">' +
+    '<div class="arbol-dibujo" id="arbolDibujo" data-etapa="' + etapa + '">' +
+      '<svg viewBox="0 0 120 145" role="img" aria-label="' +
+        esc(ARBOL_ROTULOS[etapa] + " Has abierto " + c.hechos + " de " + c.total + ".") + '">' +
+        ARBOL_ETAPAS[etapa] +
+      '</svg>' +
+    '</div>' +
+    '<div class="arbol-texto">' +
+      '<h3>' + esc(ARBOL_ROTULOS[etapa]) + '</h3>' +
+      '<p>Crece cada vez que abres una sección o pones un video. ' +
+         'Puedes volver cuando quieras: lo que ya abriste queda.</p>' +
+      '<div class="arbol-barra"><span style="width:' + pct + '%"></span></div>' +
+      '<div class="arbol-cuenta">' +
+        '<span>Secciones abiertas <b>' + c.secciones + ' de ' + c.totalSec + '</b></span>' +
+        '<span>Videos abiertos <b>' + c.videos + ' de ' + c.totalVid + '</b></span>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* Apuntar lo visto y repintar solo el árbol.
+   No se llama a renderAll(): eso reconstruye el panel entero y
+   cerraría de golpe el acordeón que la persona acaba de abrir. */
+function apuntarGuia(tipo, clave){
+  progresoGuia();
+  var donde = (tipo === "video") ? state.guiaVideos : state.guiaVistas;
+  if(donde[clave]) return;            /* ya estaba: no hay nada que celebrar */
+  donde[clave] = true;
+  saveState();
+  repintarArbol();
+}
+
+function repintarArbol(){
+  var viejo = document.querySelector(".arbol-caja");
+  if(!viejo) return;
+  var antes = document.getElementById("arbolDibujo");
+  var etapaAntes = antes ? antes.getAttribute("data-etapa") : null;
+
+  var temp = document.createElement("div");
+  temp.innerHTML = bloqueArbol();
+  var nuevo = temp.firstChild;
+  viejo.parentNode.replaceChild(nuevo, viejo);
+
+  /* La animación solo cuando de verdad cambió de etapa. Repetirla
+     en cada clic la vuelve ruido. */
+  var ahora = nuevo.querySelector("#arbolDibujo");
+  if(ahora && etapaAntes !== null && ahora.getAttribute("data-etapa") !== etapaAntes){
+    ahora.classList.add("creciendo");
+  }
 }
 
 
