@@ -46,6 +46,16 @@ CSS = """
 .bloque-senalado { animation: bloque-senala 1.1s ease-out 2; }
 @media (prefers-reduced-motion: reduce) { .bloque-senalado { animation: none; } }
 
+/* ═══════════════ EL RESULTADO, SIN RECUADRO ═══════════════
+   La ficha terminada es la página entera, no una tarjeta dentro de
+   la página: encerrarla en un marco la hacía ver como un apartado
+   más del formulario. Fondo blanco y nada más. */
+.card.bloque.resultado-final {
+  border: 0;
+  box-shadow: none;
+  background: #FFFFFF;
+}
+
 /* ═══════════════ DESCARGAR ═══════════════ */
 /* Sin recuadro. Llevaba borde azul por los cuatro lados y, pegado
    al bloque de acciones que ya tiene el suyo, se veían dos marcos
@@ -66,7 +76,11 @@ CSS = """
 .descargar .btn { border-radius: 4px; }
 
 @media print {
-  .falta-aviso, .descargar { display: none !important; }
+  /* Nada de esto tiene sentido en papel: son botones. La fila de
+     acciones —«Ver / copiar ficha en texto», «Volver a mis
+     respuestas», «Empezar de nuevo»— salía impresa en el PDF como
+     texto suelto que no lleva a ninguna parte. */
+  .falta-aviso, .descargar, .actions-row { display: none !important; }
 }
 """
 

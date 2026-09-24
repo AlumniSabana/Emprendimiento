@@ -64,7 +64,10 @@ VIDEOS = {
     "Runway (alerta de caja)":              "",
     # «¿Cómo separar las finanzas personales de las del negocio?»,
     # CoreWoman.
-    "Separación negocio / personal":        "S2vwqa4H1uU",
+    # La clave tiene que coincidir con el título del término en la
+    # Guía de uso: si allí se renombra y aquí no, el vídeo deja de
+    # aparecer sin que nada falle. Pasó al retitular este apartado.
+    "A dónde va cada peso que entra":       "S2vwqa4H1uU",
     # Estos cuatro no son conceptos generales de finanzas: son
     # maneras de trabajar que definió este tablero. Un vídeo externo
     # no puede explicarlos porque no existen fuera de la herramienta.

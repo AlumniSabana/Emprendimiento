@@ -18,7 +18,7 @@ from _comun import PALETA, PIE_CSS, pie, barra_volver
 import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
 import _ficha_cifras
 import _tablero_importar, _tablero_videos, _tablero_campanas, _tipografia
-import _tablero_menu
+import _tablero_menu, _tablero_figuras, _tablero_importar_fijos
 
 VERSION = "2026.08.31"
 
@@ -219,6 +219,17 @@ t, n_dt = quitar_fuentes_de_google(t)
 # frase a la que se le arranca la pausa sin recolocar las palabras
 # queda peor escrita que con el guión.
 t, n_gt = quitar_guiones(t, [
+    # ── El título de «Asignación de dinero» ──
+    # Se llamaba «Separación negocio / personal», que dice el
+    # problema que evita pero no lo que la pantalla hace. Lo que
+    # hace es repartir cada ingreso en cuatro antes de tocarlo, y
+    # así se titula ahora. El rótulo del índice sigue siendo
+    # «Asignación de dinero»: uno nombra, el otro explica.
+    ('<h2>Separación negocio / personal</h2>',
+     '<h2>A dónde va cada peso que entra</h2>'),
+    # El mismo término, en la Guía de uso.
+    ('{t:"Separación negocio / personal", body:',
+     '{t:"A dónde va cada peso que entra", body:'),
     ('<h3>Empieza aquí — 5 pasos (≈15 min)</h3>',
      '<h3>Empieza aquí: 5 pasos (≈15 min)</h3>'),
     ('<h3>Proyección de caja — 6 meses</h3>',
@@ -291,7 +302,7 @@ t = t.replace(_ancla_imp, """      '</tbody></table></div>'+
 _ancla_ev = """  var addIncome = root.querySelector("#addIncome");"""
 if _ancla_ev not in t:
     raise SystemExit('ERROR: no se encontró el enganche de eventos de ingresos')
-t = t.replace(_ancla_ev, """  var impBtn = root.querySelector("#impBtn");
+t = t.replace(_ancla_ev, _tablero_importar_fijos.HANDLERS + """  var impBtn = root.querySelector("#impBtn");
   var impArchivo = root.querySelector("#impArchivo");
   if(impBtn && impArchivo){
     impBtn.addEventListener("click", function(){ impArchivo.click(); });
@@ -331,7 +342,30 @@ t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
 
 t = t.replace('</style>',
               _tablero_importar.CSS + _tablero_videos.CSS
-              + _tablero_menu.CSS + '\n</style>', 1)
+              + _tablero_menu.CSS + _tablero_figuras.CSS + '\n</style>', 1)
+
+# ── Subir los gastos fijos desde un CSV ──
+# Igual que los ingresos. Van dentro de la misma tarjeta, debajo de
+# la tabla, que es donde alguien mira cuando lleva cinco filas
+# escritas a mano y le quedan diez.
+_a = ("      '<tr class=\"total-row\"><td>Total mensual</td><td class=\"mono\">'+money(total)+"
+      "'</td><td></td></tr></tbody></table></div>'+\n    '</div>'")
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el cierre de la tabla de gastos fijos')
+t = t.replace(_a,
+      "      '<tr class=\"total-row\"><td>Total mensual</td><td class=\"mono\">'+money(total)+"
+      "'</td><td></td></tr></tbody></table></div>'+\n"
+      "      bloqueImportarFijos()+\n    '</div>'", 1)
+
+# ── El dibujo de cada cálculo, a la derecha ──
+# Se añade al panel y se le pone la clase que lo coloca en la
+# segunda columna. Las pestañas sin dibujo siguen igual que antes.
+_a = """  panels.innerHTML = '<div class="panel active">' + PANEL_RENDERERS[state.activeTab]() + '</div>';"""
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el montaje de los paneles')
+t = t.replace(_a, """  var figura = bloqueFigura(state.activeTab);
+  panels.innerHTML = '<div class="panel active' + (figura ? ' con-figura' : '') + '">' +
+                     PANEL_RENDERERS[state.activeTab]() + figura + '</div>';""", 1)
 
 # ══════════════════════════════════════════════════════════════
 #  EL ÍNDICE LATERAL: CINCO GRUPOS PLEGABLES
@@ -409,7 +443,8 @@ _cierre = '/* ============================ INIT ============================ */'
 if _cierre not in t:
     raise SystemExit('ERROR: no se encontró el bloque INIT del tablero')
 t = t.replace(_cierre,
-              _tablero_importar.JS + '\n' + _tablero_videos.js() + '\n\n' + _cierre, 1)
+              _tablero_importar.JS + '\n' + _tablero_importar_fijos.JS + '\n'
+              + _tablero_videos.js() + '\n' + _tablero_figuras.js() + '\n\n' + _cierre, 1)
 
 # ── La guía de campañas ya NO va aquí ──
 # Estuvo como pestaña del tablero. Se sacó a su propia página
@@ -722,6 +757,25 @@ _j = f.find('card.appendChild(linksSection);')
 if _i < 0 or _j < 0:
     raise SystemExit('ERROR: no se encontró el bloque de enlaces sueltos')
 f = f[:_i] + f[_j + len('card.appendChild(linksSection);'):]
+
+# ── El botón «Atrás» no llevaba a ninguna parte ──
+# Venía del asistente paso a paso: «goBack()» restaba uno a
+# «currentIndex» y repintaba. Al pasar la ficha a scroll de corrido,
+# todos los bloques se muestran a la vez y ese índice dejó de leerse,
+# así que el botón repintaba lo mismo y parecía roto. Lo estaba.
+#
+# En una página de corrido «atrás» solo puede significar una cosa:
+# volver a las preguntas para cambiar una respuesta. Eso hace ahora.
+_a = 'el("button", { class: "btn btn-ghost", type: "button", onclick: goBack }, "← Atrás"),'
+if _a not in f:
+    raise SystemExit('ERROR: no se encontró el botón «Atrás» del resultado')
+f = f.replace(_a, '''el("button", {
+        class: "btn btn-ghost", type: "button",
+        onclick: () => {
+          const primero = document.querySelector(".bloque");
+          if (primero) primero.scrollIntoView({ behavior: "smooth", block: "start" });
+        },
+      }, "← Volver a mis respuestas"),''', 1)
 
 # La caja de descarga, junto a los botones que ya había en el
 # resultado. El texto de la ficha ya lo arma buildPlainTextFicha().

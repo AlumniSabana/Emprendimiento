@@ -94,6 +94,21 @@ mirar('ficha-negocio.html', herramienta + [
         lambda s: 'Descargar en PDF' in s
               and 'Descargar como archivo' not in s
               and 'Copiar al portapapeles' not in s),
+    # «goBack» movía el índice del asistente paso a paso, que dejó de
+    # leerse al pasar la ficha a scroll de corrido: el botón repintaba
+    # lo mismo y no llevaba a ninguna parte.
+    #
+    # Queda UNA mención, dentro del navRow original. Ese navRow está
+    # sobrescrito por el de _ficha_corrido.py —se declara después, en
+    # el mismo ámbito— así que nunca se ejecuta. Se cuenta en vez de
+    # exigir cero: si aparecieran dos, sería que el botón del
+    # resultado volvió a colgar de goBack.
+    ("el botón del resultado ya no cuelga de goBack",
+        lambda s: s.count('onclick: goBack') == 1),
+    ("y lleva de vuelta a las preguntas",
+        lambda s: 'Volver a mis respuestas' in s),
+    ("el resultado va sin recuadro",
+        lambda s: 'resultado-final' in s),
 ])
 mirar('tablero-financiero.html', herramienta + [
     # La guía salió del tablero a su propia página. Si un día vuelve
@@ -113,6 +128,20 @@ mirar('tablero-financiero.html', herramienta + [
     # que alguien necesita cuando entra y no sabe qué es un runway.
     ("la guía de uso ya no está dentro de Rutina",
         lambda s: '{group:"Rutina", items:[\n    {id:"cierre"' in s),
+    # Los gastos fijos también se pueden subir en CSV.
+    ("los gastos fijos se pueden importar",
+        lambda s: 'bloqueImportarFijos' in s and 'impfZona' in s),
+    # Los cuatro cálculos llevan su dibujo.
+    # Los dibujos viajan dentro de un JSON, así que sus comillas van
+    # escapadas: se busca la forma escapada, no «viewBox="0 0 300 250"».
+    ("los cuatro cálculos llevan dibujo",
+        lambda s: all(k in s for k in ('"precio":', '"equilibrio":', '"runway":', '"asignacion":'))
+              and s.count(r'<svg viewBox=\"0 0 300 250\"') == 4),
+    # El vídeo va colgado del título del término: si el título se
+    # renombra y el mapa de vídeos no, el vídeo desaparece sin ruido.
+    ("el apartado retitulado conserva su vídeo",
+        lambda s: '"A dónde va cada peso que entra"' in s
+              and 'Separación negocio / personal' not in s),
 ])
 mirar('guia-de-campanas.html', herramienta + [
     # Lee el localStorage del tablero para no volver a preguntar lo

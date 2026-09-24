@@ -352,6 +352,10 @@ MOTOR = r"""
     aMostrar.forEach(id => {
       const card = el("div", { class: "card bloque" });
       card.id = "bloque-" + id;
+      /* El resultado no es un bloque más del formulario: es la
+         ficha terminada, y va sin recuadro. La clase la usa el CSS
+         de _ficha_descargar.py para quitarle el marco. */
+      if (id === "resultado") card.classList.add("resultado-final");
       if (!vistos.has(id)) card.classList.add("bloque-nuevo");
       main.appendChild(card);
       /* El renderer llamará a navRow() y allí se registra si este

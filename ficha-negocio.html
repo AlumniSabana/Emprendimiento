@@ -852,6 +852,16 @@ html, body {
 .bloque-senalado { animation: bloque-senala 1.1s ease-out 2; }
 @media (prefers-reduced-motion: reduce) { .bloque-senalado { animation: none; } }
 
+/* ═══════════════ EL RESULTADO, SIN RECUADRO ═══════════════
+   La ficha terminada es la página entera, no una tarjeta dentro de
+   la página: encerrarla en un marco la hacía ver como un apartado
+   más del formulario. Fondo blanco y nada más. */
+.card.bloque.resultado-final {
+  border: 0;
+  box-shadow: none;
+  background: #FFFFFF;
+}
+
 /* ═══════════════ DESCARGAR ═══════════════ */
 /* Sin recuadro. Llevaba borde azul por los cuatro lados y, pegado
    al bloque de acciones que ya tiene el suyo, se veían dos marcos
@@ -872,7 +882,11 @@ html, body {
 .descargar .btn { border-radius: 4px; }
 
 @media print {
-  .falta-aviso, .descargar { display: none !important; }
+  /* Nada de esto tiene sentido en papel: son botones. La fila de
+     acciones —«Ver / copiar ficha en texto», «Volver a mis
+     respuestas», «Empezar de nuevo»— salía impresa en el PDF como
+     texto suelto que no lleva a ninguna parte. */
+  .falta-aviso, .descargar, .actions-row { display: none !important; }
 }
 
 
@@ -2029,7 +2043,13 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
           }
         },
       }, "Ver / copiar ficha en texto"),
-      el("button", { class: "btn btn-ghost", type: "button", onclick: goBack }, "← Atrás"),
+      el("button", {
+        class: "btn btn-ghost", type: "button",
+        onclick: () => {
+          const primero = document.querySelector(".bloque");
+          if (primero) primero.scrollIntoView({ behavior: "smooth", block: "start" });
+        },
+      }, "← Volver a mis respuestas"),
       el("button", {
         class: "btn btn-ghost", type: "button",
         onclick: () => {
@@ -2271,6 +2291,10 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     aMostrar.forEach(id => {
       const card = el("div", { class: "card bloque" });
       card.id = "bloque-" + id;
+      /* El resultado no es un bloque más del formulario: es la
+         ficha terminada, y va sin recuadro. La clase la usa el CSS
+         de _ficha_descargar.py para quitarle el marco. */
+      if (id === "resultado") card.classList.add("resultado-final");
       if (!vistos.has(id)) card.classList.add("bloque-nuevo");
       main.appendChild(card);
       /* El renderer llamará a navRow() y allí se registra si este

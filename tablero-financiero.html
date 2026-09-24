@@ -344,6 +344,49 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
    plegarlas ahí no ahorra nada. */
 @media print { .navgroup-btn { color: #000; } }
 
+/* ═══════════════ DIBUJOS DE LOS CÁLCULOS ═══════════════
+   El dibujo va a la derecha del contenido, ocupando el espacio que
+   antes quedaba vacío. El encabezado del panel cruza las dos
+   columnas; las tarjetas se quedan en la primera. Sin forzar la
+   columna, la segunda tarjeta de «Precio mínimo» se subía al lado
+   del dibujo y la lectura saltaba de una columna a otra. */
+.panel.con-figura {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 312px;
+  gap: 0 18px;
+  align-items: start;
+}
+.panel.con-figura > .panel-head { grid-column: 1 / -1; }
+.panel.con-figura > .card { grid-column: 1; }
+.panel.con-figura > .calc-figura { grid-column: 2; grid-row: 2; }
+
+.calc-figura {
+  background: var(--paper-raised); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 15px 12px;
+  box-shadow: var(--shadow);
+}
+.calc-figura h3 {
+  font-size: 12.5px; margin: 0 0 9px; color: var(--ink);
+  line-height: 1.3;
+}
+.calc-figura svg { display: block; width: 100%; height: auto; }
+.calc-figura .pie-figura {
+  margin: 8px 0 0; font-size: 11px; line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* Por debajo de 1120 px la columna de 312 px deja al contenido sin
+   sitio: los campos de porcentaje de «Asignación» se apretaban en
+   tres columnas de 90 px. Se apila y el dibujo pasa debajo. */
+@media (max-width: 1120px) {
+  .panel.con-figura { display: block; }
+  .calc-figura { margin-top: 16px; }
+}
+@media print {
+  .panel.con-figura { display: block; }
+  .calc-figura { border-color: #999; box-shadow: none; page-break-inside: avoid; }
+}
+
 
 /* ═══════════════ PIE INSTITUCIONAL ═══════════════
    Idéntico al de «Estudio de Pitch» y «Construye tu portafolio»,
@@ -897,6 +940,7 @@ function panelFijos(){
       '<div class="tbl-actions"><h3 style="margin:0">Gastos fijos mensuales<span class="badge-count">'+rows.length+'</span></h3><button class="btn small" id="addFixed">+ Agregar gasto fijo</button></div>'+
       '<div class="scrollx"><table class="tbl" id="fixedTbl"><thead><tr><th>Concepto</th><th>Monto / mes</th><th></th></tr></thead><tbody>'+body+
       '<tr class="total-row"><td>Total mensual</td><td class="mono">'+money(total)+'</td><td></td></tr></tbody></table></div>'+
+      bloqueImportarFijos()+
     '</div>'
   );
 }
@@ -1057,7 +1101,7 @@ function panelAsignacion(){
   var warnMsg = sum!==100 ? '<div class="hint" style="color:var(--critical); font-weight:600; margin-top:6px">Los porcentajes suman '+sum+'%. Deben sumar 100%.</div>' : '<div class="hint" style="color:var(--good); font-weight:600; margin-top:6px">Suman 100%. Asignación válida.</div>';
 
   return (
-    '<div class="panel-head"><h2>Separación negocio / personal</h2><p>Cada peso que entra se reparte por adelantado. Así el dueño no vive del efectivo de la caja general.</p></div>'+
+    '<div class="panel-head"><h2>A dónde va cada peso que entra</h2><p>Cada peso que entra se reparte por adelantado. Así el dueño no vive del efectivo de la caja general.</p></div>'+
     '<div class="card">'+
       '<h3>Porcentajes de asignación</h3><div class="hint">Defínelos tú. Deben sumar 100%. Se aplican sobre los ingresos de '+monthLabel(m)+' ('+money(inc)+').</div>'+
       '<div class="grid3">'+
@@ -1087,7 +1131,7 @@ var GUIDE = [
   {t:"Calculadora de precio mínimo", body:"Convierte tus gastos fijos y tu sueldo objetivo en una tarifa por hora. Cualquier precio por debajo de ese número te hace perder dinero, aunque el cliente pague.", red:"Si tu tarifa de mercado actual es menor a la mínima calculada, o subes precios o reduces gastos. No hay tercera opción sostenible."},
   {t:"Punto de equilibrio", body:"El número de clientes o proyectos que necesitas al mes solo para cubrir gastos, antes de empezar a ganar algo para ti.", red:"Si llevas dos meses por debajo del punto de equilibrio, el problema no es de ventas, sino de estructura de costos o de precio."},
   {t:"Runway (alerta de caja)", body:"Cuántos meses puedes seguir operando con la caja actual si no entra ni un peso más. Es tu margen de reacción real.", red:"Con runway menor a 2 meses, pausa cualquier gasto no esencial hoy mismo y prioriza cobrar cuentas pendientes."},
-  {t:"Separación negocio / personal", body:"Cada ingreso se reparte de inmediato en cuatro baldes: operación, impuestos, reserva y sueldo del dueño. Evita que uses la caja del negocio como si fuera tu cuenta personal.", red:"Si retiras más de lo que tu balde de 'sueldo' permite, estás financiando tu vida con la reserva o los impuestos del negocio."},
+  {t:"A dónde va cada peso que entra", body:"Cada ingreso se reparte de inmediato en cuatro baldes: operación, impuestos, reserva y sueldo del dueño. Evita que uses la caja del negocio como si fuera tu cuenta personal.", red:"Si retiras más de lo que tu balde de 'sueldo' permite, estás financiando tu vida con la reserva o los impuestos del negocio."},
   {t:"Semáforo financiero", body:"Verde: ganancia positiva y runway sano. Amarillo: ganancia ajustada o runway corto, hay que actuar pronto. Rojo: pérdida o runway crítico, decisión inmediata.", red:"El semáforo en rojo no es un juicio, es una señal de que toca revisar precio, gastos o cobros esta semana."},
   {t:"Errores comunes en tracción temprana", body:"Los tres más frecuentes: cobrar por intuición o copiando a la competencia sin conocer los propios costos; confundir caja con ganancia (\"tengo plata en el banco, voy bien\"); y mezclar cuentas personales y del negocio sin ningún método.", red:"Si te reconoces en alguno, empieza por la calculadora de precio mínimo: resuelve la causa más común."},
   {t:"Rutina de cierre mensual", body:"Un ritual corto y fijo (30 min) al final de cada mes para actualizar el tablero y responder tres preguntas clave. Sin esta rutina, el tablero se desactualiza y deja de servir.", red:"Si llevas más de un mes sin cerrar, hazlo hoy antes de seguir tomando decisiones: los números viejos engañan."}
@@ -1148,7 +1192,9 @@ function renderAll(){
   buildNav(document.getElementById("navTabs"), false);
   buildNav(document.getElementById("mobileTabs"), true);
   var panels = document.getElementById("panels");
-  panels.innerHTML = '<div class="panel active">' + PANEL_RENDERERS[state.activeTab]() + '</div>';
+  var figura = bloqueFigura(state.activeTab);
+  panels.innerHTML = '<div class="panel active' + (figura ? ' con-figura' : '') + '">' +
+                     PANEL_RENDERERS[state.activeTab]() + figura + '</div>';
   attachHandlers();
 }
 
@@ -1156,6 +1202,32 @@ function attachHandlers(){
   var root = document.getElementById("panels");
 
   // income
+
+  var impfBtn = root.querySelector("#impfBtn");
+  var impfArchivo = root.querySelector("#impfArchivo");
+  if(impfBtn && impfArchivo){
+    impfBtn.addEventListener("click", function(){ impfArchivo.click(); });
+    impfArchivo.addEventListener("change", function(e){
+      leerArchivoFijos(e.target.files && e.target.files[0]);
+      e.target.value = "";
+    });
+  }
+  var impfEjemplo = root.querySelector("#impfEjemplo");
+  if(impfEjemplo) impfEjemplo.addEventListener("click", descargarEjemploFijosCSV);
+  var impfZona = root.querySelector("#impfZona");
+  if(impfZona){
+    ["dragenter","dragover"].forEach(function(ev){
+      impfZona.addEventListener(ev, function(e){
+        e.preventDefault(); impfZona.classList.add("encima"); });
+    });
+    ["dragleave","drop"].forEach(function(ev){
+      impfZona.addEventListener(ev, function(e){
+        e.preventDefault(); impfZona.classList.remove("encima"); });
+    });
+    impfZona.addEventListener("drop", function(e){
+      leerArchivoFijos(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+    });
+  }
   var impBtn = root.querySelector("#impBtn");
   var impArchivo = root.querySelector("#impArchivo");
   if(impBtn && impArchivo){
@@ -1551,11 +1623,169 @@ function descargarEjemploCSV(){
 
 
 /* ══════════════════════════════════════════════════════════
+   IMPORTAR GASTOS FIJOS
+   ══════════════════════════════════════════════════════════ */
+
+/* Qué columna es el concepto y cuál el monto. Se buscan por
+   nombre; si la hoja no trae títulos, se asume el orden de la
+   tabla que la persona está viendo: concepto, monto. */
+function columnasFijos(cabecera){
+  var norm = cabecera.map(function(c){
+    return String(c||"").trim().toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "");
+  });
+  function buscar(claves){
+    for(var i = 0; i < norm.length; i++)
+      for(var j = 0; j < claves.length; j++)
+        if(norm[i].indexOf(claves[j]) >= 0) return i;
+    return -1;
+  }
+  var c = buscar(["concepto","gasto","nombre","descripcion","detalle","rubro","item"]);
+  var v = buscar(["monto","valor","importe","total","costo","precio","mensual"]);
+  return {
+    concepto: c >= 0 ? c : 0,
+    monto:    v >= 0 ? v : 1,
+    hayCabecera: (c >= 0 || v >= 0)
+  };
+}
+
+function importarFijosCSV(texto){
+  var filas = csvFilas(texto);
+  if(!filas.length) return {añadidos:0, avisos:["El archivo está vacío."]};
+
+  var col = columnasFijos(filas[0]);
+  var datos = col.hayCabecera ? filas.slice(1) : filas;
+  var nuevos = [], avisos = [];
+
+  datos.forEach(function(f, i){
+    var linea = (col.hayCabecera ? i + 2 : i + 1);
+
+    /* Una fila totalmente vacía no es un error: es la línea en
+       blanco que Excel deja al final de casi todo archivo. */
+    var vacia = f.every(function(c){ return !String(c == null ? "" : c).trim(); });
+    if(vacia) return;
+
+    var monto = aCifra(f[col.monto]);
+    if(monto === null){
+      avisos.push("Fila " + linea + ": no se entendió el monto (" +
+                  (String(f[col.monto]||"").trim() || "vacío") + ").");
+      return;
+    }
+    var nombre = String(f[col.concepto] == null ? "" : f[col.concepto]).trim();
+    if(!nombre){
+      avisos.push("Fila " + linea + ": sin concepto, se guardó como «Sin nombre».");
+      nombre = "Sin nombre";
+    }
+    nuevos.push({ id: uid(), name: nombre, amount: Math.round(monto) });
+  });
+
+  if(nuevos.length){
+    state.fixedExpenses = state.fixedExpenses.concat(nuevos);
+    saveState();
+  }
+  return {añadidos: nuevos.length, avisos: avisos};
+}
+
+function pintarResultadoFijos(res){
+  var caja = document.getElementById("impfResultado");
+  if(!caja) return;
+  var h = "";
+  if(res.añadidos > 0){
+    h += '<p class="imp-ok">Se agregaron ' + res.añadidos +
+         (res.añadidos === 1 ? " gasto fijo." : " gastos fijos.") + '</p>';
+  } else {
+    h += '<p class="imp-mal">No se pudo leer ningún gasto del archivo.</p>';
+  }
+  if(res.avisos.length){
+    var muestra = res.avisos.slice(0, 5);
+    h += '<p class="imp-aviso">' + res.avisos.length +
+         (res.avisos.length === 1 ? " fila necesita revisión:" : " filas necesitan revisión:") + '</p>';
+    h += '<ul class="imp-detalle">' + muestra.map(function(a){
+      return "<li>" + esc(a) + "</li>"; }).join("");
+    if(res.avisos.length > muestra.length)
+      h += "<li>y " + (res.avisos.length - muestra.length) + " más.</li>";
+    h += "</ul>";
+  }
+  caja.innerHTML = h;
+}
+
+function leerArchivoFijos(archivo){
+  if(!archivo) return;
+  var nombre = (archivo.name || "").toLowerCase();
+  var caja = document.getElementById("impfResultado");
+  if(/\.xlsx?$/.test(nombre)){
+    if(caja) caja.innerHTML = '<p class="imp-mal">Este es un archivo de Excel. ' +
+      'Ábrelo y usa <strong>Archivo → Guardar como → CSV</strong>, luego sube ese archivo.</p>';
+    return;
+  }
+  function procesar(texto){
+    try{
+      var res = importarFijosCSV(texto);
+      /* Repintar primero y escribir el mensaje después: renderAll()
+         reconstruye el panel y se llevaría por delante el aviso. */
+      renderAll();
+      pintarResultadoFijos(res);
+    }catch(err){
+      if(caja) caja.innerHTML = '<p class="imp-mal">No se pudo leer el archivo: ' +
+        esc(String(err && err.message || err)) + '</p>';
+    }
+  }
+  var lector = new FileReader();
+  lector.onerror = function(){
+    if(caja) caja.innerHTML = '<p class="imp-mal">No se pudo abrir el archivo.</p>';
+  };
+  lector.onload = function(e){
+    var t = String(e.target.result || "");
+    if(t.indexOf("�") < 0){ procesar(t); return; }
+    var l2 = new FileReader();
+    l2.onerror = lector.onerror;
+    l2.onload = function(e2){ procesar(String(e2.target.result || "")); };
+    l2.readAsText(archivo, "ISO-8859-1");
+  };
+  lector.readAsText(archivo, "UTF-8");
+}
+
+function bloqueImportarFijos(){
+  return (
+    '<div class="imp-zona" id="impfZona">' +
+      '<div class="imp-cab">' +
+        '<h4>¿Ya tienes tus gastos fijos en una hoja?</h4>' +
+      '</div>' +
+      '<p class="imp-ayuda">Súbelos de una vez en vez de escribirlos uno a uno. ' +
+        'En Excel o Google Sheets usa <strong>Archivo → Guardar como → CSV</strong>. ' +
+        'Se esperan dos columnas: <code>concepto</code> y <code>monto</code>. ' +
+        'Si la hoja no tiene títulos, se toma ese mismo orden. ' +
+        'No hace falta el mes: un gasto fijo se repite todos los meses.</p>' +
+      '<div class="imp-acciones">' +
+        '<button class="btn small" id="impfBtn" type="button">Elegir archivo CSV</button>' +
+        '<button class="btn small ghost" id="impfEjemplo" type="button">Descargar ejemplo</button>' +
+      '</div>' +
+      '<input type="file" id="impfArchivo" accept=".csv,text/csv,text/plain">' +
+      '<div class="imp-resultado" id="impfResultado"></div>' +
+    '</div>'
+  );
+}
+
+function descargarEjemploFijosCSV(){
+  var csv = "concepto,monto\n" +
+            "Arriendo del local,1.200.000\n" +
+            "Servicios (agua, luz, gas),320000\n" +
+            "Internet y telefonía,145000\n" +
+            "Contador,250000\n";
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + csv], {type:"text/csv;charset=utf-8"}));
+  a.download = "ejemplo-gastos-fijos.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+
+
+/* ══════════════════════════════════════════════════════════
    VIDEOS DE LA GUÍA
    El reproductor se inserta al pulsar, no al abrir la página:
    así YouTube solo sabe de quien decidió ver un vídeo.
    ══════════════════════════════════════════════════════════ */
-var VIDEOS_GUIA = {"Facturación vs. ganancia real": "JRxuCwqW0J8", "Ingresos por cliente y mes": "JRxuCwqW0J8", "Gastos fijos": "OqCo9Fljxmw", "Gastos variables": "OqCo9Fljxmw", "Flujo de caja proyectado": "zIVOrdu2w1I", "Calculadora de precio mínimo": "", "Punto de equilibrio": "NkbrYt291ZU", "Runway (alerta de caja)": "", "Separación negocio / personal": "S2vwqa4H1uU", "Semáforo financiero": "", "Errores comunes en tracción temprana": "", "Rutina de cierre mensual": ""};
+var VIDEOS_GUIA = {"Facturación vs. ganancia real": "JRxuCwqW0J8", "Ingresos por cliente y mes": "JRxuCwqW0J8", "Gastos fijos": "OqCo9Fljxmw", "Gastos variables": "OqCo9Fljxmw", "Flujo de caja proyectado": "zIVOrdu2w1I", "Calculadora de precio mínimo": "", "Punto de equilibrio": "NkbrYt291ZU", "Runway (alerta de caja)": "", "A dónde va cada peso que entra": "S2vwqa4H1uU", "Semáforo financiero": "", "Errores comunes en tracción temprana": "", "Rutina de cierre mensual": ""};
 
 function bloqueVideo(titulo){
   var id = VIDEOS_GUIA[titulo];
@@ -1588,6 +1818,24 @@ document.addEventListener("click", function(e){
   caja.innerHTML = "";
   caja.appendChild(marco);
 });
+
+
+/* ══════════════════════════════════════════════════════════
+   EL DIBUJO DE CADA CÁLCULO
+   Se añade al panel y se marca el panel para que lo coloque a la
+   derecha. Las pestañas sin dibujo no cambian en nada.
+   ══════════════════════════════════════════════════════════ */
+var FIGURAS_CALCULO = {"precio": ["Cómo se arma el precio mínimo", "<svg viewBox=\"0 0 300 250\" role=\"img\" aria-labelledby=\"figPrecioT figPrecioD\">\n  <title id=\"figPrecioT\">Cómo se arma el precio mínimo</title>\n  <desc id=\"figPrecioD\">Una barra apilada: el costo directo, más la parte\n  de gastos fijos que le corresponde, más el margen. La suma es el precio\n  mínimo. Cobrar por debajo de esa línea da pérdida.</desc>\n\n  <!-- la barra, de abajo hacia arriba -->\n  <rect x=\"58\" y=\"176\" width=\"74\" height=\"44\" fill=\"#001459\" rx=\"3\"/>\n  <rect x=\"58\" y=\"126\" width=\"74\" height=\"48\" fill=\"#25409A\" rx=\"3\"/>\n  <rect x=\"58\" y=\"86\"  width=\"74\" height=\"38\" fill=\"#158A5E\" rx=\"3\"/>\n\n  <!-- rótulos de cada tramo -->\n  <text x=\"140\" y=\"203\" font-size=\"11\" fill=\"#0A1330\">Lo que te cuesta</text>\n  <text x=\"140\" y=\"216\" font-size=\"10\" fill=\"#4B5670\">hacerlo o prestarlo</text>\n  <text x=\"140\" y=\"148\" font-size=\"11\" fill=\"#0A1330\">Su parte de los</text>\n  <text x=\"140\" y=\"161\" font-size=\"10\" fill=\"#4B5670\">gastos fijos</text>\n  <text x=\"140\" y=\"109\" font-size=\"11\" fill=\"#0A1330\">Lo que quieres</text>\n  <text x=\"140\" y=\"122\" font-size=\"10\" fill=\"#4B5670\">ganar</text>\n\n  <!-- la línea del precio mínimo -->\n  <line x1=\"40\" y1=\"80\" x2=\"290\" y2=\"80\" stroke=\"#001459\" stroke-width=\"2\"\n        stroke-dasharray=\"5 3\"/>\n  <text x=\"40\" y=\"70\" font-size=\"11.5\" font-weight=\"700\" fill=\"#001459\">Precio mínimo</text>\n\n  <!-- la zona de pérdida, debajo de la línea -->\n  <rect x=\"10\" y=\"86\" width=\"40\" height=\"134\" fill=\"#FAE8E9\" rx=\"3\"/>\n  <text x=\"30\" y=\"153\" font-size=\"10\" fill=\"#A3252F\" text-anchor=\"middle\"\n        transform=\"rotate(-90 30 153)\">Cobrar aquí es perder</text>\n</svg>", "Cobrar menos no es más barato para el cliente: es poner tú la diferencia, venta tras venta."], "equilibrio": ["Dónde está el punto de equilibrio", "<svg viewBox=\"0 0 300 250\" role=\"img\" aria-labelledby=\"figEqT figEqD\">\n  <title id=\"figEqT\">Dónde está el punto de equilibrio</title>\n  <desc id=\"figEqD\">Dos líneas sobre unos ejes: los gastos, que casi no\n  cambian vendas lo que vendas, y los ingresos, que suben con cada venta.\n  Donde se cruzan está el punto de equilibrio: antes se pierde, después se\n  gana.</desc>\n\n  <!-- ejes -->\n  <line x1=\"46\" y1=\"44\" x2=\"46\" y2=\"196\" stroke=\"#C3CFE3\" stroke-width=\"1.5\"/>\n  <line x1=\"46\" y1=\"196\" x2=\"290\" y2=\"196\" stroke=\"#C3CFE3\" stroke-width=\"1.5\"/>\n  <text x=\"46\" y=\"36\" font-size=\"10\" fill=\"#4B5670\">Dinero</text>\n  <text x=\"290\" y=\"212\" font-size=\"10\" fill=\"#4B5670\" text-anchor=\"end\">Ventas del mes</text>\n\n  <!-- zonas: pierdes antes del cruce, ganas después -->\n  <path d=\"M46 196 L177 196 L177 123 Z\" fill=\"#FAE8E9\"/>\n  <path d=\"M177 123 L177 196 L290 196 L290 62 Z\" fill=\"#E4F2EC\"/>\n\n  <!-- la recta de gastos: casi plana, porque no dependen de lo que vendas.\n       El rótulo va al ARRANQUE de la línea y no al final: al final chocaba\n       con el texto del punto de equilibrio, que ocupa el centro alto. -->\n  <line x1=\"46\" y1=\"130\" x2=\"290\" y2=\"118\" stroke=\"#8A5200\" stroke-width=\"2.5\"/>\n  <text x=\"50\" y=\"124\" font-size=\"10.5\" fill=\"#8A5200\" font-weight=\"600\">Tus gastos</text>\n\n  <!-- la recta de ingresos: sube con cada venta -->\n  <line x1=\"46\" y1=\"196\" x2=\"290\" y2=\"62\" stroke=\"#001459\" stroke-width=\"2.5\"/>\n  <text x=\"290\" y=\"56\" font-size=\"10.5\" fill=\"#001459\" text-anchor=\"end\" font-weight=\"600\">Lo que vendes</text>\n\n  <!-- el cruce -->\n  <line x1=\"177\" y1=\"123\" x2=\"177\" y2=\"196\" stroke=\"#0A1330\" stroke-width=\"1\"\n        stroke-dasharray=\"3 3\"/>\n  <circle cx=\"177\" cy=\"123\" r=\"5\" fill=\"#FFFFFF\" stroke=\"#0A1330\" stroke-width=\"2.5\"/>\n  <text x=\"177\" y=\"92\" font-size=\"11\" font-weight=\"700\" fill=\"#0A1330\" text-anchor=\"middle\">Punto de</text>\n  <text x=\"177\" y=\"104\" font-size=\"11\" font-weight=\"700\" fill=\"#0A1330\" text-anchor=\"middle\">equilibrio</text>\n\n  <text x=\"128\" y=\"182\" font-size=\"10\" fill=\"#A3252F\" text-anchor=\"middle\">Pierdes</text>\n  <text x=\"236\" y=\"182\" font-size=\"10\" fill=\"#158A5E\" text-anchor=\"middle\">Ganas</text>\n</svg>", "Hasta ese punto solo estás cubriendo gastos. Lo que vendas de ahí en adelante ya te queda."], "runway": ["Qué mide el runway", "<svg viewBox=\"0 0 300 250\" role=\"img\" aria-labelledby=\"figRwT figRwD\">\n  <title id=\"figRwT\">Qué mide el runway</title>\n  <desc id=\"figRwD\">Barras que bajan mes a mes: la plata que tienes hoy se\n  va gastando hasta llegar a cero. El runway son los meses que faltan para\n  ese momento.</desc>\n\n  <line x1=\"42\" y1=\"176\" x2=\"286\" y2=\"176\" stroke=\"#C3CFE3\" stroke-width=\"1.5\"/>\n\n  <!-- la caja bajando -->\n  <rect x=\"50\"  y=\"56\"  width=\"30\" height=\"120\" fill=\"#001459\" rx=\"3\"/>\n  <rect x=\"94\"  y=\"86\"  width=\"30\" height=\"90\"  fill=\"#25409A\" rx=\"3\"/>\n  <rect x=\"138\" y=\"116\" width=\"30\" height=\"60\"  fill=\"#7FA6D0\" rx=\"3\"/>\n  <rect x=\"182\" y=\"146\" width=\"30\" height=\"30\"  fill=\"#8A5200\" rx=\"3\"/>\n  <rect x=\"226\" y=\"170\" width=\"30\" height=\"6\"   fill=\"#A3252F\" rx=\"2\"/>\n\n  <text x=\"65\"  y=\"192\" font-size=\"9.5\" fill=\"#4B5670\" text-anchor=\"middle\">hoy</text>\n  <text x=\"109\" y=\"192\" font-size=\"9.5\" fill=\"#4B5670\" text-anchor=\"middle\">mes 1</text>\n  <text x=\"153\" y=\"192\" font-size=\"9.5\" fill=\"#4B5670\" text-anchor=\"middle\">mes 2</text>\n  <text x=\"197\" y=\"192\" font-size=\"9.5\" fill=\"#4B5670\" text-anchor=\"middle\">mes 3</text>\n  <text x=\"241\" y=\"192\" font-size=\"9.5\" fill=\"#A3252F\" text-anchor=\"middle\" font-weight=\"700\">mes 4</text>\n\n  <text x=\"46\" y=\"44\" font-size=\"11\" fill=\"#0A1330\">La plata que tienes hoy</text>\n\n  <!-- la flecha del tiempo que queda -->\n  <line x1=\"50\" y1=\"212\" x2=\"241\" y2=\"212\" stroke=\"#0A1330\" stroke-width=\"1.5\"/>\n  <line x1=\"50\" y1=\"208\" x2=\"50\" y2=\"216\" stroke=\"#0A1330\" stroke-width=\"1.5\"/>\n  <line x1=\"241\" y1=\"208\" x2=\"241\" y2=\"216\" stroke=\"#0A1330\" stroke-width=\"1.5\"/>\n  <text x=\"145\" y=\"226\" font-size=\"11\" font-weight=\"700\" fill=\"#0A1330\" text-anchor=\"middle\">Esto es tu runway</text>\n</svg>", "Los meses que te quedan si dejaras de vender mañana. No mide cuánta plata tienes, sino cuánto tiempo te da."], "asignacion": ["Cómo se reparte cada ingreso", "<svg viewBox=\"0 0 300 250\" role=\"img\" aria-labelledby=\"figAsT figAsD\">\n  <title id=\"figAsT\">Cómo se reparte cada ingreso</title>\n  <desc id=\"figAsD\">Lo que entra se divide en cuatro partes apenas llega:\n  operación, impuestos, reserva y el sueldo del dueño. Cada parte va a lo\n  suyo y no se mezcla con las demás.</desc>\n\n  <!-- lo que entra -->\n  <rect x=\"88\" y=\"14\" width=\"124\" height=\"34\" rx=\"6\" fill=\"#E3EAF7\"\n        stroke=\"#001459\" stroke-width=\"1.5\"/>\n  <text x=\"150\" y=\"36\" font-size=\"12\" font-weight=\"700\" fill=\"#001459\" text-anchor=\"middle\">Lo que entra</text>\n\n  <!-- el reparto -->\n  <path d=\"M150 48 L150 62 M150 62 L48 62 L48 78 M150 62 L116 62 L116 78\n           M150 62 L184 62 L184 78 M150 62 L252 62 L252 78\"\n        fill=\"none\" stroke=\"#7FA6D0\" stroke-width=\"1.5\"/>\n\n  <!-- los cuatro baldes -->\n  <rect x=\"20\" y=\"78\" width=\"56\" height=\"52\" rx=\"5\" fill=\"#001459\"/>\n  <text x=\"48\" y=\"100\" font-size=\"10\" fill=\"#FFFFFF\" text-anchor=\"middle\">Operar</text>\n  <text x=\"48\" y=\"113\" font-size=\"9\" fill=\"#C7D6F0\" text-anchor=\"middle\">el negocio</text>\n\n  <rect x=\"88\" y=\"78\" width=\"56\" height=\"52\" rx=\"5\" fill=\"#8A5200\"/>\n  <text x=\"116\" y=\"100\" font-size=\"10\" fill=\"#FFFFFF\" text-anchor=\"middle\">Impuestos</text>\n  <text x=\"116\" y=\"113\" font-size=\"9\" fill=\"#FBEFDD\" text-anchor=\"middle\">no es tuyo</text>\n\n  <rect x=\"156\" y=\"78\" width=\"56\" height=\"52\" rx=\"5\" fill=\"#4B5670\"/>\n  <text x=\"184\" y=\"100\" font-size=\"10\" fill=\"#FFFFFF\" text-anchor=\"middle\">Reserva</text>\n  <text x=\"184\" y=\"113\" font-size=\"9\" fill=\"#D9E1EE\" text-anchor=\"middle\">meses flojos</text>\n\n  <rect x=\"224\" y=\"78\" width=\"56\" height=\"52\" rx=\"5\" fill=\"#158A5E\"/>\n  <text x=\"252\" y=\"100\" font-size=\"10\" fill=\"#FFFFFF\" text-anchor=\"middle\">Tu sueldo</text>\n  <text x=\"252\" y=\"113\" font-size=\"9\" fill=\"#E4F2EC\" text-anchor=\"middle\">fijo y claro</text>\n\n  <!-- la caja que NO hay que usar como cuenta personal -->\n  <rect x=\"20\" y=\"152\" width=\"260\" height=\"46\" rx=\"6\" fill=\"#FAE8E9\"\n        stroke=\"#A3252F\" stroke-width=\"1\" stroke-dasharray=\"4 3\"/>\n  <text x=\"150\" y=\"171\" font-size=\"10.5\" fill=\"#A3252F\" text-anchor=\"middle\" font-weight=\"600\">Sin repartir, todo se ve como plata tuya</text>\n  <text x=\"150\" y=\"187\" font-size=\"10\" fill=\"#A3252F\" text-anchor=\"middle\">y el IVA de marzo se gasta en febrero.</text>\n</svg>", "Se reparte apenas entra, no a fin de mes: para entonces ya no se sabe de quién era cada peso."]};
+
+function bloqueFigura(tab){
+  var f = FIGURAS_CALCULO[tab];
+  if(!f) return "";
+  return '<aside class="calc-figura">' +
+           '<h3>' + esc(f[0]) + '</h3>' +
+           f[1] +
+           '<p class="pie-figura">' + esc(f[2]) + '</p>' +
+         '</aside>';
+}
 
 
 /* ============================ INIT ============================ */
