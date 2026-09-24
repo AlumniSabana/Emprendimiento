@@ -148,10 +148,94 @@ main{ padding:2.2rem 0 3rem; }
 .panel-head h2{ font-size:24px; }
 .panel-head p{ color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:62ch; }
 
+/* ═══════════════ LOS TRES PASOS, DE LADO ═══════════════
+   La guía se recorre de izquierda a derecha, no bajando. Son tres
+   momentos distintos —cuánto puedes poner, con qué piezas, y
+   afinarlo— y encadenarlos en una sola columna larga hacía que la
+   parte de Pomelli pareciera una nota al pie del presupuesto.
+
+   Cada paso es una diapositiva. Solo se ve una; las otras dos
+   están al lado, fuera del marco. */
+.pasos-barra{
+  display:flex; gap:8px; margin-bottom:18px;
+  list-style:none; padding:0;
+}
+.pasos-barra li{ flex:1 1 0; min-width:0; }
+.pasos-barra button{
+  width:100%; text-align:left; cursor:pointer;
+  background:var(--paper-raised); border:1px solid var(--line);
+  border-top:3px solid var(--line);
+  border-radius:0 0 8px 8px; padding:9px 12px 10px;
+  font-family:inherit; color:var(--ink-soft);
+  transition:border-color .15s, color .15s, background .15s;
+}
+.pasos-barra button:hover{ border-color:var(--line-strong); border-top-color:var(--line-strong); }
+.pasos-barra button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.pasos-barra .n{
+  display:block; font-family:var(--font-mono); font-size:10px;
+  font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  margin-bottom:2px;
+}
+.pasos-barra .t{ display:block; font-size:13px; font-weight:600; line-height:1.3; }
+.pasos-barra [aria-current="step"]{
+  background:var(--paper-raised); border-top-color:var(--accent);
+  color:var(--ink);
+}
+.pasos-barra [aria-current="step"] .n{ color:var(--accent); }
+/* El paso ya visitado se marca, para saber por dónde se ha pasado
+   sin tener que volver a entrar a mirar. */
+.pasos-barra .visto .n::after{ content:" ·  visto"; color:var(--good); }
+
+.marco{ overflow:hidden; }
+.pista{
+  display:flex; align-items:flex-start;
+  width:300%;
+  transition:transform .42s cubic-bezier(.3,.8,.35,1);
+}
+@media (prefers-reduced-motion: reduce){ .pista{ transition:none; } }
+.diapo{
+  width:33.3333%; flex:0 0 33.3333%;
+  padding:2px;   /* deja respirar la sombra de las tarjetas */
+}
+/* Lo que no se está viendo no debe alcanzarse con el tabulador: si
+   no, tabular desde el último campo salta a un botón invisible que
+   está dos pantallas a la derecha. */
+.diapo[aria-hidden="true"]{ visibility:hidden; }
+
+.pasos-pie{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-top:18px;
+}
+.pasos-pie .btn[disabled]{
+  opacity:.4; cursor:not-allowed;
+  background:transparent; color:var(--ink-soft); border-color:var(--line-strong);
+}
+.pasos-pie .cuenta{
+  margin-left:auto; font-size:12px; color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;
+}
+.btn.ghost{
+  background:transparent; color:var(--accent);
+  border-color:var(--line-strong);
+}
+.btn.ghost:hover{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-strong); }
+
+@media (max-width:640px){
+  .pasos-barra{ gap:5px; }
+  .pasos-barra .t{ font-size:11.5px; }
+  .pasos-barra button{ padding:7px 8px 8px; }
+}
+
 @media print{
   .cab{ background:none; color:#000; padding:1rem 0; }
   .cab h1, .cab p, .cab .eyebrow{ color:#000; }
   .origen button{ display:none; }
+  /* En papel no hay «siguiente»: se imprimen los tres pasos
+     seguidos, que es lo que alguien espera de un PDF. */
+  .pasos-barra, .pasos-pie{ display:none !important; }
+  .marco{ overflow:visible; }
+  .pista{ display:block; width:auto; transform:none !important; }
+  .diapo{ width:auto; visibility:visible !important; page-break-inside:avoid; margin-bottom:18px; }
 }
 """
 
@@ -169,8 +253,28 @@ CUERPO = """
 
 <main>
   <div class="envoltura">
-    <div id="cifras"></div>
-    <div id="guia"></div>
+    <ul class="pasos-barra" id="pasosBarra"></ul>
+
+    <div class="marco" id="marco">
+      <div class="pista" id="pista">
+        <section class="diapo" id="paso-1" aria-label="Sección 1: tus cifras y tu plan">
+          <div id="cifras"></div>
+          <div id="guia"></div>
+        </section>
+        <section class="diapo" id="paso-2" aria-label="Sección 2: las piezas gráficas">
+          <div id="piezas"></div>
+        </section>
+        <section class="diapo" id="paso-3" aria-label="Sección 3: afinar con inteligencia artificial">
+          <div id="ia"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="pasos-pie">
+      <button class="btn ghost" type="button" id="pasoAtras">&larr; Atrás</button>
+      <button class="btn" type="button" id="pasoSig">Siguiente &rarr;</button>
+      <span class="cuenta" id="pasoCuenta"></span>
+    </div>
   </div>
 </main>
 """
@@ -316,9 +420,16 @@ function leerPropio(){
 }
 function guardarPropio(){
   try{
-    localStorage.setItem(CLAVE_PROPIA, JSON.stringify({
-      bizType: state.bizType, ingresos: state.ingresos, fijos: state.fijos
-    }));
+    /* Se fusiona con lo que ya hubiera en vez de reemplazarlo: en
+       esta misma clave vive también en qué paso se quedó la
+       persona, y escribir el objeto entero lo borraba. Se veía como
+       que la guía «se reiniciaba» al tocar una cifra. */
+    var d = {};
+    try{ d = JSON.parse(localStorage.getItem(CLAVE_PROPIA) || "{}") || {}; }catch(e){}
+    d.bizType  = state.bizType;
+    d.ingresos = state.ingresos;
+    d.fijos    = state.fijos;
+    localStorage.setItem(CLAVE_PROPIA, JSON.stringify(d));
   }catch(e){}
 }
 
@@ -444,9 +555,155 @@ function pintarCifras(){
   });
 }
 
+/* ══════════════════════════════════════════════════════════
+   LOS TRES PASOS, DE IZQUIERDA A DERECHA
+   ----------------------------------------------------------
+   Tres momentos distintos: cuánto puedes poner y dónde, con qué
+   piezas, y cómo afinarlo. Puestos uno debajo de otro, el de
+   Pomelli parecía una nota al pie del presupuesto.
+
+   La pista mide 300% y se mueve con «transform»: se desplaza el
+   navegador con la tarjeta gráfica, sin volver a maquetar la
+   página. Cambiar «margin-left» haría lo mismo a la vista y
+   costaría un reflujo en cada paso.
+   ══════════════════════════════════════════════════════════ */
+
+/* Se llaman «secciones» y no «pasos» a propósito. Dentro del plan
+   los tres canales ya van rotulados «PASO 1», «PASO 2», «PASO 3»
+   —ese es el orden en que conviene atacarlos— y tener dos cosas
+   distintas llamadas «Paso 1» en la misma pantalla es pedir que se
+   confundan. */
+var PASOS = [
+  {n: "Sección 1", t: "Tus cifras y tu plan"},
+  {n: "Sección 2", t: "Las piezas gráficas"},
+  {n: "Sección 3", t: "Afinar con IA"}
+];
+
+var pasoActual = 0;
+var pasosVistos = {0: true};
+
+function irAPaso(i, conFoco){
+  pasoActual = Math.max(0, Math.min(PASOS.length - 1, i));
+  pasosVistos[pasoActual] = true;
+
+  document.getElementById("pista").style.transform =
+    "translateX(-" + (pasoActual * (100 / PASOS.length)) + "%)";
+
+  /* Lo que no se ve se saca del tabulador y de los lectores de
+     pantalla. Sin esto, tabular desde el último campo del paso 1
+     salta a un botón que está dos pantallas a la derecha. */
+  for(var k = 0; k < PASOS.length; k++){
+    var d = document.getElementById("paso-" + (k + 1));
+    if(!d) continue;
+    var oculta = (k !== pasoActual);
+    d.setAttribute("aria-hidden", oculta ? "true" : "false");
+    d.inert = oculta;                    /* donde exista */
+    var focables = d.querySelectorAll("a, button, input, select, textarea");
+    for(var j = 0; j < focables.length; j++){
+      if(oculta) focables[j].setAttribute("tabindex", "-1");
+      else focables[j].removeAttribute("tabindex");
+    }
+  }
+
+  pintarBarraPasos();
+  pintarPiePasos();
+  guardarPaso();
+
+  /* Al cambiar de paso, la página sube al principio del marco: si
+     no, se llega al paso 3 mirando su mitad de abajo, porque el
+     scroll se quedó donde estaba en el paso anterior. */
+  var marco = document.getElementById("marco");
+  if(marco && marco.getBoundingClientRect().top < 0){
+    marco.scrollIntoView({behavior: "smooth", block: "start"});
+  }
+  if(conFoco){
+    var d = document.getElementById("paso-" + (pasoActual + 1));
+    if(d){ d.setAttribute("tabindex", "-1"); d.focus({preventScroll: true}); }
+  }
+}
+
+function pintarBarraPasos(){
+  var barra = document.getElementById("pasosBarra");
+  barra.innerHTML = PASOS.map(function(p, i){
+    var actual = (i === pasoActual);
+    return '<li><button type="button" data-paso="' + i + '"' +
+      (actual ? ' aria-current="step"' : '') +
+      (pasosVistos[i] && !actual ? ' class="visto"' : '') + '>' +
+      '<span class="n">' + esc(p.n) + '</span>' +
+      '<span class="t">' + esc(p.t) + '</span>' +
+      '</button></li>';
+  }).join("");
+  Array.prototype.forEach.call(barra.querySelectorAll("[data-paso]"), function(b){
+    b.addEventListener("click", function(){
+      irAPaso(Number(b.getAttribute("data-paso")), true);
+    });
+  });
+}
+
+function pintarPiePasos(){
+  var atras = document.getElementById("pasoAtras");
+  var sig   = document.getElementById("pasoSig");
+  atras.disabled = (pasoActual === 0);
+  sig.disabled   = (pasoActual === PASOS.length - 1);
+  sig.innerHTML  = (pasoActual === PASOS.length - 1)
+    ? "Esta es la última sección"
+    : "Siguiente: " + esc(PASOS[pasoActual + 1].t) + " &rarr;";
+  document.getElementById("pasoCuenta").textContent =
+    "Sección " + (pasoActual + 1) + " de " + PASOS.length;
+}
+
+/* En qué paso se quedó. Va en la clave propia de esta página, no
+   en la del tablero. */
+function guardarPaso(){
+  try{
+    var d = JSON.parse(localStorage.getItem(CLAVE_PROPIA) || "{}");
+    d.paso = pasoActual;
+    localStorage.setItem(CLAVE_PROPIA, JSON.stringify(d));
+  }catch(e){}
+}
+function pasoGuardado(){
+  try{
+    var d = JSON.parse(localStorage.getItem(CLAVE_PROPIA) || "{}");
+    var p = Number(d.paso);
+    if(isFinite(p) && p >= 0 && p < PASOS.length) return p;
+  }catch(e){}
+  return 0;
+}
+
+function montarPasos(){
+  document.getElementById("pasoAtras").addEventListener("click", function(){
+    irAPaso(pasoActual - 1, true);
+  });
+  document.getElementById("pasoSig").addEventListener("click", function(){
+    irAPaso(pasoActual + 1, true);
+  });
+
+  /* Flechas del teclado. Se ignoran mientras se escribe en un
+     campo: ahí la flecha mueve el cursor, no la diapositiva. */
+  document.addEventListener("keydown", function(e){
+    var t = e.target || {};
+    var escribiendo = /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName || "");
+    if(escribiendo || e.ctrlKey || e.metaKey || e.altKey) return;
+    if(e.key === "ArrowRight"){ irAPaso(pasoActual + 1, false); }
+    else if(e.key === "ArrowLeft"){ irAPaso(pasoActual - 1, false); }
+  });
+}
+
 function pintar(){
   pintarCifras();
-  document.getElementById("guia").innerHTML = panelCampanas();
+  document.getElementById("guia").innerHTML   = panelCampanas();
+  document.getElementById("piezas").innerHTML = bloqueEjemplos();
+  document.getElementById("ia").innerHTML     = bloqueCampanaIA();
+
+  /* Repintar deja botones y enlaces nuevos dentro de las tres
+     diapositivas, incluidas las dos que no se están viendo. Hay que
+     volver a sacarlos del tabulador o, tras tocar una cifra, el
+     tabulador vuelve a saltar fuera de pantalla.
+     Solo si los pasos ya están montados: la primera pintada ocurre
+     antes de que exista la barra. */
+  if(document.getElementById("pasosBarra").children.length){
+    irAPaso(pasoActual, false);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -474,6 +731,9 @@ if(delTablero){
 __GUIA__
 
 pintar();
+montarPasos();
+/* Se entra por donde se quedó, salvo la primera vez. */
+irAPaso(pasoGuardado(), false);
 
 })();
 """

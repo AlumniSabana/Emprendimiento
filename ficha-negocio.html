@@ -890,6 +890,37 @@ html, body {
 }
 
 
+/* ═══════════════ LA REJILLA, EQUILIBRADA ═══════════════
+   Era «repeat(auto-fit, minmax(220px, 1fr))»: metía tantas columnas
+   como cupieran, sin mirar cuántas tarjetas había. Con cuatro
+   entidades salían tres arriba y una sola abajo, que se lee como si
+   la última sobrara.
+
+   Ahora el número de columnas lo decide la cantidad de tarjetas
+   —lo pone «--cols» desde el JS— y la última fila, cuando no llena,
+   queda centrada. Con cinco eso da tres arriba y dos abajo,
+   centradas bajo el hueco, en vez de dos pegadas a la izquierda.
+
+   Se usa flex y no grid porque centrar la última fila incompleta en
+   grid obliga a calcular a mano en qué columna empieza cada
+   sobrante; en flex, «justify-content:center» lo hace solo. */
+.entity-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+}
+.entity-grid > .entity-card {
+  flex: 0 1 calc((100% - (var(--cols, 3) - 1) * .75rem) / var(--cols, 3));
+  min-width: 210px;
+}
+/* Una sola tarjeta no se estira a todo lo ancho: una ficha de dos
+   líneas ocupando 900 px se lee peor, no mejor.
+   Se mira un atributo propio y no el «style»: cada navegador
+   serializa las variables CSS a su manera —con espacio o sin él—
+   y un selector que dependa de eso falla en unos sí y en otros no. */
+.entity-grid[data-cols="1"] > .entity-card { max-width: 420px; }
+
 /* ═══════════════ CADA DOCUMENTO, SU ENLACE ═══════════════ */
 /* El nombre de la entidad vuelve a ser texto: es un rótulo, no un
    destino. Lo que lleva a alguna parte es cada documento. */
@@ -2006,6 +2037,9 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
       ]),
     ]);
     const grid = el("div", { class: "entity-grid" });
+    const nCols = columnasPara(entidades.size);
+    grid.style.setProperty("--cols", nCols);
+    grid.setAttribute("data-cols", nCols);
     for (const [nombre, info] of entidades.entries()) {
       grid.appendChild(
         el("div", { class: `entity-card ${info.tipo}` }, [
@@ -2424,6 +2458,30 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
     "Secretaría de Salud departamental o distrital": true,
     "Secretaría de Salud municipal": true
   };
+
+  /* Cuántas columnas para esta cantidad de tarjetas.
+     Se escribe la tabla entera en vez de una fórmula: son ocho
+     casos posibles como mucho —hay ocho entidades en total— y así
+     se puede mirar y discutir cada uno. Una fórmula de reparto
+     óptimo aquí sería más corta y menos clara.
+
+     El tope es 3 aunque quepan 4: con cuatro columnas los nombres
+     largos («Secretaría de Salud departamental o distrital») se
+     parten en cinco líneas. */
+  const COLUMNAS_POR_CANTIDAD = {
+    1: 1,   // sola, sin estirar
+    2: 2,
+    3: 3,   // las tres arriba
+    4: 2,   // 2 + 2, y no 3 + 1
+    5: 3,   // 3 + 2, con las dos de abajo centradas
+    6: 3,   // 3 + 3
+    7: 3,   // 3 + 3 + 1
+    8: 3,   // 3 + 3 + 2
+  };
+
+  function columnasPara(n) {
+    return COLUMNAS_POR_CANTIDAD[n] || 3;
+  }
 
   function tituloEntidad(nombre) {
     var h = el("h4", {}, nombre);

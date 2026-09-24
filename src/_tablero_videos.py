@@ -133,6 +133,10 @@ document.addEventListener("click", function(e){
   var b = e.target.closest ? e.target.closest("[data-video]") : null;
   if(!b) return;
   var id = b.getAttribute("data-video");
+  /* El árbol de la guía crece también con los videos. Se apunta
+     antes de insertar el reproductor: después, el botón ya no
+     existe y no habría de dónde sacar el identificador. */
+  if(typeof apuntarGuia === "function") apuntarGuia("video", id);
   var caja = b.parentNode;
   var marco = document.createElement("div");
   marco.className = "vid-marco";

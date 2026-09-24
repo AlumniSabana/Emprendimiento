@@ -109,6 +109,10 @@ mirar('ficha-negocio.html', herramienta + [
         lambda s: 'Volver a mis respuestas' in s),
     ("el resultado va sin recuadro",
         lambda s: 'resultado-final' in s),
+    # Las columnas de la rejilla dependen de cuántas entidades hay,
+    # para que la última fila no quede con una tarjeta suelta.
+    ("la rejilla de entidades se equilibra",
+        lambda s: 'columnasPara' in s and 'COLUMNAS_POR_CANTIDAD' in s),
 ])
 mirar('tablero-financiero.html', herramienta + [
     # La guía salió del tablero a su propia página. Si un día vuelve
@@ -142,6 +146,37 @@ mirar('tablero-financiero.html', herramienta + [
     ("el apartado retitulado conserva su vídeo",
         lambda s: '"A dónde va cada peso que entra"' in s
               and 'Separación negocio / personal' not in s),
+    # Los cuatro porcentajes van dos y dos, no tres y uno suelto.
+    ("los porcentajes van en dos filas de dos",
+        lambda s: 'style="margin-top:16px; max-width:33%"' not in s
+              and s.count('allocField("sueldo"') == 1),
+    # Pasarse del 100% y quedarse corto no son el mismo error.
+    ("avisa distinto al pasarse del 100%",
+        lambda s: 'Te estás repartiendo más de lo que entra' in s
+              and 'Falta por asignar' in s),
+    # La barra encogía los segmentos para que cupieran, así que 110%
+    # se veía igual que 100%: llena de lado a lado.
+    ("la barra usa el ancho proporcional, no el crudo",
+        lambda s: 'style="width:\'+Math.max(w,0)+\'%' in s),
+    ("y marca dónde quedó el 100%",
+        lambda s: 'alloc-limite' in s),
+    # El árbol de la guía.
+    ("la guía lleva el árbol que crece",
+        lambda s: 'bloqueArbol()' in s and 'arbol-caja' in s),
+    ("el árbol tiene sus seis etapas",
+        lambda s: s.count('Aquí está la semilla') >= 1
+              and s.count('dando fruto') >= 1),
+    ("cuenta lo que de verdad puede saber",
+        lambda s: 'Secciones abiertas' in s and 'Videos abiertos' in s),
+    # Cada término de la guía dice a qué paso pertenece.
+    ("cada término de la guía lleva su paso",
+        lambda s: 'subtituloPaso' in s and 'paso-guia' in s),
+    # Las claves de PASOS son títulos de GUIDE: si uno se renombra
+    # allí y aquí no, ese término se queda mudo sin que nada falle.
+    ("los pasos cubren los doce términos",
+        lambda s: (lambda titulos, pasos: all(t in pasos for t in titulos))(
+            re.findall(r'\{t:"([^"]+)"', s[s.find('var GUIDE = ['):]),
+            s[s.find('var PASOS_GUIA'):s.find('var CLASES_PASO')])),
 ])
 mirar('guia-de-campanas.html', herramienta + [
     # Lee el localStorage del tablero para no volver a preguntar lo
@@ -157,6 +192,17 @@ mirar('guia-de-campanas.html', herramienta + [
               and 'setItem("tf_dashboard_v1"' not in s),
     ("sabe que se muestra suelta",
         lambda s: 'window.CAMPANAS_SUELTA = true;' in s),
+    # Tres secciones que se recorren de lado, no bajando.
+    ("va en tres secciones horizontales",
+        lambda s: s.count('class="diapo"') == 3
+              and 'pasos-barra' in s and 'translateX' in s),
+    ("las piezas y la IA no se quedaron en la primera",
+        lambda s: 'id="piezas"' in s and 'id="ia"' in s),
+    # La sección de Gemini dice qué falta para encenderla en vez de
+    # limitarse a un botón gris.
+    ("la sección de IA explica qué falta",
+        lambda s: 'Qué falta para encenderlo' in s
+              and 'clave de API' in s),
     # El enlace a Pomelli tiene que ser el general. Una dirección
     # «/campaigns/<código>» es la de una campaña guardada dentro de
     # UNA cuenta: a los demás les sale la pantalla de inicio de

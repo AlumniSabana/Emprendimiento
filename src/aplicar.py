@@ -18,7 +18,8 @@ from _comun import PALETA, PIE_CSS, pie, barra_volver
 import _ficha_corrido, _ficha_formulario, _ficha_descargar, _ficha_entidades
 import _ficha_cifras
 import _tablero_importar, _tablero_videos, _tablero_campanas, _tipografia
-import _tablero_menu, _tablero_figuras, _tablero_importar_fijos
+import _tablero_menu, _tablero_figuras, _tablero_importar_fijos, _tablero_arbol
+import _tablero_pasos
 
 VERSION = "2026.08.31"
 
@@ -342,7 +343,152 @@ t = t.replace(_ancla_vid, "+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+", 1)
 
 t = t.replace('</style>',
               _tablero_importar.CSS + _tablero_videos.CSS
-              + _tablero_menu.CSS + _tablero_figuras.CSS + '\n</style>', 1)
+              + _tablero_menu.CSS + _tablero_figuras.CSS
+              + _tablero_arbol.CSS + _tablero_pasos.CSS + '\n</style>', 1)
+
+# ── El paso al que pertenece cada término de la guía ──
+# Va bajo el título y se ve con la viñeta cerrada, que es lo que
+# permite recorrer la lista buscando qué falta sin abrir las doce.
+_a = ("""'<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+"""
+      """'</span><h4 style="flex:1">'+esc(g.t)+'</h4><span class="chev">▾</span></button>'+""")
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró la cabecera del acordeón de la guía')
+t = t.replace(_a,
+      ("""'<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+"""
+       """'</span><div class="titulo-y-paso"><h4>'+esc(g.t)+'</h4>'+subtituloPaso(g.t)+"""
+       """'</div><span class="chev">▾</span></button>'+"""), 1)
+
+# ══════════════════════════════════════════════════════════════
+#  LOS CUATRO PORCENTAJES, EN DOS FILAS DE DOS
+#
+#  Estaban en un «grid3» de tres columnas y el cuarto campo colgaba
+#  aparte, en un segundo grid con «max-width:33%». Ahí «Sueldo del
+#  dueño %» se partía en cuatro líneas y su casilla quedaba tan
+#  estrecha que el número se comía las flechitas del selector.
+# ══════════════════════════════════════════════════════════════
+_a = """      '<div class="grid3">'+
+        allocField("operacion","Operación %",a.operacion)+
+        allocField("impuestos","Impuestos %",a.impuestos)+
+        allocField("reserva","Reserva %",a.reserva)+
+      '</div>'+
+      '<div class="grid3" style="margin-top:16px; max-width:33%">'+
+        allocField("sueldo","Sueldo del dueño %",a.sueldo)+
+      '</div>'+"""
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró la rejilla de porcentajes')
+t = t.replace(_a, """      '<div class="grid2">'+
+        allocField("operacion","Operación %",a.operacion)+
+        allocField("impuestos","Impuestos %",a.impuestos)+
+        allocField("reserva","Reserva %",a.reserva)+
+        allocField("sueldo","Sueldo del dueño %",a.sueldo)+
+      '</div>'+""", 1)
+
+# ══════════════════════════════════════════════════════════════
+#  LA ADVERTENCIA DE PASARSE DEL 100%
+#
+#  Antes había un solo mensaje para los dos errores: «suman 110%.
+#  Deben sumar 100%», en rojo y del tamaño de una nota al pie.
+#  Pasarse y quedarse corto no son lo mismo:
+#
+#   · Pasarse es repartir plata que no existe. Si alguien asigna
+#     110%, cada peso que saque para su sueldo sale de los
+#     impuestos o de la reserva, y eso se descubre en marzo.
+#   · Quedarse corto solo deja una parte sin asignar, que es un
+#     estado normal mientras se está cuadrando.
+#
+#  Así que se separan: aviso fuerte para el primero, nota tranquila
+#  para el segundo, y confirmación cuando cuadra.
+# ══════════════════════════════════════════════════════════════
+_a = ("""  var warnMsg = sum!==100 ? '<div class="hint" style="color:var(--critical); font-weight:600; margin-top:6px">Los porcentajes suman '+sum+'%. Deben sumar 100%.</div>' """
+      """: '<div class="hint" style="color:var(--good); font-weight:600; margin-top:6px">Suman 100%. Asignación válida.</div>';""")
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el mensaje de la suma de porcentajes')
+t = t.replace(_a, """  var warnMsg;
+  if(sum > 100){
+    warnMsg = '<div class="alloc-aviso pasado" role="alert">'+
+      '<b>Te estás repartiendo más de lo que entra.</b>'+
+      '<span>Los porcentajes suman '+sum+'%, es decir '+(sum-100)+'% de más. '+
+      'Todo peso que saques por encima del 100% sale de otro balde: normalmente '+
+      'de los impuestos o de la reserva, y eso se nota cuando toca pagarlos. '+
+      'Baja '+(sum-100)+' punto'+((sum-100)===1?'':'s')+' en cualquiera de los cuatro.</span>'+
+      '</div>';
+  } else if(sum < 100){
+    warnMsg = '<div class="alloc-aviso corto">'+
+      '<b>Falta por asignar '+(100-sum)+'%.</b>'+
+      '<span>Suman '+sum+'%. Lo que no asignes se queda en la caja general, '+
+      'que es de donde cuesta saber de quién era cada peso.</span>'+
+      '</div>';
+  } else {
+    warnMsg = '<div class="alloc-aviso bien">'+
+      '<b>Suman 100%.</b><span>Cada peso que entre ya tiene destino.</span>'+
+      '</div>';
+  }""", 1)
+
+# ══════════════════════════════════════════════════════════════
+#  LA BARRA DEJA DE MENTIR CUANDO SE PASA DEL 100%
+#
+#  La barra es un «display:flex» con «overflow:hidden», y sus
+#  segmentos llevaban el porcentaje crudo como ancho. Al sumar 110%
+#  los cuatro no cabían, flex los encogía a partes iguales, y el
+#  resultado se veía EXACTAMENTE igual que un reparto correcto:
+#  una barra llena de lado a lado. Justo cuando hay que avisar de
+#  un error, el dibujo decía que todo estaba en orden.
+#
+#  El arreglo estaba a medio escribir en el archivo original: la
+#  línea de arriba ya calculaba el ancho bueno en «w» —dividiendo
+#  entre el máximo de la suma y 100— y la de abajo no lo usaba.
+#  Se usa «w», y con eso la barra se comporta en los dos lados:
+#  por encima de 100 los segmentos se reparten proporcionalmente,
+#  por debajo queda hueco a la derecha, que es lo que falta.
+#
+#  Y se añade la marca del 100%: sin ella, una barra llena de
+#  colores sigue sin decir dónde estaba el límite que se cruzó.
+# ══════════════════════════════════════════════════════════════
+_a = ("""    segs += '<div class="alloc-seg" style="width:'+Math.max(vals[k],0)+'%; background:'"""
+      """+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';""")
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el segmento de la barra de asignación')
+t = t.replace(_a, ("""    segs += '<div class="alloc-seg" style="width:'+Math.max(w,0)+'%; background:'"""
+                   """+colors[k]+'">'+(vals[k]>=8?vals[k]+"%":"")+'</div>';"""), 1)
+
+_a = """      '<div class="alloc-bar">'+segs+'</div>'+"""
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró la barra de asignación')
+t = t.replace(_a, """      '<div class="alloc-bar">'+segs+
+        (sum>100 ? '<div class="alloc-limite" style="left:'+(100/sum*100)+'%"><span>100%</span></div>' : '')+
+      '</div>'+""", 1)
+
+# ══════════════════════════════════════════════════════════════
+#  EL ÁRBOL DE LA GUÍA
+# ══════════════════════════════════════════════════════════════
+_a = """    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Once secciones, tu referencia rápida del tablero.</p></div>'+
+    '<div class="card">'+items+'</div>'"""
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el cuerpo del panel de la guía')
+t = t.replace(_a, """    '<div class="panel-head"><h2>Guía de uso</h2><p>Qué significa cada métrica, en lenguaje llano, y qué hacer cuando algo se pone en rojo. Tu referencia rápida del tablero.</p></div>'+
+    bloqueArbol()+
+    '<div class="card">'+items+'</div>'""", 1)
+
+# Apuntar la sección al abrirla. El acordeón ya tenía su manejador;
+# se le añade el apunte sin tocar lo que hacía.
+_a = """  root.querySelectorAll(".accordion-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      btn.parentElement.classList.toggle("open");
+    });
+  });"""
+if _a not in t:
+    raise SystemExit('ERROR: no se encontró el manejador del acordeón')
+t = t.replace(_a, """  root.querySelectorAll(".accordion-head").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var item = btn.parentElement;
+      item.classList.toggle("open");
+      /* Se apunta solo al ABRIR. Contando también el cierre, un
+         clic de ida y vuelta sumaría dos veces la misma sección. */
+      if(item.classList.contains("open")){
+        apuntarGuia("seccion", item.getAttribute("data-idx"));
+      }
+    });
+  });""", 1)
 
 # ── Subir los gastos fijos desde un CSV ──
 # Igual que los ingresos. Van dentro de la misma tarjeta, debajo de
@@ -444,7 +590,8 @@ if _cierre not in t:
     raise SystemExit('ERROR: no se encontró el bloque INIT del tablero')
 t = t.replace(_cierre,
               _tablero_importar.JS + '\n' + _tablero_importar_fijos.JS + '\n'
-              + _tablero_videos.js() + '\n' + _tablero_figuras.js() + '\n\n' + _cierre, 1)
+              + _tablero_videos.js() + '\n' + _tablero_figuras.js() + '\n'
+              + _tablero_arbol.js() + '\n' + _tablero_pasos.js() + '\n\n' + _cierre, 1)
 
 # ── La guía de campañas ya NO va aquí ──
 # Estuvo como pestaña del tablero. Se sacó a su propia página
@@ -726,6 +873,17 @@ _ancla_ent = 'el("h4", {}, nombre),'
 if _ancla_ent not in f:
     raise SystemExit('ERROR: no se encontró el título de las tarjetas de entidad')
 f = f.replace(_ancla_ent, 'tituloEntidad(nombre),', 1)
+
+# El número de columnas se decide con la cantidad de entidades, para
+# que la última fila no quede con una tarjeta suelta.
+_a = 'const grid = el("div", { class: "entity-grid" });'
+if _a not in f:
+    raise SystemExit('ERROR: no se encontró la rejilla de entidades')
+f = f.replace(_a,
+    'const grid = el("div", { class: "entity-grid" });\n'
+    '    const nCols = columnasPara(entidades.size);\n'
+    '    grid.style.setProperty("--cols", nCols);\n'
+    '    grid.setAttribute("data-cols", nCols);', 1)
 
 _ancla_items = 'el("ul", {}, info.items.map((i) => el("li", {}, i))),'
 if _ancla_items not in f:

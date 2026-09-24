@@ -191,6 +191,27 @@ CSS = """
 }
 .camp-ia h4 { margin: 0 0 4px; font-size: 14px; }
 .camp-ia p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+/* ── El paso 3, cuando la guía va suelta ── */
+.camp-ia-rejilla {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px; margin-bottom: 16px;
+}
+.camp-ia-col h4, .camp-ia-falta h4 { margin: 0 0 7px; font-size: 13px; }
+.camp-ia-col ul, .camp-ia-falta ol {
+  margin: 0; padding-left: 1.1rem;
+  font-size: 12.5px; line-height: 1.6; color: var(--ink-soft);
+}
+.camp-ia-col li, .camp-ia-falta li { margin-bottom: 5px; }
+.camp-ia-falta li b { color: var(--ink); }
+.camp-ia-falta {
+  background: var(--paper-sunken); border-radius: 9px;
+  padding: 13px 15px; margin-bottom: 16px;
+}
+.camp-ia-nota {
+  margin: 8px 0 0; font-size: 12px; line-height: 1.55;
+  color: var(--ink-soft); font-style: italic;
+}
+
 .camp-ia button[disabled] {
   background: transparent; color: var(--ink-soft);
   border: 1px solid var(--line-strong); border-radius: 6px;
@@ -353,8 +374,12 @@ function panelCampanas(){
       : ' en la pestaña de Ingresos.') + '</li>' +
     '</ul>';
 
-  h += bloqueEjemplos();
-  h += bloqueCampanaIA();
+  /* Suelta, las piezas y la parte de IA son sus propios pasos y se
+     montan aparte. Dentro del tablero van seguidas, como estaban. */
+  if(!CAMPANAS_SUELTA){
+    h += bloqueEjemplos();
+    h += bloqueCampanaIA();
+  }
   h += '</div>';
   return h;
 }
@@ -452,16 +477,78 @@ function bloquePomelli(){
 
 /* El botón de IA: construido, visible y desactivado.
    Se deja a la vista a propósito, para que el Centro vea qué se
-   activaría, en vez de esconderlo hasta que alguien se acuerde. */
+   activaría, en vez de esconderlo hasta que alguien se acuerde.
+
+   Suelta, esto es el tercer paso y lleva la explicación completa:
+   qué haría, qué se enviaría y qué falta para encenderlo. Dentro
+   del tablero va la versión corta, que es un bloque más de la
+   pestaña y no un apartado propio. */
 function bloqueCampanaIA(){
   if(CAMPANAS_IA_ACTIVA){
     return '<div class="camp-ia"><h4>Afinar este plan con IA</h4>' +
       '<p>Se enviarán tu tipo de negocio y tus cifras al servicio de IA de la Universidad para adaptar el plan a tu caso. No se envía el nombre de tus clientes.</p>' +
       '<button class="btn small" id="campIA" type="button">Afinar con IA</button></div>';
   }
-  return '<div class="camp-ia"><h4>Afinar este plan con IA</h4>' +
-    '<p>Pendiente de autorización del Centro de Desarrollo Profesional para el uso de inteligencia artificial en esta herramienta. ' +
-    'El plan de arriba está armado con reglas, no con IA.</p>' +
-    '<button type="button" disabled>Disponible próximamente</button></div>';
+  if(!CAMPANAS_SUELTA){
+    return '<div class="camp-ia"><h4>Afinar este plan con IA</h4>' +
+      '<p>Pendiente de autorización del Centro de Desarrollo Profesional para el uso de inteligencia artificial en esta herramienta. ' +
+      'El plan de arriba está armado con reglas, no con IA.</p>' +
+      '<button type="button" disabled>Disponible próximamente</button></div>';
+  }
+
+  /* ── El paso 3, completo ── */
+  return '<div class="card">' +
+    '<h3>Afinar tu campaña con Gemini</h3>' +
+    '<p style="font-size:13px;color:var(--ink-soft);line-height:1.65;margin:5px 0 14px">' +
+      'El plan que viste en la sección 1 está armado con reglas fijas: las mismas para ' +
+      'todos los negocios del mismo tipo. Una IA podría ajustarlo a lo tuyo en concreto. ' +
+      '<b>Todavía no está conectada</b>, y abajo está por qué.</p>' +
+
+    '<div class="camp-ia-rejilla">' +
+      '<div class="camp-ia-col">' +
+        '<h4>Qué haría</h4>' +
+        '<ul>' +
+          '<li>Adaptar los tres canales a tu actividad concreta, no solo a «productos» o «servicios».</li>' +
+          '<li>Proponerte qué decir en cada uno, con el vocabulario de tu sector.</li>' +
+          '<li>Revisar tu presupuesto contra lo que suele costar anunciarse en tu ciudad.</li>' +
+          '<li>Sugerir cuándo conviene empezar, según la estacionalidad de lo que vendes.</li>' +
+        '</ul>' +
+      '</div>' +
+      '<div class="camp-ia-col">' +
+        '<h4>Qué se enviaría</h4>' +
+        '<ul>' +
+          '<li>Tu tipo de negocio y lo que vendes.</li>' +
+          '<li>Tus cifras del mes: lo que entra y lo que se va en gastos fijos.</li>' +
+          '<li>Tu ciudad, si la escribes.</li>' +
+        '</ul>' +
+        '<p class="camp-ia-nota">Nunca el nombre de tus clientes ni el detalle de cada venta: ' +
+        'para proponer un plan de campaña no hacen falta.</p>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="camp-ia-falta">' +
+      '<h4>Qué falta para encenderlo</h4>' +
+      '<ol>' +
+        '<li><b>La autorización del Centro.</b> El semáforo de uso de IA pone la ' +
+          'investigación de mercados en «uso condicionado», y una propuesta de ' +
+          'campaña generada por IA entra ahí. Hay que definir con qué condiciones.</li>' +
+        '<li><b>Un servidor que guarde la clave.</b> Hoy esta página funciona sola, ' +
+          'sin cuenta y sin enviar nada a ninguna parte. Llamar a Gemini exige una ' +
+          'clave de API, y una clave escrita dentro de un archivo que cualquiera ' +
+          'puede abrir deja de ser secreta el mismo día. Tiene que vivir en un ' +
+          'servidor del Centro que haga la llamada por ti.</li>' +
+      '</ol>' +
+      '<p class="camp-ia-nota">Mientras tanto, el plan de la sección 1 sigue sirviendo: ' +
+      'está hecho con reglas que se pueden leer y discutir, que es más de lo que ' +
+      'se puede decir de muchas respuestas de IA.</p>' +
+    '</div>' +
+
+    '<div class="camp-ia">' +
+      '<h4>Afinar este plan con IA</h4>' +
+      '<p>Se activará cuando el Centro lo autorice. El botón está construido: ' +
+      'encenderlo es cambiar una línea.</p>' +
+      '<button type="button" disabled>Disponible próximamente</button>' +
+    '</div>' +
+  '</div>';
 }
 """
