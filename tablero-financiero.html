@@ -257,31 +257,70 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
 .imp-zona input[type=file] { display: none; }
 @media print { .imp-zona { display: none !important; } }
 
-/* ═══════════════ VIDEOS DE LA GUÍA ═══════════════ */
+/* ═══════════════ VIDEOS DE LA GUÍA ═══════════════
+   El video se ve como un reproductor, no como un botón que promete
+   uno. Era una fila estrecha con una flechita y un rótulo, y había
+   que fiarse del texto para saber que detrás había un video.
+
+   Lo que se ve antes de pulsar es un marco 16:9 con su botón de
+   reproducir en medio: lo mismo que se ve al abrir el reproductor
+   de verdad antes de darle al play.
+
+   ── POR QUÉ NO SE INCRUSTA EL REPRODUCTOR DE ENTRADA ──────────
+   Porque cargarlo es pedirle la página a YouTube. Con siete videos
+   en la guía, abrir esa pestaña serían siete peticiones a Google
+   antes de que nadie haya querido ver nada: la herramienta dejaría
+   de abrir sin conexión, y YouTube sabría quién entró aunque no
+   viera ningún video.
+
+   Así, el reproductor de verdad se inserta al pulsar. A la vista
+   es lo mismo; la diferencia es quién se entera. */
 .vid { margin-top: 14px; }
+
 .vid-btn {
-  display: flex; align-items: center; gap: .7rem; width: 100%;
-  background: var(--paper-sunken); border: 1px solid var(--line);
-  border-radius: 9px; padding: .7rem .85rem; cursor: pointer;
-  text-align: left; font-family: inherit; color: var(--ink);
-  transition: border-color .15s, background .15s;
+  position: relative; display: block; width: 100%; padding: 0;
+  border: 1px solid var(--line-strong); border-radius: 10px;
+  overflow: hidden; cursor: pointer;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(160deg, #0A1330 0%, #1E306E 100%);
+  font-family: inherit; text-align: left;
+  transition: border-color .15s, transform .15s;
 }
-.vid-btn:hover { border-color: var(--accent-strong); background: var(--accent-soft); }
+.vid-btn:hover { border-color: var(--accent-strong); }
+.vid-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* El botón de reproducir, en el centro del marco. */
 .vid-play {
-  flex: none; width: 34px; height: 34px; border-radius: 50%;
-  background: var(--accent); color: #FFFFFF;
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 62px; height: 62px; border-radius: 50%;
+  background: rgba(255,255,255,.94); color: #0A1330;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; padding-left: 3px;
+  font-size: 22px; padding-left: 5px;
+  box-shadow: 0 6px 20px -6px rgba(0,0,0,.55);
+  transition: transform .18s, background .18s;
 }
-.vid-txt { min-width: 0; }
-.vid-txt b { display: block; font-size: 13px; font-weight: 600; }
-.vid-txt span { font-size: 12px; color: var(--ink-soft); }
+.vid-btn:hover .vid-play { transform: translate(-50%, -50%) scale(1.08); background: #FFFFFF; }
+@media (prefers-reduced-motion: reduce) {
+  .vid-btn:hover .vid-play { transform: translate(-50%, -50%); }
+}
+
+/* El rótulo, abajo del marco y sobre el degradado. */
+.vid-txt {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 26px 14px 11px;
+  background: linear-gradient(transparent, rgba(0,0,0,.55));
+}
+.vid-txt b { display: block; font-size: 13.5px; font-weight: 600; color: #FFFFFF; }
+.vid-txt span { font-size: 12px; color: #C7D6F0; }
+
 .vid-marco {
   position: relative; width: 100%; aspect-ratio: 16 / 9;
-  margin-top: 10px; border-radius: 9px; overflow: hidden;
-  background: #000; border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden;
+  background: #000; border: 1px solid var(--line-strong);
 }
 .vid-marco iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
 @media print { .vid { display: none !important; } }
 
 /* ═══════════════ GRUPOS PLEGABLES DEL ÍNDICE ═══════════════ */
@@ -445,6 +484,17 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
   background: var(--paper-raised); border: 1px solid var(--line);
   border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
   box-shadow: var(--shadow);
+  /* Se queda pegado arriba mientras se recorre la guía. Estaba al
+     principio y solo se veía al principio: quien abría una sección
+     de las de abajo no llegaba a ver crecer nada, que es justo lo
+     que el árbol está para enseñar.
+
+     El desplazamiento es el alto de la barra de «Volver», que
+     también es pegajosa y está por encima: sin contarla, el árbol
+     se metería debajo de ella. */
+  position: sticky;
+  top: calc(var(--alto-volver, 51px) + 12px);
+  z-index: 12;
 }
 .arbol-dibujo {
   flex: none; width: 96px; height: 116px;
@@ -491,22 +541,19 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
 }
 @media print { .arbol-caja { display: none !important; } }
 
-/* ═══════════════ EL PASO DE CADA TÉRMINO ═══════════════
-   Va bajo el título del acordeón, visible con la viñeta cerrada:
-   el sentido de esto es poder recorrer la lista y ver de un vistazo
-   qué falta por llenar, sin abrir las doce. */
-.accordion-head { flex-wrap: wrap; }
-.accordion-head .titulo-y-paso { flex: 1; min-width: 0; }
-.accordion-head .titulo-y-paso h4 { margin: 0; }
+/* ═══════════════ EL PASO DE CADA PANEL ═══════════════
+   Va en el encabezado del panel, entre el título y la descripción:
+   el aviso llega cuando la persona tiene delante el formulario que
+   hay que llenar, no cuando está leyendo un glosario. */
+.panel-head .paso-guia { margin: 7px 0 9px; }
 
 .paso-guia {
   display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-  margin-top: 3px;
-  font-size: 11.5px; line-height: 1.45; color: var(--ink-soft);
+  font-size: 12.5px; line-height: 1.5; color: var(--ink-soft);
 }
 .paso-guia .etq {
   flex: none;
-  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
   letter-spacing: .07em; text-transform: uppercase;
   border-radius: 99px; padding: 2px 8px;
 }
@@ -516,7 +563,7 @@ nav.tabs{ padding:6px 12px 20px; display:flex; flex-direction:column; gap:2px; }
 .paso-guia.lectura .etq { background: var(--paper-sunken); color: var(--ink-soft); }
 
 .paso-guia .num {
-  flex: none; font-family: var(--font-mono); font-size: 10.5px;
+  flex: none; font-family: var(--font-mono); font-size: 11px;
   font-weight: 700; color: var(--gold);
 }
 @media print { .paso-guia .etq { border: 1px solid #999; } }
@@ -1293,7 +1340,7 @@ var GUIDE = [
 function panelGuia(){
   var items = GUIDE.map(function(g,i){
     return '<div class="accordion-item" data-idx="'+i+'">'+
-      '<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+'</span><div class="titulo-y-paso"><h4>'+esc(g.t)+'</h4>'+subtituloPaso(g.t)+'</div><span class="chev">▾</span></button>'+
+      '<button class="accordion-head"><span class="num">0'+(i+1<10?"0"+(i+1):(i+1))+'</span><h4 style="flex:1">'+esc(g.t)+'</h4><span class="chev">▾</span></button>'+
       '<div class="accordion-body"><p>'+esc(g.body)+'</p><div class="redbox"><b>Si el número se pone en rojo:</b> '+esc(g.red)+'</div>'+bloqueVideo(g.t)+'</div>'+
     '</div>';
   }).join("");
@@ -1347,8 +1394,16 @@ function renderAll(){
   buildNav(document.getElementById("mobileTabs"), true);
   var panels = document.getElementById("panels");
   var figura = bloqueFigura(state.activeTab);
+  var rotuloPaso = subtituloPaso(state.activeTab);
+  var cuerpoPanel = PANEL_RENDERERS[state.activeTab]();
+  /* El rótulo se cuela detrás del </h2> del encabezado, que es lo
+     primero que arma cada panel. Si algún panel dejara de empezar
+     por ahí, se queda sin rótulo y no se rompe nada más. */
+  if(rotuloPaso){
+    cuerpoPanel = cuerpoPanel.replace('</h2>', '</h2>' + rotuloPaso);
+  }
   panels.innerHTML = '<div class="panel active' + (figura ? ' con-figura' : '') + '">' +
-                     PANEL_RENDERERS[state.activeTab]() + figura + '</div>';
+                     cuerpoPanel + figura + '</div>';
   attachHandlers();
 }
 
@@ -1952,10 +2007,11 @@ function bloqueVideo(titulo){
   if(!id) return "";
   return (
     '<div class="vid">' +
-      '<button class="vid-btn" type="button" data-video="' + esc(id) + '">' +
+      '<button class="vid-btn" type="button" data-video="' + esc(id) + '"' +
+        ' aria-label="Reproducir la explicación en video, aquí mismo">' +
         '<span class="vid-play" aria-hidden="true">&#9654;</span>' +
-        '<span class="vid-txt"><b>Ver explicación en video</b>' +
-        '<span>Se abre aquí mismo, sin salir de la herramienta.</span></span>' +
+        '<span class="vid-txt"><b>Explicación en video</b>' +
+        '<span>Pulsa para reproducirlo aquí mismo.</span></span>' +
       '</button>' +
     '</div>'
   );
@@ -2103,11 +2159,14 @@ function repintarArbol(){
 /* ══════════════════════════════════════════════════════════
    EL PASO AL QUE PERTENECE CADA TÉRMINO DE LA GUÍA
    ══════════════════════════════════════════════════════════ */
-var PASOS_GUIA   = {"Facturación vs. ganancia real": ["lectura", null, "Léelo antes de empezar: es la idea que sostiene todo lo demás"], "Ingresos por cliente y mes": ["escribe", 2, "Se llena en Ingresos, del grupo Datos del mes"], "Gastos fijos": ["escribe", 3, "Se llena en Gastos fijos, del grupo Datos del mes"], "Gastos variables": ["escribe", 3, "Se llena en Gastos variables, del grupo Datos del mes"], "Flujo de caja proyectado": ["calcula", null, "Sale solo con tus ingresos y tus gastos (pasos 2 y 3)"], "Calculadora de precio mínimo": ["escribe", 5, "Se llena en Precio mínimo: horas, sueldo objetivo y gastos"], "Punto de equilibrio": ["calcula", null, "Sale solo con tus ingresos y tus gastos (pasos 2 y 3)"], "Runway (alerta de caja)": ["escribe", 4, "Escribe tu caja actual en Runway; el resto sale de tus gastos"], "A dónde va cada peso que entra": ["escribe", null, "Se define en Asignación de dinero, cuando ya tengas ingresos"], "Semáforo financiero": ["calcula", null, "Sale solo en el Resumen cuando los pasos 1 a 4 están completos"], "Errores comunes en tracción temprana": ["lectura", null, "No se llena: es para revisar cada cierto tiempo"], "Rutina de cierre mensual": ["lectura", null, "Se hace en Cierre mensual, una vez al mes"]};
+var PASOS_GUIA   = {"ingresos": ["escribe", 2, "Registra aquí lo que facturaste este mes, cliente por cliente"], "fijos": ["escribe", 3, "Lo que pagas todos los meses, vendas o no vendas"], "variables": ["escribe", 3, "Lo que solo pagas cuando vendes: materiales, comisiones, envíos"], "flujo": ["calcula", null, "Sale solo con tus ingresos y tus gastos (pasos 2 y 3)"], "precio": ["escribe", 5, "Escribe tus horas y el sueldo que quieres; el mínimo sale de ahí"], "equilibrio": ["calcula", null, "Sale solo con tus ingresos y tus gastos (pasos 2 y 3)"], "runway": ["escribe", 4, "Escribe tu caja actual; los meses que aguantas salen de tus gastos"], "asignacion": ["escribe", null, "Reparte tus porcentajes; se aplican sobre los ingresos del mes"], "resumen": ["calcula", null, "Se llena solo cuando los pasos 1 a 5 están completos"], "cierre": ["lectura", null, "No se llena: es la rutina para repasar una vez al mes"]};
 var CLASES_PASO  = {"escribe": "Lo escribes tú", "calcula": "Se calcula solo", "lectura": "Solo para leer"};
 
-function subtituloPaso(titulo){
-  var p = PASOS_GUIA[titulo];
+/* El rótulo del paso, para la pestaña que se está mostrando. Las
+   pestañas que no llevan (la guía) devuelven cadena vacía y no
+   añaden nada. */
+function subtituloPaso(tab){
+  var p = PASOS_GUIA[tab];
   if(!p) return "";
   var clase = p[0], num = p[1], donde = p[2];
   return '<div class="paso-guia ' + clase + '">' +
