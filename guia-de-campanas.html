@@ -155,158 +155,94 @@ main{ padding:2.2rem 0 3rem; }
 .panel-head h2{ font-size:24px; }
 .panel-head p{ color:var(--ink-soft); font-size:13.5px; margin-top:6px; max-width:62ch; }
 
-/* ═══════════════ LAS TRES SECCIONES, DE LADO ═══════════════
+/* ═══════════════ LOS TRES PASOS, DE LADO ═══════════════
    La guía se recorre de izquierda a derecha, no bajando. Son tres
    momentos distintos —cuánto puedes poner, con qué piezas, y
    afinarlo— y encadenarlos en una sola columna larga hacía que la
    parte de Pomelli pareciera una nota al pie del presupuesto.
 
-   La sección activa va centrada y las vecinas ASOMAN por los
-   lados. Ese pedazo que se ve es lo que dice que hay más: con las
-   otras dos escondidas del todo, nada en pantalla anunciaba que la
-   página seguía hacia los lados, y las flechas parecían decorado.
-
-   Las vecinas van atenuadas para que no compitan con la que se
-   está leyendo, pero siguen siendo un objetivo pulsable: pulsar el
-   trozo que asoma lleva a esa sección, que es lo que uno intenta
-   hacer al verlo. */
-/* El carrusel va más ancho que el resto de la página. Con el asomo
-   a media tarjeta, las vecinas se comen la mitad del sitio: dentro
-   de los 940 px de la envoltura la sección central se quedaba en
-   340 px y sus propias columnas no cabían. La cabecera sigue
-   estrecha, que es lo que se lee de corrido; esto es una galería. */
-.envoltura-ancha{
-  max-width:1280px; margin:0 auto;
-  padding:0 clamp(1.1rem, 4vw, 2rem);
+   Cada paso es una diapositiva. Solo se ve una; las otras dos
+   están al lado, fuera del marco. */
+.pasos-barra{
+  display:flex; gap:8px; margin-bottom:18px;
+  list-style:none; padding:0;
 }
-
-.carrusel{
-  display:flex; align-items:flex-start; gap:10px;
+.pasos-barra li{ flex:1 1 0; min-width:0; }
+.pasos-barra button{
+  width:100%; text-align:left; cursor:pointer;
+  background:var(--paper-raised); border:1px solid var(--line);
+  border-top:3px solid var(--line);
+  border-radius:0 0 8px 8px; padding:9px 12px 10px;
+  font-family:inherit; color:var(--ink-soft);
+  transition:border-color .15s, color .15s, background .15s;
 }
-
-/* Las flechas. Grandes y sin caja de color: lo que se pulsa es el
-   área, no el dibujo, así que el objetivo es cómodo sin que el
-   botón pese más que el contenido. */
-.flecha-seccion{
-  flex:none;
-  /* Pegajosas. Centradas verticalmente quedaban a mitad de una
-     sección que puede medir tres pantallas: al entrar no se veían,
-     y había que bajar a buscar el control para avanzar. Así
-     acompañan la lectura y siguen a mano en cualquier punto.
-     El navegador las suelta solo al llegar al final del carrusel,
-     que es justo donde ya no hacen falta. */
-  position:sticky; top:45vh;
-  width:52px; height:92px;
-  display:flex; align-items:center; justify-content:center;
-  background:transparent; border:1px solid transparent; border-radius:10px;
-  color:var(--accent); cursor:pointer; padding:0;
-  transition:background .15s, color .15s, border-color .15s, opacity .15s;
+.pasos-barra button:hover{ border-color:var(--line-strong); border-top-color:var(--line-strong); }
+.pasos-barra button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.pasos-barra .n{
+  display:block; font-family:var(--font-mono); font-size:10px;
+  font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  margin-bottom:2px;
 }
-.flecha-seccion svg{ width:30px; height:30px; display:block; }
-.flecha-seccion:hover:not([disabled]){ background:var(--accent-soft); border-color:var(--accent-strong); }
-.flecha-seccion:active:not([disabled]){ background:var(--accent-strong); color:#FFFFFF; }
-.flecha-seccion:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-/* Aquí vivía el estilo de flecha apagada. Ya no hace falta: el
-   carrusel da la vuelta, así que en ningún punto hay una flecha que
-   no lleve a ninguna parte. */
-
-.marco{
-  position:relative;          /* dentro se colocan las secciones */
-  flex:1 1 auto; min-width:0;
-  overflow:hidden;
-  padding:4px 0;              /* deja respirar la sombra de las tarjetas */
-  /* La altura la fija el JS con la de la sección que se está
-     viendo, y se anima al cambiar. Sin eso, las tres miden lo que
-     la más alta y una sección corta arrastra media pantalla de
-     vacío debajo. */
-  transition:height .45s cubic-bezier(.3,.8,.35,1);
+.pasos-barra .t{ display:block; font-size:13px; font-weight:600; line-height:1.3; }
+.pasos-barra [aria-current="step"]{
+  background:var(--paper-raised); border-top-color:var(--accent);
+  color:var(--ink);
 }
+.pasos-barra [aria-current="step"] .n{ color:var(--accent); }
+/* El paso ya visitado se marca, para saber por dónde se ha pasado
+   sin tener que volver a entrar a mirar. */
+.pasos-barra .visto .n::after{ content:" ·  visto"; color:var(--good); }
 
-/* Cada sección se coloca por su cuenta; no hay una tira que se
-   desplace entera.
-
-   La tira servía mientras el recorrido era de ida y vuelta: las
-   tres iban en fila y bastaba moverla. Pero en un anillo la última
-   tiene que asomar antes de la primera, y en una fila eso no
-   existe: a la derecha de la tercera no hay nada.
-
-   Colocándolas una a una, cada sección calcula en círculo si le
-   toca el centro, la izquierda o la derecha. Con tres el anillo
-   siempre está completo: nunca queda un lado vacío. */
+.marco{ overflow:hidden; }
+.pista{
+  display:flex; align-items:flex-start;
+  width:300%;
+  transition:transform .42s cubic-bezier(.3,.8,.35,1);
+}
+@media (prefers-reduced-motion: reduce){ .pista{ transition:none; } }
 .diapo{
-  position:absolute; top:4px; left:0;
-  width:calc(50% - 16px);
-  opacity:.4;
-  transition:transform .45s cubic-bezier(.3,.8,.35,1), opacity .35s;
-  will-change:transform;
+  width:33.3333%; flex:0 0 33.3333%;
+  padding:2px;   /* deja respirar la sombra de las tarjetas */
 }
-.diapo[aria-hidden="false"]{ opacity:1; }
-/* La vecina que asoma se puede pulsar; la activa no, o cada clic
-   dentro del contenido contaría como «ir a esta sección». */
-.diapo[aria-hidden="true"]{ cursor:pointer; }
+/* Lo que no se está viendo no debe alcanzarse con el tabulador: si
+   no, tabular desde el último campo salta a un botón invisible que
+   está dos pantallas a la derecha. */
+.diapo[aria-hidden="true"]{ visibility:hidden; }
 
-@media (prefers-reduced-motion: reduce){
-  .diapo{ transition:none; }
-  .marco{ transition:none; }
-}
-
-/* ── El pie: dónde estoy y cuántas van ── */
 .pasos-pie{
-  display:flex; align-items:center; justify-content:center;
-  gap:14px; flex-wrap:wrap; margin-top:16px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-top:18px;
 }
-.pasos-puntos{ display:flex; gap:8px; list-style:none; margin:0; padding:0; }
-.pasos-puntos button{
-  width:9px; height:9px; padding:0; border-radius:50%;
-  background:var(--line-strong); border:0; cursor:pointer;
-  transition:background .2s, transform .2s;
+.pasos-pie .btn[disabled]{
+  opacity:.4; cursor:not-allowed;
+  background:transparent; color:var(--ink-soft); border-color:var(--line-strong);
 }
-.pasos-puntos button:hover{ background:var(--accent-strong); }
-.pasos-puntos button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
-.pasos-puntos [aria-current="step"]{ background:var(--accent); transform:scale(1.35); }
-.pasos-pie .rotulo{
-  font-size:12.5px; color:var(--ink-soft);
+.pasos-pie .cuenta{
+  margin-left:auto; font-size:12px; color:var(--ink-soft);
   font-variant-numeric:tabular-nums;
 }
-.pasos-pie .rotulo b{ color:var(--ink); font-weight:600; }
+.btn.ghost{
+  background:transparent; color:var(--accent);
+  border-color:var(--line-strong);
+}
+.btn.ghost:hover{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-strong); }
 
-/* El asomo de media tarjeta solo cabe si hay ancho de sobra. Según
-   se estrecha la ventana se va recortando, hasta quedar en un borde
-   en el móvil: ahí lo que importa es que la sección que se lee tenga
-   sitio, no que se adivine la siguiente. */
-@media (max-width:1100px){
-  .diapo{ width:calc(68% - 16px); }
-}
-@media (max-width:860px){
-  .diapo{ width:calc(86% - 16px); }
-}
-@media (max-width:720px){
-  /* Con el hueco de 10 px de aquí, este ancho deja un borde de unos
-     20 px asomando. Estaba en 94% y el asomo se quedaba en 7 px:
-     tan poco que parecía un error de alineación y no otra tarjeta. */
-  .diapo{ width:calc(90% - 10px); }
-  .flecha-seccion{ width:34px; height:72px; }
-  .flecha-seccion svg{ width:22px; height:22px; }
-  .carrusel{ gap:4px; }
+@media (max-width:640px){
+  .pasos-barra{ gap:5px; }
+  .pasos-barra .t{ font-size:11.5px; }
+  .pasos-barra button{ padding:7px 8px 8px; }
 }
 
 @media print{
   .cab{ background:none; color:#000; padding:1rem 0; }
   .cab h1, .cab p, .cab .eyebrow{ color:#000; }
   .origen button{ display:none; }
-  /* En papel no hay «siguiente»: se imprimen las tres secciones
-     seguidas, que es lo que alguien espera de un PDF. Y las tres a
-     plena tinta, no atenuadas. */
-  .flecha-seccion, .pasos-pie{ display:none !important; }
-  .carrusel{ display:block; }
-  .flecha-seccion{ position:static; }
-  .marco{ overflow:visible; padding:0; }
-  .pista{ display:block; width:auto; }
-  .diapo{
-    position:static; width:auto; opacity:1 !important; cursor:auto;
-    transform:none !important;
-    page-break-inside:avoid; margin-bottom:18px;
-  }
+  /* En papel no hay «siguiente»: se imprimen los tres pasos
+     seguidos, que es lo que alguien espera de un PDF. */
+  .pasos-barra, .pasos-pie{ display:none !important; }
+  .marco{ overflow:visible; }
+  .pista{ display:block; width:auto; transform:none !important; }
+  .diapo{ width:auto; visibility:visible !important; page-break-inside:avoid; margin-bottom:18px; }
 }
 
 /* ═══════════════ GUÍA DE CAMPAÑAS ═══════════════ */
@@ -372,18 +308,9 @@ main{ padding:2.2rem 0 3rem; }
    mensaje se edita el texto sin volver a generar la pieza. Además
    así llevan el azul institucional exacto, no el que aproximó la
    herramienta que las generó. */
-/* Dos y dos, siempre. Eran «auto-fit» con mínimo de 190 px, que
-   con la guía a todo lo ancho daba cuatro en fila; al meterla en el
-   carrusel la tarjeta se estrechó y salían tres arriba y una sola
-   abajo. Como son cuatro piezas fijas, dos columnas reparten sin
-   sobrantes y además dejan cada pieza más grande, que para algo son
-   ejemplos de diseño y hay que poder verlos. */
 .camp-piezas {
-  display: grid; grid-template-columns: repeat(2, 1fr);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px; margin: 14px 0 16px;
-}
-@media (max-width: 520px) {
-  .camp-piezas { grid-template-columns: 1fr; }
 }
 .pieza {
   /* «min-height» y no «aspect-ratio».
@@ -597,16 +524,10 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
 </header>
 
 <main>
-  <div class="envoltura-ancha">
-    <div class="carrusel">
-      <button class="flecha-seccion" type="button" id="pasoAtras" aria-label="Sección anterior">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M15.5 4 L7.5 12 L15.5 20" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+  <div class="envoltura">
+    <ul class="pasos-barra" id="pasosBarra"></ul>
 
-      <div class="marco" id="marco">
+    <div class="marco" id="marco">
       <div class="pista" id="pista">
         <section class="diapo" id="paso-1" aria-label="Sección 1: tus cifras y tu plan">
           <div id="cifras"></div>
@@ -619,19 +540,12 @@ footer.pie { background: var(--azul); color: #B9C9E2; padding: 3rem 0 1.6rem; }
           <div id="ia"></div>
         </section>
       </div>
-      </div>
-
-      <button class="flecha-seccion" type="button" id="pasoSig" aria-label="Sección siguiente">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M8.5 4 L16.5 12 L8.5 20" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
     </div>
 
     <div class="pasos-pie">
-      <ul class="pasos-puntos" id="pasosPuntos"></ul>
-      <span class="rotulo" id="pasoCuenta"></span>
+      <button class="btn ghost" type="button" id="pasoAtras">&larr; Atrás</button>
+      <button class="btn" type="button" id="pasoSig">Siguiente &rarr;</button>
+      <span class="cuenta" id="pasoCuenta"></span>
     </div>
   </div>
 </main>
@@ -974,37 +888,24 @@ var PASOS = [
 ];
 
 var pasoActual = 0;
+var pasosVistos = {0: true};
 
 function irAPaso(i, conFoco){
-  /* Da la vuelta: de la última se pasa a la primera y al revés, así
-     que ninguna flecha se queda muerta en un extremo.
+  pasoActual = Math.max(0, Math.min(PASOS.length - 1, i));
+  pasosVistos[pasoActual] = true;
 
-     El doble módulo es para los negativos: en JavaScript «-1 % 3»
-     da -1, no 2, y con un solo módulo retroceder desde la primera
-     sección dejaría el índice en -1 y no pintaría nada. */
-  var n = PASOS.length;
-  pasoActual = ((i % n) + n) % n;
+  document.getElementById("pista").style.transform =
+    "translateX(-" + (pasoActual * (100 / PASOS.length)) + "%)";
 
-  /* Aquí se alargaba la animación cuando se cerraba el círculo,
-     porque la tira tenía que recorrer dos posiciones de una vez.
-     Con el anillo ya no pasa: todo movimiento es de un sitio al de
-     al lado, incluido el de la última a la primera. */
-  colocarPista();
-
-  /* Lo que no está activo sale del tabulador y de los lectores de
-     pantalla, aunque se vea asomando. Sin esto, tabular desde el
-     último campo de la sección 1 salta a un botón que está medio
-     fuera de pantalla. */
+  /* Lo que no se ve se saca del tabulador y de los lectores de
+     pantalla. Sin esto, tabular desde el último campo del paso 1
+     salta a un botón que está dos pantallas a la derecha. */
   for(var k = 0; k < PASOS.length; k++){
     var d = document.getElementById("paso-" + (k + 1));
     if(!d) continue;
     var oculta = (k !== pasoActual);
     d.setAttribute("aria-hidden", oculta ? "true" : "false");
-    /* Aquí iba «d.inert = oculta». Se quitó: «inert» no solo saca
-       del tabulador, también bloquea el ratón, y con eso el trozo
-       que asoma dejaba de poder pulsarse. Lo que hacía falta —que
-       no se tabule hacia dentro y que un lector de pantalla no lo
-       lea— ya lo hacen «aria-hidden» y los tabindex de abajo. */
+    d.inert = oculta;                    /* donde exista */
     var focables = d.querySelectorAll("a, button, input, select, textarea");
     for(var j = 0; j < focables.length; j++){
       if(oculta) focables[j].setAttribute("tabindex", "-1");
@@ -1012,132 +913,55 @@ function irAPaso(i, conFoco){
     }
   }
 
-  pintarPuntos();
-  pintarFlechas();
+  pintarBarraPasos();
+  pintarPiePasos();
   guardarPaso();
 
-  /* Al cambiar de sección, la página sube al principio del marco:
-     si no, se llega a la siguiente mirando su mitad de abajo,
-     porque el scroll se quedó donde estaba. */
+  /* Al cambiar de paso, la página sube al principio del marco: si
+     no, se llega al paso 3 mirando su mitad de abajo, porque el
+     scroll se quedó donde estaba en el paso anterior. */
   var marco = document.getElementById("marco");
   if(marco && marco.getBoundingClientRect().top < 0){
     marco.scrollIntoView({behavior: "smooth", block: "start"});
   }
   if(conFoco){
-    var d2 = document.getElementById("paso-" + (pasoActual + 1));
-    if(d2){ d2.setAttribute("tabindex", "-1"); d2.focus({preventScroll: true}); }
+    var d = document.getElementById("paso-" + (pasoActual + 1));
+    if(d){ d.setAttribute("tabindex", "-1"); d.focus({preventScroll: true}); }
   }
 }
 
-/* Dónde tiene que quedar la pista para que la sección activa
-   quede centrada y las vecinas asomen por igual a los dos lados.
-
-   Se MIDE en píxeles en vez de calcularlo con porcentajes. El
-   ancho de la tarjeta (86%) y el hueco entre ellas (16px) están en
-   el CSS y cambian con la media query; repetir esa aritmética aquí
-   dejaría dos sitios que hay que acordarse de cambiar a la vez.
-   Midiendo, el JS no necesita saber cuánto mide nada. */
-/* El hueco entre secciones. Tiene que coincidir con el que usan
-   los «calc(... - 16px)» del CSS: si allí cambia y aquí no, las
-   secciones se solapan o se separan. */
-var HUECO = 16;
-
-/* Qué sitio le toca a la sección «i»: 0 el centro, -1 la izquierda,
-   +1 la derecha. La cuenta se hace en círculo, y por eso desde la
-   última se ve la primera asomando a la derecha.
-
-   Con tres secciones los tres sitios están siempre ocupados. Si
-   algún día fueran más, las que caen fuera del anillo visible se
-   mandan al borde para que no se queden encima de las otras. */
-function ranuraDe(i){
-  var n = PASOS.length;
-  var rel = ((i - pasoActual) % n + n) % n;
-  if(rel === 0) return 0;
-  if(rel === 1) return 1;
-  if(rel === n - 1) return -1;
-  return rel < n / 2 ? 2 : -2;      /* fuera de vista */
-}
-
-function colocarPista(){
-  var marco = document.getElementById("marco");
-  var act = document.getElementById("paso-" + (pasoActual + 1));
-  if(!marco || !act) return;
-
-  var ancho = act.offsetWidth;
-  var centro = (marco.clientWidth - ancho) / 2;
-  var salto = ancho + HUECO;
-
-  for(var k = 0; k < PASOS.length; k++){
-    var d = document.getElementById("paso-" + (k + 1));
-    if(!d) continue;
-
-    var sitio = ranuraDe(k);
-    var antes = (d.dataset.ranura === undefined) ? sitio : Number(d.dataset.ranura);
-    d.dataset.ranura = sitio;
-
-    var x = centro + sitio * salto;
-
-    /* Al cerrar el círculo hay una sección que pasa de un lado al
-       otro: la que estaba asomando por la izquierda tiene que ir a
-       asomar por la derecha. Deslizarla por delante de las otras
-       dos sería un latigazo, así que se cambia de sitio sin
-       animación y se funde: como está al 40% y medio fuera del
-       marco, el cambio se lee como un relevo y no como un salto.
-
-       Se detecta por la distancia: un movimiento normal es de un
-       sitio; dar la vuelta son dos. */
-    if(Math.abs(sitio - antes) > 1){
-      d.style.transition = "none";
-      d.style.opacity = "0";
-      d.style.transform = "translateX(" + x + "px)";
-      void d.offsetWidth;            /* fuerza el reflujo antes de devolver la transición */
-      d.style.transition = "";
-      d.style.opacity = "";          /* vuelve al valor del CSS y se funde */
-    } else {
-      d.style.transform = "translateX(" + x + "px)";
-    }
-  }
-
-  /* El marco se ajusta a lo que mide la sección que se ve. El +8
-     es el «padding» de arriba y abajo, que está para que no se
-     recorte la sombra de las tarjetas. */
-  marco.style.height = (act.offsetHeight + 8) + "px";
-}
-
-function pintarPuntos(){
-  var caja = document.getElementById("pasosPuntos");
-  caja.innerHTML = PASOS.map(function(p, i){
+function pintarBarraPasos(){
+  var barra = document.getElementById("pasosBarra");
+  barra.innerHTML = PASOS.map(function(p, i){
     var actual = (i === pasoActual);
     return '<li><button type="button" data-paso="' + i + '"' +
       (actual ? ' aria-current="step"' : '') +
-      ' aria-label="' + esc(p.n + ": " + p.t) + '"></button></li>';
+      (pasosVistos[i] && !actual ? ' class="visto"' : '') + '>' +
+      '<span class="n">' + esc(p.n) + '</span>' +
+      '<span class="t">' + esc(p.t) + '</span>' +
+      '</button></li>';
   }).join("");
-  Array.prototype.forEach.call(caja.querySelectorAll("[data-paso]"), function(b){
+  Array.prototype.forEach.call(barra.querySelectorAll("[data-paso]"), function(b){
     b.addEventListener("click", function(){
       irAPaso(Number(b.getAttribute("data-paso")), true);
     });
   });
-  document.getElementById("pasoCuenta").innerHTML =
-    "<b>" + esc(PASOS[pasoActual].t) + "</b> &middot; " +
-    (pasoActual + 1) + " de " + PASOS.length;
 }
 
-/* Las flechas ya no se apagan: siempre llevan a alguna parte. Lo
-   que cambia es lo que anuncian, para que quien navega con lector
-   de pantalla sepa que la siguiente vuelve al principio en vez de
-   oír «sección siguiente» y aterrizar en la primera sin aviso. */
-function pintarFlechas(){
-  var n = PASOS.length;
-  var anterior = PASOS[((pasoActual - 1) % n + n) % n];
-  var siguiente = PASOS[(pasoActual + 1) % n];
-  document.getElementById("pasoAtras")
-    .setAttribute("aria-label", "Ir a " + anterior.n + ": " + anterior.t);
-  document.getElementById("pasoSig")
-    .setAttribute("aria-label", "Ir a " + siguiente.n + ": " + siguiente.t);
+function pintarPiePasos(){
+  var atras = document.getElementById("pasoAtras");
+  var sig   = document.getElementById("pasoSig");
+  atras.disabled = (pasoActual === 0);
+  sig.disabled   = (pasoActual === PASOS.length - 1);
+  sig.innerHTML  = (pasoActual === PASOS.length - 1)
+    ? "Esta es la última sección"
+    : "Siguiente: " + esc(PASOS[pasoActual + 1].t) + " &rarr;";
+  document.getElementById("pasoCuenta").textContent =
+    "Sección " + (pasoActual + 1) + " de " + PASOS.length;
 }
 
-/* En qué sección se quedó. Va en la clave propia de esta página,
-   no en la del tablero. */
+/* En qué paso se quedó. Va en la clave propia de esta página, no
+   en la del tablero. */
 function guardarPaso(){
   try{
     var d = JSON.parse(localStorage.getItem(CLAVE_PROPIA) || "{}");
@@ -1171,37 +995,6 @@ function montarPasos(){
     if(e.key === "ArrowRight"){ irAPaso(pasoActual + 1, false); }
     else if(e.key === "ArrowLeft"){ irAPaso(pasoActual - 1, false); }
   });
-
-  /* Pulsar el trozo que asoma lleva a esa sección. Es lo que uno
-     intenta al verlo, y sin esto no pasa nada al hacer clic.
-     El manejador va en la sección entera pero solo actúa si NO es
-     la activa; si no, cualquier clic dentro del contenido contaría
-     como «ir a esta sección». */
-  for(var k = 0; k < PASOS.length; k++){
-    (function(i){
-      var d = document.getElementById("paso-" + (i + 1));
-      if(!d) return;
-      /* En fase de captura y cortando el evento: si no, un clic
-         sobre el enlace de Pomelli que asoma abriría Pomelli Y
-         cambiaría de sección a la vez. Pulsar lo que asoma
-         significa «tráemelo», nunca «actívalo». */
-      d.addEventListener("click", function(e){
-        if(i === pasoActual) return;
-        e.preventDefault();
-        e.stopPropagation();
-        irAPaso(i, true);
-      }, true);
-    })(k);
-  }
-
-  /* Al cambiar el ancho de la ventana cambian el tamaño de la
-     tarjeta y el hueco, así que la posición medida deja de valer y
-     la sección activa queda descuadrada. */
-  var temporizador = null;
-  window.addEventListener("resize", function(){
-    clearTimeout(temporizador);
-    temporizador = setTimeout(colocarPista, 120);
-  });
 }
 
 function pintar(){
@@ -1214,8 +1007,9 @@ function pintar(){
      diapositivas, incluidas las dos que no se están viendo. Hay que
      volver a sacarlos del tabulador o, tras tocar una cifra, el
      tabulador vuelve a saltar fuera de pantalla.
-     Solo si ya están montadas: la primera pintada ocurre antes. */
-  if(document.getElementById("pasosPuntos").children.length){
+     Solo si los pasos ya están montados: la primera pintada ocurre
+     antes de que exista la barra. */
+  if(document.getElementById("pasosBarra").children.length){
     irAPaso(pasoActual, false);
   }
 }
